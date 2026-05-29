@@ -13,13 +13,13 @@
     --brand: #0E9F6E; --brand-2: #14C98A; --brand-soft: #E6F8F1;
     --ink: #0B1220; --ink-2: #3A4658; --ink-3: #6B7685;
     --line: #E5E9EC; --paper: #FFFFFF; --paper-2: #F6FAF8;
-    --ok: #047857; --warn: #B45309; --bad: #B91C1C;
+    --ok: #047857; --warn: #B45309; --bad: #B91C1C; --gold: #C8881A;
   }
   html.dark {
     --brand: #1DCB8E; --brand-2: #2BE6A6; --brand-soft: #0F2A20;
     --ink: #E8EEF0; --ink-2: #AEBBC2; --ink-3: #7C8A93;
     --line: #1D2A28; --paper: #0A100E; --paper-2: #0E1513;
-    --ok: #34D399; --warn: #FBBF24; --bad: #F87171;
+    --ok: #34D399; --warn: #FBBF24; --bad: #F87171; --gold: #F5C84B;
   }
   html { font-family: 'Inter', system-ui, sans-serif; }
   body { color: var(--ink); background: var(--paper-2); }
@@ -185,11 +185,11 @@
 
     <!-- REPUTACION -->
     <section id="reputacion" class="card p-7">
-      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="star" class="lucide-lg brand-text"></i>Reputación y confianza</h2>
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="star" class="lucide-lg" style="color:var(--gold)"></i>Reputación y confianza</h2>
       <p class="text-sm mb-3" style="color:var(--ink-2)">Con dinero no se juega: saber con quién te metes es esencial. Por eso la reputación está <b style="color:var(--ink)">desde el inicio</b>.</p>
       <div class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm" style="color:var(--ink-2)">
         <div class="flex gap-2"><i data-lucide="thumbs-up" class="lucide chk"></i>Al cerrar un bolso, cada quien valora a los demás: manito arriba/abajo + comentario.</div>
-        <div class="flex gap-2"><i data-lucide="star" class="lucide chk"></i>El perfil muestra la puntuación en estrellitas.</div>
+        <div class="flex gap-2"><i data-lucide="star" class="lucide" style="color:var(--gold); flex:0 0 auto"></i>El perfil muestra la puntuación en estrellitas.</div>
         <div class="flex gap-2"><i data-lucide="trending-down" class="lucide chk"></i>La reputación baja por retrasos y mora.</div>
         <div class="flex gap-2"><i data-lucide="history" class="lucide chk"></i>Al unirte ves al organizador y su historial (sanes hechos, completados, montos, tipos).</div>
       </div>
@@ -202,7 +202,7 @@
       <div class="grid sm:grid-cols-3 gap-3">
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="wallet" class="lucide brand-text"></i>Tu saldo</div><p class="text-sm" style="color:var(--ink-2)">Cuánto tienes en tu wallet, con equivalente en Bs.</p></div>
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="users" class="lucide brand-text"></i>Tus recolectas</div><p class="text-sm" style="color:var(--ink-2)">En qué bolsos/vacas estás, su estado y próximos vencimientos.</p></div>
-        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="star" class="lucide brand-text"></i>Tu reputación</div><p class="text-sm" style="color:var(--ink-2)">Tus estrellitas y accesos rápidos para crear o unirte.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="star" class="lucide" style="color:var(--gold)"></i>Tu reputación</div><p class="text-sm" style="color:var(--ink-2)">Tus estrellitas y accesos rápidos para crear o unirte.</p></div>
       </div>
     </section>
 
@@ -295,7 +295,7 @@
     if (window.lucide) lucide.createIcons();
   }
   const saved = localStorage.getItem('greensol-theme');
-  applyTheme(saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  applyTheme(saved || 'light'); // light por defecto: mejor primera impresion y confianza; dark queda opcional
   if (btn) btn.addEventListener('click', () => {
     const next = root.classList.contains('dark') ? 'light' : 'dark';
     localStorage.setItem('greensol-theme', next); applyTheme(next);
