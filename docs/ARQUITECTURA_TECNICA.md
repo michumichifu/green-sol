@@ -121,7 +121,26 @@ flowchart LR
 
 Lectura: el nivel sin cripto solo usa Frontend + Backend + Storage. La capa Solana (RPC, USDC, multifirma, wallets) es opcional y se enchufa cuando el grupo quiere respaldar el bote.
 
-## 8. Resumen de decisiones técnicas
+## 8. Datos del modo tradicional (sin cripto)
+
+Para recolectas en modo tradicional, el backend (Postgres) guarda, sin nada on-chain:
+
+- **Cuentas destino del grupo:** tipo (pago móvil / cuenta bancaria), banco (con su código), titular, número y tipo de cuenta. Visibles para el grupo, para pagar a tiempo.
+- **Reportes de pago por participante:** comprobante (imagen en object storage), número de referencia, fecha, monto, banco origen/destino y la tasa aplicada.
+
+## 9. Verificación de identidad (KYC) y roles
+
+- **Registro rápido** sin cédula. KYC se exige solo para **funciones de dinero** (como hacen los exchanges).
+- KYC con **proveedor tercero** (verificación automática de documento + selfie/video); ellos almacenan esa parte. No construir KYC propio ni hacerlo manual.
+- **Roles:** usuario, administrador de grupo, y **super-admin** con un panel interno (ruta y credenciales aparte, permisos estrictos) para auditar usuarios, grupos, métodos de pago y documentos, y frenar estafas.
+
+## 10. Despliegue y operación
+
+- **Pruebas / MVP:** **Vercel** (Next.js nativo, HTTPS y servidor gestionados; seguro y gratis para empezar) + Postgres gestionada + object storage para comprobantes.
+- **Producción seria:** **VPS propio en contenedor** (Docker), superficie cerrada, backups, cuando el proyecto madure y haya datos reales.
+- Almacenamiento ligero (capturas + texto). Secretos (API de tasas, claves de KYC, RPC) siempre en variables de entorno, nunca en el repo.
+
+## 11. Resumen de decisiones técnicas
 
 - Backend tradicional para todo lo que no es dinero; Solana solo para el bote opcional.
 - Stack: Next.js + TS + Tailwind + Postgres/Prisma + object storage + @solana/web3.js + RPC dedicado.

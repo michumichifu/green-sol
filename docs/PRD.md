@@ -1,138 +1,149 @@
 # PRD — Green Sol
 
-> Proyecto del Solana Vibe Bootcamp (Venezuela). Aplicación web (con visión a móvil) para **ahorrar en grupo o individualmente de forma transparente**, que funciona sin cripto y, opcionalmente, con un bote real en dólares digitales sobre Solana.
+> Proyecto del Solana Vibe Bootcamp (Venezuela). App para **juntar dinero en grupo de forma transparente** (san, bolso, pote, vaca) y dividir cuentas. Funciona con método tradicional (reporte de pagos) o con cripto opcional sobre Solana, sin que la app custodie dinero a la fuerza.
 
-- **Versión:** 0.2 (idea cerrada)
+- **Versión:** 0.3 (idea ampliada)
 - **Fecha:** 2026-05-29
 - **Fase:** 0 — Documentación previa al desarrollo
-- **Nombre:** Green Sol (descartado: Cochino — connotación negativa fuera de Venezuela; otros barajados: Alma, La Vaca)
+- **Nombre:** Green Sol (sol verde). Descartado: Cochino.
 
-La versión visual para lectura rápida está en [PRD.html](PRD.html). Detalles técnicos en [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md) y [SEGURIDAD_Y_WALLETS.md](SEGURIDAD_Y_WALLETS.md).
+Versión visual: [PRD.html](PRD.html). Técnica: [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md) y [SEGURIDAD_Y_WALLETS.md](SEGURIDAD_Y_WALLETS.md).
 
 ---
 
 ## 1. Resumen ejecutivo
 
-Green Sol es una app para **juntar y organizar dinero en grupo de forma transparente**: hacer una recolecta o ahorro común (la "vaca", el "san" o "bolso" de toda la vida) y también **dividir una cuenta o gasto a pagar** entre varias personas. Cada quien ve cuánto se lleva, cuánto falta y quién aportó o cuánto le toca.
+Green Sol digitaliza y hace **transparente** una práctica que en Venezuela y Latinoamérica todos conocen: juntar dinero en grupo. Cubre tres formas, todas con el mismo motor:
 
-La clave del diseño es que funciona en **dos niveles**:
+1. **San / bolso** — recolecta **rotativa**: todos aportan periódicamente y por turnos cada quien recibe el bote.
+2. **Pote / vaca** — recolecta hacia una **meta común** para gastar o repartir.
+3. **Dividir una cuenta** — repartir un **gasto a pagar** entre varios.
 
-- **Sin cripto (base):** un registro transparente de la vaca. La app lleva las cuentas; no toca el dinero de nadie. Cero desconfianza, funciona en cualquier país.
-- **Con cripto (opcional):** quien quiera, respalda el bote con **dólares digitales (USDC) sobre Solana**, verificable y sin que la app custodie los fondos.
+Cada recolecta puede manejarse de forma **tradicional** (la app organiza y cada quien reporta sus pagos con comprobante; el dinero se mueve por fuera, en Bs o efectivo) o con **cripto** (USDC/SOL sobre Solana). La gracia: transparencia total (quién puso qué, a quién le toca) sin obligar a nadie a confiar su dinero a la plataforma.
 
-La cripto entra solo para **dar respaldo y transparencia real, nunca para custodiar dinero del usuario**. Eso elimina la barrera de desconfianza que hunde a la mayoría de las apps cripto.
+> **Nota sobre el "MVP":** los tres tipos se desarrollan (por fases). El **san/bolso** y el **pote/vaca** son el gancho inicial de promoción porque es lo que más engancha al hablar de finanzas en Venezuela; "dividir cuentas" llega en una fase posterior, pero también se construye.
 
 ## 2. Problema que resuelve
 
-- **Las "vacas" se manejan a ciegas y con desconfianza.** Cuando un grupo junta dinero para algo, alguien guarda el bote y los demás tienen que confiar. No hay transparencia de quién puso qué ni de cuánto falta.
-- **Ahorrar en bolívares no protege el valor** (contexto venezolano: inflación, confusión entre tasa BCV y tasa real de mercado). La gente quiere dólares pero **no sabe usar USDT/USDC** ni quiere lidiar con esa complejidad.
-- **Las apps que piden "mete tu dinero aquí" generan rechazo inmediato**, sobre todo si exigen una wallet para entrar.
-
-Green Sol ataca las tres: transparencia del bote, ahorro en dólares estables sin complejidad, y una app que **no exige cripto ni custodia tu dinero**.
+- **Los sanes y vacas se manejan a ciegas:** alguien guarda el dinero y el resto confía; no hay transparencia de quién aportó, a quién le toca, ni cuánto falta.
+- **Ahorrar en bolívares no protege el valor** (inflación, tasa BCV irreal). La gente quiere dólares pero no sabe usar USDT/USDC ni quiere complejidad.
+- **Las apps que dicen "mete tu dinero aquí" generan rechazo.** Green Sol no exige cripto ni custodia tu dinero: organiza y da transparencia.
 
 ## 3. Principio rector de UX
 
-Toda decisión se mide contra: **¿reduce la fricción y la desconfianza de alguien que nunca ha usado cripto?**
+¿Reduce la fricción y la desconfianza de alguien que nunca ha usado cripto?
 
-1. **La app vale por sí misma sin cripto.** Funciona completa como registro de ahorro aunque nunca toques una wallet.
-2. **Solana es opcional y solo para recibir/respaldar**, nunca para custodiar dinero. Recibir no da miedo; entregar sí.
-3. **Registro con correo y contraseña.** La wallet, si se usa, se crea por detrás (embebida, no-custodial).
-4. **Lenguaje humano, no jerga.** Todo explicado con tooltips y guías claras.
-5. **Single-user primero.** Útil para una persona; el grupo es la evolución natural.
+1. La app **vale sin cripto**: funciona como registro transparente de la recolecta.
+2. **Cripto opcional**, y solo para respaldar/recibir, nunca custodiar a la fuerza.
+3. **Registro rápido** con correo (la wallet se crea por detrás); cédula/KYC solo para funciones de dinero.
+4. **Lenguaje humano**, tooltips y guías claras.
+5. **Transparencia pública** dentro del grupo (turnos, aportes, mora).
 
-## 4. La idea en detalle
+## 4. Los tres tipos de recolecta
 
-### Modo individual
+### San / bolso (rotativo) — gancho principal
 
-El usuario crea una **meta** (nombre, monto objetivo, foto opcional) y le da seguimiento visual: una barra de progreso hacia el objetivo. Puede adjuntar una **nota** a cada meta — texto simple y/o una **nota de voz** — para registrar el porqué, el plan, recordatorios, etc.
+Aporte periódico y reparto por turnos. Ejemplo: 5 personas, cada una recibe $100; dura 5 semanas; cada semana **todos aportan $20** y **a uno le toca cobrar** los $100. Quien cobra primero se compromete a seguir aportando. Al final, cada quien puso $100 y recibió $100 una vez. Ahorro disciplinado, sencillo, muy popular.
 
-### Modo grupo (la vaca / el san)
+### Pote / vaca (meta común)
 
-La misma meta, pero compartida. Varios participan, cada quien registra/aporta, y todos ven el progreso del bote y **quién aportó cuánto**. Es el corazón del producto: aquí Green Sol resuelve un problema real que una wallet o una cuenta de banco no resuelven (coordinación, transparencia y confianza del bote común).
+Todos aportan (montos iguales o distintos, como acuerden) **hasta llegar a una meta**, sin fechas fijas, y luego se gasta o reparte.
 
-### Modo dividir cuentas (cuentas por pagar)
+### Dividir una cuenta (fase posterior)
 
-El mismo motor sirve para **dividir una cuenta o un gasto** entre varias personas (una salida, un servicio compartido, un alquiler). En vez de juntar hacia una meta, se reparte un monto y cada quien ve **cuánto le toca** y cuánto ha pagado. Recolectar y dividir son la misma mecánica vista al derecho y al revés; por eso van **unificadas** en una sola app. (En Venezuela a la recolecta también se le dice *san*, *bolso* o *recolecta*.)
+Repartir un gasto a pagar entre varios (la cena de $600 entre 12). Cada quien ve cuánto le toca y su equivalente en Bs a la tasa elegida.
 
-### Moneda de referencia y tasas (contexto Venezuela)
+## 5. Método por recolecta: tradicional o cripto
 
-Las recolectas, ahorros y pagos se llevan en **USDC** (referente al dólar) — o en **SOL** para usuarios muy cripto. Pero como en Venezuela la gente piensa en bolívares, cada monto muestra además un **tag con el equivalente en Bs**, a la tasa que el usuario elija ver:
+Al crear cualquier recolecta se elige el método. **No es un modo global**: cada bolso/vaca/cuenta puede ser de un tipo distinto.
 
-- **BCV** — tasa oficial; no sigue al mercado real, casi no fluctúa.
-- **Promedio USDT P2P** — la "tasa Binance" que la gente usa de referencia. No es fija: varía por comerciante, condiciones y monto, así que se toma como **promedio aproximado**.
-- **Personalizada** — el usuario fija su propia tasa.
+### Tradicional (la app organiza, el dinero va por fuera)
 
-El valor real **siempre vive en USDC/SOL**; las tasas son solo para *mostrar el equivalente* en Bs. Para obtenerlas se usará una **API externa de consulta** (de un desarrollador venezolano radicado en España) que entrega BCV, promedio USDT y otra referencia. Detalle de integración en [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md).
+- Referencia en **USDT y/o Bs**, a la tasa que elijan (BCV / USDT / personalizada).
+- Métodos: **efectivo** (más para bolsos en dólares físicos), **transferencia bancaria** o **pago móvil**.
+- Al crear la recolecta se indican los **datos de la cuenta destino**: tipo (pago móvil / cuenta bancaria), banco (con su **código**), titular, número de cuenta, tipo de cuenta. Así cada quien tiene los datos a la mano.
+- Cada participante **reporta su pago**: sube el comprobante (captura), número de referencia, fecha, monto, banco origen y destino. La app lleva el control de quién pagó qué, cuándo y a qué tasa correspondía.
 
-### Custodia: dos modalidades (cuando se activa la cripto)
+### Cripto (sobre Solana)
 
-1. **Bote gestionado con multifirma.** El bote es una wallet que **exige varias aprobaciones para mover fondos** (ej. 2 de 3 administradores). No existe una llave secreta única que entregar o robar; **ni la app ni un solo administrador pueden vaciarlo**. La app coordina las firmas, no custodia. El creador es administrador y puede nombrar más.
-2. **Modo espejo (wallet externa).** El grupo usa su propia wallet externa y Green Sol solo **refleja** los datos (saldo, aportes, quién puso qué). Para los que no quieren confiar en ninguna plataforma.
+- Referencia y movimiento en **USDC** (o SOL).
+- El grupo elige entre:
+  - **Wallet de la app** (embebida, no-custodial): el usuario maneja su saldo y hace transferencias/retiros desde la app sin cargar una wallet externa (experiencia tipo GMGN).
+  - **Autocustodia / dirección externa**: ponen su dirección y ellos transfieren; la app refleja los datos (modo espejo).
+- El **bote de grupo** seguro usa **multifirma** (ver [SEGURIDAD_Y_WALLETS.md](SEGURIDAD_Y_WALLETS.md)).
 
-> **Atribución de aportes:** para saber *quién* aportó, lo ideal es que los aportes salgan desde direcciones de usuarios registrados en la app. Un ingreso desde una dirección suelta se detecta, pero no se puede atribuir a una persona.
+## 6. Moneda, tasas y equivalencia en bolívares
 
-## 5. Usuarios objetivo
+El valor real vive en USDC/SOL (cripto) o en la moneda que el grupo acuerde (tradicional). Cada monto muestra un **tag con el equivalente en Bs** a la tasa elegida:
 
-- **Persona principal — organizador de vacas:** quien junta dinero con amigos/familia/compañeros para una meta común y quiere transparencia sin pelear con hojas de cálculo ni con la desconfianza.
-- **Persona secundaria — ahorrador individual:** quien quiere fijarse metas y verlas progresar (modo individual con notas).
-- **Usuario avanzado (pro):** quien activa la capa Solana para respaldar el bote en USDC, usa multifirma o modo espejo.
+- **BCV** (oficial; no sigue al mercado).
+- **USDT** (mercado/cripto; aproximado, varía por comerciante y monto). Se usa "USDT", no "Binance".
+- **Personalizada**.
 
-## 6. Requisitos funcionales
+En **preferencias del usuario**: moneda por defecto (Bs/USDC) y tasa de referencia. Las tasas vienen de una **API externa** (dev venezolano en España), consultada desde el backend y cacheada; son **solo informativas**, nunca mueven fondos.
 
-### 6.1 Cuenta y acceso
-- Registro/login con correo + contraseña. Wallet embebida no-custodial creada por detrás (solo si se usa la capa cripto).
-- Opción de conectar/importar wallet externa.
-- **Preferencias:** moneda por defecto (Bs o USDC) y tasa de referencia para el equivalente en Bs (BCV / promedio USDT / personalizada).
+## 7. Turnos del san y mora
 
-### 6.2 Metas, recolectas y división (núcleo, sin cripto)
-- Crear meta/recolecta: nombre, monto objetivo, foto opcional.
-- **Modo dividir:** repartir un monto entre participantes y ver cuánto le toca y cuánto ha pagado cada uno.
-- Registrar aportes/pagos; ver barra de progreso y monto faltante.
-- En grupo: invitar por enlace, ver aportes por persona.
-- Mostrar cada monto con su **equivalente en Bs** según la tasa elegida.
-- Nota por meta: texto + nota de voz (audio).
+- **Turnos:** el orden de quién cobra cada ronda se define **al azar** (con animación a elegir: dado, ruleta, carrusel) o **manual**. Siempre **público y transparente**: todos ven quién giró, cuándo y a quién le tocó.
+- **Mora:** si alguien no aporta su cuota, la app **notifica al grupo, al moroso y al administrador**.
+- **Multa por mora (opcional):** configurable al crear la recolecta — por **porcentaje** o **monto fijo**, en USDC, SOL o Bs (a tasa BCV/USDT/personalizada).
 
-### 6.3 Capa cripto (opcional)
-- Respaldar el bote con USDC sobre Solana.
-- Bote gestionado con multifirma (roles de administrador) o modo espejo (reflejar wallet externa).
-- Retiro/transferencia del bote (con aprobaciones según multifirma).
+## 8. Cuenta, registro, verificación y roles
 
-## 7. Requisitos no funcionales
+- **Registro rápido** con correo + contraseña (wallet embebida creada por detrás). Sin cédula al inicio, para no poner barrera (como los exchanges).
+- **Datos de perfil:** nacionalidad; si es venezolano, tipo de documento (cédula/pasaporte) y número. Sirven contra estafas.
+- **Verificación de identidad (KYC):** **no se exige para registrarse**, pero **sí para acceder a las funciones de dinero** (crear/cobrar recolectas con montos, etc.). Razón: al ser finanzas, alguien debe responsabilizarse; el usuario verificado responde por su uso. Se hará con un **proveedor tercero** (verificación automática de documento/selfie/video), no manual.
+- **Roles:** usuario normal; administrador de un grupo; y **super-admin** (ver sección 9).
 
-- **Confianza por diseño:** no-custodial; la app no guarda llaves ni dinero ajeno.
-- **Seguridad:** ver [SEGURIDAD_Y_WALLETS.md](SEGURIDAD_Y_WALLETS.md).
-- **Almacenamiento de archivos** (audio/imágenes) en object storage tradicional, NO on-chain.
-- **Responsive** escritorio→móvil; **accesibilidad**; **i18n** (español por defecto).
-- Stack alineado con lo que el equipo ya domina.
+## 9. Panel Super-Admin
 
-## 8. Qué usa Solana y qué no
+Acceso interno separado (puerta trasera) para los responsables de la plataforma:
+
+- Ver y administrar **usuarios** y los **grupos/recolectas** creados.
+- Ver **métodos de pago** y **datos/documentos subidos** (cédula, pasaporte, comprobantes).
+- Hacer **comprobaciones manuales** puntuales para detectar y frenar estafadores.
+- Mayor control y seguridad de la app y de los usuarios.
+
+Hay dos accesos: el **normal** (todo lo descrito para usuarios) y el **interno super-admin**.
+
+## 10. Qué usa Solana y qué no
 
 | Capa | ¿On-chain? | Ejemplos |
 | --- | --- | --- |
-| Cuentas, metas, registro de aportes, notas | No (web tradicional) | Login, metas, progreso, texto/audio |
-| Archivos pesados (audio, imágenes) | No (object storage) | Notas de voz, fotos |
-| Tasas y equivalencia en Bs | No (API externa) | BCV, promedio USDT, personalizada (solo para mostrar) |
-| Respaldo del bote en dólares digitales | Sí (Solana) | Saldo USDC, aportes verificables |
-| Mover fondos del bote | Sí (multifirma) | Retiros aprobados por administradores |
-| Reflejar una wallet externa | Sí (lectura RPC) | Modo espejo |
+| Cuentas, recolectas, turnos, reportes de pago, notas | No (web tradicional) | Login, grupos, progreso, comprobantes |
+| Archivos pesados (comprobantes, audio, fotos) | No (object storage) | Capturas, notas de voz |
+| Tasas y equivalencia en Bs | No (API externa) | BCV, USDT, personalizada |
+| Recolecta con cripto (saldo del bote) | Sí (Solana) | USDC/SOL verificable |
+| Mover fondos del bote cripto | Sí (multifirma) | Retiros aprobados |
+| Reflejar wallet externa | Sí (lectura RPC) | Modo espejo |
 
-## 9. Roadmap por fases
+## 11. Requisitos no funcionales
+
+- **Confianza por diseño:** no-custodial por defecto; la app no obliga a entregar dinero.
+- **Seguridad:** datos personales y comprobantes cifrados y con acceso restringido. Ver [SEGURIDAD_Y_WALLETS.md](SEGURIDAD_Y_WALLETS.md).
+- **Responsive** escritorio→móvil; **accesibilidad**; **i18n** (español por defecto).
+- Almacenamiento ligero (capturas + texto): no requiere mucho espacio.
+
+## 12. Roadmap por fases
 
 - **Fase 0 — Documentación (actual).**
-- **Fase 1 — MVP web (en devnet):** cuenta con correo, crear meta, registro de aportes sin cripto, barra de progreso, nota de texto + voz, grupo básico por enlace, y modo espejo de una dirección.
-- **Fase 2 — Capa cripto completa:** bote en USDC, multifirma, roles de administrador, atribución de aportes.
-- **Fase 3 — Notas ricas y móvil:** editor de texto enriquecido (colores, fuentes, imágenes, links), empaquetado Android/iOS.
+- **Fase 1 — MVP gancho (tradicional, sin cripto):** pantalla de bienvenida, registro, preferencias (moneda/tasa), crear **san/bolso** y **pote/vaca**, datos de cuenta destino, reporte de pagos con comprobante, turnos (azar/manual) y avisos de mora. Pruebas en Vercel.
+- **Fase 2 — Capa cripto:** wallet embebida, USDC/SOL, bote multifirma o modo espejo, tasas vía API, multas por mora.
+- **Fase 3 — Confianza y escala:** dividir cuentas, KYC con proveedor, panel super-admin completo, despliegue en VPS (contenedor).
+- **Fase 4 — Móvil:** Android/iOS.
 
-## 10. Identidad de marca
+## 13. Identidad de marca
 
-- **Nombre:** Green Sol — un sol (Solana es, literalmente, una estrella) en **verde**. El verde evoca dinero, organización y calma/confianza.
-- **Concepto visual:** astros / galaxia, con el sol verde como elemento central.
-- **Ícono:** un sol verde (o blanco) que contraste tanto en modo claro como oscuro.
-- **Por qué no "Cochino":** funciona en Venezuela (alcancía/cerdito), pero en otros países connota suciedad. Green Sol viaja mejor y conecta con Solana.
+- **Green Sol:** el sol (Solana es una estrella) en **verde** (dinero, organización, calma). Concepto astros/galaxia; ícono de sol que contrasta en claro y oscuro.
 
-## 11. Fuera de alcance / decisiones abiertas
+## 14. Despliegue (resumen)
 
-- Identidad visual final (diseño del logo del sol, escala de verdes, tipografía).
-- Proveedor de wallet embebida (ver arquitectura).
+- **Pruebas:** Vercel (cuenta y proyecto ya vinculados con GitHub). Seguro y gratis para empezar.
+- **Producción:** VPS propio en contenedor cerrado, con datos restringidos, cuando el proyecto madure. Detalle en [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md).
+
+## 15. Fuera de alcance / decisiones abiertas
+
+- Proveedor de wallet embebida y de KYC (a elegir).
+- Endpoint/credenciales de la API de tasas (irán en variables de entorno, no en el repo).
 - Modelo de negocio.
-- Conversión a moneda local: el usuario retira a su exchange y convierte; Green Sol no hace cambio de divisa.
+- Conversión a moneda local: el usuario la hace por fuera; Green Sol no cambia divisas.
