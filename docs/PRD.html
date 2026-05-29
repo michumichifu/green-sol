@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Green Sol — PRD v0.2 · Ahorro en grupo transparente sobre Solana</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --brand: #0E9F6E;
+    --brand-2: #14C98A;
+    --brand-soft: #E6F8F1;
+    --ink: #0B1220;
+    --ink-2: #3A4658;
+    --ink-3: #6B7685;
+    --line: #E5E9EC;
+    --paper: #FFFFFF;
+    --paper-2: #F6FAF8;
+    --ok: #047857;
+    --warn: #B45309;
+    --bad: #B91C1C;
+  }
+  html.dark {
+    --brand: #1DCB8E;
+    --brand-2: #2BE6A6;
+    --brand-soft: #0F2A20;
+    --ink: #E8EEF0;
+    --ink-2: #AEBBC2;
+    --ink-3: #7C8A93;
+    --line: #1D2A28;
+    --paper: #0A100E;
+    --paper-2: #0E1513;
+    --ok: #34D399;
+    --warn: #FBBF24;
+    --bad: #F87171;
+  }
+  html { font-family: 'Inter', system-ui, sans-serif; }
+  body { color: var(--ink); background: var(--paper-2); }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .brand-text { color: var(--brand); }
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 1rem; }
+  .toc a { color: var(--ink-2); border-left: 2px solid transparent; }
+  .toc a:hover { color: var(--brand); }
+  .toc a.active { color: var(--brand); font-weight: 600; border-left-color: var(--brand); }
+  table { width:100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align:left; padding: 10px 12px; background: var(--paper-2); border-bottom: 1px solid var(--line); font-weight:600; color: var(--ink-2); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .badge { display:inline-flex; align-items:center; gap:.4rem; padding: 3px 10px; border-radius:9999px; font-size: 11.5px; font-weight: 500; }
+  .badge-ok    { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+  .badge-warn  { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn); }
+  .badge-brand { background: var(--brand-soft); color: var(--brand); }
+  .badge-muted { background: color-mix(in srgb, var(--ink-3) 14%, transparent); color: var(--ink-3); }
+  .lucide { stroke-width: 2; width: 18px; height: 18px; }
+  .lucide-lg { stroke-width: 2; width: 22px; height: 22px; }
+  .sun-logo { background: radial-gradient(circle at 35% 30%, var(--brand-2), var(--brand) 70%); box-shadow: 0 0 0 6px color-mix(in srgb, var(--brand) 18%, transparent); }
+  .hero-glow { background: radial-gradient(60% 120% at 80% 0%, color-mix(in srgb, var(--brand) 22%, transparent), transparent 60%); }
+  .chk { color: var(--ok); flex:0 0 auto; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP BAR -->
+<header class="sticky top-0 z-30 backdrop-blur border-b" style="background: color-mix(in srgb, var(--paper) 85%, transparent); border-color:var(--line)">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center gap-3">
+    <div class="w-9 h-9 rounded-full sun-logo flex items-center justify-center">
+      <i data-lucide="sun" class="lucide-lg" style="color:white;"></i>
+    </div>
+    <div class="flex flex-col leading-tight">
+      <div class="font-semibold text-[15px]">Green Sol</div>
+      <div class="text-xs" style="color:var(--ink-3)">PRD · ahorro en grupo transparente</div>
+    </div>
+    <span class="ml-3 badge badge-brand"><i data-lucide="tag" class="lucide"></i>PRD v0.2</span>
+    <span class="badge badge-muted hidden sm:inline-flex"><i data-lucide="calendar" class="lucide"></i>2026-05-29</span>
+    <span class="badge badge-warn hidden md:inline-flex"><i data-lucide="flask-conical" class="lucide"></i>Fase 0 · documentación</span>
+    <div class="ml-auto flex items-center gap-3">
+      <a href="https://github.com/michumichifu/green-sol" target="_blank" class="badge badge-brand"><i data-lucide="github" class="lucide"></i>Repo</a>
+      <button id="themeBtn" class="w-9 h-9 rounded-lg flex items-center justify-center border" style="border-color:var(--line); color:var(--ink-2)" title="Cambiar tema">
+        <i data-lucide="moon" class="lucide"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="max-w-7xl mx-auto px-6 py-8 flex gap-8">
+  <!-- TOC -->
+  <aside class="hidden lg:block w-60 flex-shrink-0">
+    <div class="sticky top-24">
+      <div class="text-xs font-semibold uppercase tracking-wide mb-3" style="color:var(--ink-3)">Contenido</div>
+      <nav class="toc text-sm space-y-1">
+        <a href="#resumen" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="sparkles" class="lucide"></i>Resumen</a>
+        <a href="#problema" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="alert-triangle" class="lucide"></i>Problema</a>
+        <a href="#idea" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="lightbulb" class="lucide"></i>La idea</a>
+        <a href="#custodia" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="shield-check" class="lucide"></i>Custodia</a>
+        <a href="#solana" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="layers" class="lucide"></i>Qué usa Solana</a>
+        <a href="#stack" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="code-2" class="lucide"></i>Stack</a>
+        <a href="#seguridad" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="lock" class="lucide"></i>Seguridad</a>
+        <a href="#roadmap" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="route" class="lucide"></i>Roadmap</a>
+        <a href="#marca" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="palette" class="lucide"></i>Marca</a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 min-w-0 space-y-10">
+
+    <!-- HERO / RESUMEN -->
+    <section id="resumen" class="card p-7 relative overflow-hidden">
+      <div class="hero-glow absolute inset-0 pointer-events-none"></div>
+      <div class="relative">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-12 h-12 rounded-full sun-logo flex items-center justify-center">
+            <i data-lucide="sun" class="lucide-lg" style="color:white;"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold">Green Sol</h1>
+            <p class="text-sm" style="color:var(--ink-3)">Solana Vibe Bootcamp · Venezuela</p>
+          </div>
+        </div>
+        <p class="text-[15px] leading-relaxed" style="color:var(--ink-2)">
+          App para organizar <b style="color:var(--ink)">ahorros y metas</b>, solo o en grupo (la "vaca" / "san" de toda la vida), de forma <b style="color:var(--ink)">transparente</b>: todos ven cuánto se lleva ahorrado, cuánto falta y quién aportó.
+        </p>
+        <div class="grid sm:grid-cols-2 gap-3 mt-5">
+          <div class="rounded-xl p-4" style="background:var(--paper-2); border:1px solid var(--line)">
+            <div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="notebook-pen" class="lucide brand-text"></i>Sin cripto (la base)</div>
+            <p class="text-sm" style="color:var(--ink-2)">Un registro transparente de la vaca. La app lleva las cuentas y <b style="color:var(--ink)">no toca el dinero de nadie</b>. Cero desconfianza, cualquier país.</p>
+          </div>
+          <div class="rounded-xl p-4" style="background:var(--brand-soft); border:1px solid color-mix(in srgb, var(--brand) 30%, transparent)">
+            <div class="flex items-center gap-2 font-semibold mb-1 brand-text"><i data-lucide="coins" class="lucide"></i>Con cripto (opcional)</div>
+            <p class="text-sm" style="color:var(--ink-2)">Quien quiera, respalda el bote en <b style="color:var(--ink)">dólares digitales (USDC) sobre Solana</b>, verificable y sin que la app custodie los fondos.</p>
+          </div>
+        </div>
+        <p class="text-sm mt-4 p-3 rounded-lg flex gap-2" style="background:var(--paper-2); color:var(--ink-2); border:1px solid var(--line)">
+          <i data-lucide="info" class="lucide brand-text" style="flex:0 0 auto"></i>
+          <span>La cripto entra solo para <b style="color:var(--ink)">dar respaldo y transparencia</b>, nunca para custodiar dinero del usuario. Eso elimina la barrera de desconfianza que hunde a la mayoría de apps cripto.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- PROBLEMA -->
+    <section id="problema" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="alert-triangle" class="lucide-lg brand-text"></i>Problema que resuelve</h2>
+      <div class="grid sm:grid-cols-3 gap-3">
+        <div class="rounded-xl p-4" style="background:var(--paper-2); border:1px solid var(--line)">
+          <i data-lucide="eye-off" class="lucide-lg brand-text"></i>
+          <p class="text-sm mt-2" style="color:var(--ink-2)">Las <b style="color:var(--ink)">vacas / sanes</b> se manejan a ciegas: alguien guarda el bote y el resto debe confiar, sin transparencia de quién aportó.</p>
+        </div>
+        <div class="rounded-xl p-4" style="background:var(--paper-2); border:1px solid var(--line)">
+          <i data-lucide="trending-down" class="lucide-lg brand-text"></i>
+          <p class="text-sm mt-2" style="color:var(--ink-2)">Ahorrar en <b style="color:var(--ink)">bolívares no protege el valor</b>; la gente quiere dólares pero no sabe usar USDT/USDC.</p>
+        </div>
+        <div class="rounded-xl p-4" style="background:var(--paper-2); border:1px solid var(--line)">
+          <i data-lucide="hand-coins" class="lucide-lg brand-text"></i>
+          <p class="text-sm mt-2" style="color:var(--ink-2)">Las apps que piden <b style="color:var(--ink)">"mete tu dinero aquí"</b> generan rechazo, sobre todo si exigen una wallet para entrar.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- IDEA -->
+    <section id="idea" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="lightbulb" class="lucide-lg brand-text"></i>La idea en detalle</h2>
+      <div class="space-y-4">
+        <div>
+          <h3 class="font-semibold flex items-center gap-2 mb-1"><i data-lucide="user" class="lucide brand-text"></i>Modo individual</h3>
+          <p class="text-sm" style="color:var(--ink-2)">Creas una <b style="color:var(--ink)">meta</b> (nombre, monto, foto) y la ves progresar con una barra. Cada meta puede llevar una <b style="color:var(--ink)">nota</b>: texto y/o nota de voz.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold flex items-center gap-2 mb-1"><i data-lucide="users" class="lucide brand-text"></i>Modo grupo (la vaca / el san)</h3>
+          <p class="text-sm" style="color:var(--ink-2)">La misma meta, compartida. Cada quien aporta y todos ven el progreso y <b style="color:var(--ink)">quién aportó cuánto</b>. Es el corazón del producto: resuelve la coordinación, la transparencia y la confianza del bote común.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CUSTODIA -->
+    <section id="custodia" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-2"><i data-lucide="shield-check" class="lucide-lg brand-text"></i>Custodia: dos modalidades (capa cripto)</h2>
+      <p class="text-sm mb-4" style="color:var(--ink-3)">Solo aplica cuando el grupo activa el respaldo en USDC. La app nunca custodia.</p>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="rounded-xl p-4" style="background:var(--brand-soft); border:1px solid color-mix(in srgb, var(--brand) 30%, transparent)">
+          <div class="flex items-center gap-2 font-semibold brand-text mb-1"><i data-lucide="key-round" class="lucide"></i>Bote con multifirma</div>
+          <p class="text-sm" style="color:var(--ink-2)">Mover fondos exige varias aprobaciones (ej. 2 de 3 administradores). <b style="color:var(--ink)">No hay una llave única</b> que robar; ni la app ni una sola persona pueden vaciar el bote. Vía un protocolo probado como Squads.</p>
+        </div>
+        <div class="rounded-xl p-4" style="background:var(--paper-2); border:1px solid var(--line)">
+          <div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="scan-eye" class="lucide brand-text"></i>Modo espejo</div>
+          <p class="text-sm" style="color:var(--ink-2)">El grupo usa su propia wallet externa y la app solo <b style="color:var(--ink)">refleja</b> los datos (saldo, aportes, quién puso qué). Solo lectura, cero custodia.</p>
+        </div>
+      </div>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Atribución de aportes: para saber quién aportó, lo ideal es que los aportes salgan desde direcciones de usuarios registrados.</span></p>
+    </section>
+
+    <!-- SOLANA -->
+    <section id="solana" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="layers" class="lucide-lg brand-text"></i>Qué usa Solana y qué no</h2>
+      <div class="overflow-x-auto rounded-xl" style="border:1px solid var(--line)">
+        <table>
+          <thead><tr><th>Capa</th><th>¿On-chain?</th><th>Ejemplos</th></tr></thead>
+          <tbody>
+            <tr><td>Cuentas, metas, aportes, notas</td><td><span class="badge badge-muted">No · web tradicional</span></td><td>Login, metas, progreso, texto/audio</td></tr>
+            <tr><td>Archivos pesados</td><td><span class="badge badge-muted">No · object storage</span></td><td>Notas de voz, fotos</td></tr>
+            <tr><td>Respaldo del bote</td><td><span class="badge badge-brand">Sí · Solana</span></td><td>Saldo USDC, aportes verificables</td></tr>
+            <tr><td>Mover fondos del bote</td><td><span class="badge badge-brand">Sí · multifirma</span></td><td>Retiros aprobados</td></tr>
+            <tr><td>Reflejar wallet externa</td><td><span class="badge badge-brand">Sí · lectura RPC</span></td><td>Modo espejo</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- STACK -->
+    <section id="stack" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="code-2" class="lucide-lg brand-text"></i>Stack recomendado</h2>
+      <div class="flex flex-wrap gap-2">
+        <span class="badge badge-brand"><i data-lucide="square-code" class="lucide"></i>Next.js + TypeScript</span>
+        <span class="badge badge-brand"><i data-lucide="paintbrush" class="lucide"></i>Tailwind CSS</span>
+        <span class="badge badge-brand"><i data-lucide="database" class="lucide"></i>Postgres + Prisma</span>
+        <span class="badge badge-brand"><i data-lucide="hard-drive" class="lucide"></i>Object storage</span>
+        <span class="badge badge-brand"><i data-lucide="link" class="lucide"></i>@solana/web3.js</span>
+        <span class="badge badge-brand"><i data-lucide="server" class="lucide"></i>RPC Helius / QuickNode</span>
+        <span class="badge badge-brand"><i data-lucide="wallet" class="lucide"></i>Wallet embebida (Privy / Web3Auth)</span>
+        <span class="badge badge-brand"><i data-lucide="users-round" class="lucide"></i>Multifirma (Squads)</span>
+      </div>
+      <p class="text-sm mt-4 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Sin programa propio en el MVP: USDC ya existe como token SPL y la multifirma se integra de un protocolo auditado. Empezar en <b class="brand-text">devnet</b>.</span></p>
+    </section>
+
+    <!-- SEGURIDAD -->
+    <section id="seguridad" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="lock" class="lucide-lg brand-text"></i>Seguridad: la regla de oro</h2>
+      <p class="text-[15px] p-4 rounded-xl mb-4" style="background:var(--brand-soft); color:var(--ink); border:1px solid color-mix(in srgb, var(--brand) 30%, transparent)">
+        <b>Green Sol nunca tiene la llave secreta del dinero de un usuario ni la del bote de un grupo.</b> Confianza, cumplimiento legal y seguridad, todo de una.
+      </p>
+      <div class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm" style="color:var(--ink-2)">
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>No se guarda ninguna llave de usuario ni del bote.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Bote de grupo con multifirma o modo espejo.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Secretos solo en variables de entorno.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Toda transacción se simula antes de firmar.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>La frase semilla nunca viaja al servidor.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Todo el MVP probado en devnet primero.</div>
+      </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section id="roadmap" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="route" class="lucide-lg brand-text"></i>Roadmap por fases</h2>
+      <div class="space-y-3">
+        <div class="flex gap-3"><span class="badge badge-ok" style="flex:0 0 auto"><i data-lucide="dot" class="lucide"></i>Fase 0</span><p class="text-sm" style="color:var(--ink-2)">Documentación (actual): este PRD y la fundación técnica.</p></div>
+        <div class="flex gap-3"><span class="badge badge-brand" style="flex:0 0 auto"><i data-lucide="dot" class="lucide"></i>Fase 1</span><p class="text-sm" style="color:var(--ink-2)">MVP web en devnet: cuenta con correo, crear meta, registro de aportes sin cripto, barra de progreso, nota de texto + voz, grupo por enlace, modo espejo.</p></div>
+        <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto"><i data-lucide="dot" class="lucide"></i>Fase 2</span><p class="text-sm" style="color:var(--ink-2)">Capa cripto completa: bote en USDC, multifirma, roles de administrador, atribución de aportes.</p></div>
+        <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto"><i data-lucide="dot" class="lucide"></i>Fase 3</span><p class="text-sm" style="color:var(--ink-2)">Notas ricas (editor con imágenes y links) y empaquetado móvil Android/iOS.</p></div>
+      </div>
+    </section>
+
+    <!-- MARCA -->
+    <section id="marca" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="palette" class="lucide-lg brand-text"></i>Identidad de marca</h2>
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-16 h-16 rounded-full sun-logo flex items-center justify-center">
+          <i data-lucide="sun" class="lucide" style="color:white; width:30px; height:30px;"></i>
+        </div>
+        <p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">Green Sol</b>: un sol (Solana es, literalmente, una estrella) en <b class="brand-text">verde</b> — dinero, organización y calma. Concepto visual de astros / galaxia, con el sol verde como centro. Ícono de sol que contrasta en claro y oscuro.</p>
+      </div>
+      <p class="text-sm" style="color:var(--ink-3)">Nombre anterior descartado: "Cochino" (connotación negativa fuera de Venezuela).</p>
+    </section>
+
+    <footer class="pt-2 pb-10 text-center text-xs" style="color:var(--ink-3)">
+      Green Sol · Solana Vibe Bootcamp Venezuela · PRD v0.2 · <span class="mono">2026-05-29</span> ·
+      <a href="https://github.com/michumichifu/green-sol" class="brand-text underline">github.com/michumichifu/green-sol</a>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // Tema (dark/light) con persistencia
+  const root = document.documentElement;
+  const btn = document.getElementById('themeBtn');
+  function applyTheme(t) {
+    root.classList.toggle('dark', t === 'dark');
+    if (btn) btn.innerHTML = '<i data-lucide="' + (t === 'dark' ? 'sun' : 'moon') + '" class="lucide"></i>';
+    if (window.lucide) lucide.createIcons();
+  }
+  const saved = localStorage.getItem('greensol-theme');
+  applyTheme(saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  if (btn) btn.addEventListener('click', () => {
+    const next = root.classList.contains('dark') ? 'light' : 'dark';
+    localStorage.setItem('greensol-theme', next);
+    applyTheme(next);
+  });
+
+  // Iconos
+  if (window.lucide) lucide.createIcons();
+
+  // Scroll-spy del TOC
+  const tocLinks = document.querySelectorAll('.toc a');
+  const sections = Array.from(tocLinks).map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  function onScroll() {
+    let active = sections[0];
+    for (const s of sections) { if (s.getBoundingClientRect().top <= 130) active = s; }
+    tocLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + (active ? active.id : '')));
+  }
+  document.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.local
+.DS_Store
+dist/
+build/
+*.log
+
+# Privado: entregas de clase, bitácora del proceso y borradores de tweets (no se sube a GitHub)
+_privado/
