@@ -72,9 +72,12 @@
         <a href="#resumen" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="sparkles" class="lucide"></i>Resumen</a>
         <a href="#problema" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="alert-triangle" class="lucide"></i>Problema</a>
         <a href="#tipos" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="layers" class="lucide"></i>Los tres tipos</a>
+        <a href="#publico" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="globe" class="lucide"></i>Público o privado</a>
         <a href="#metodo" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="arrow-left-right" class="lucide"></i>Tradicional o cripto</a>
         <a href="#moneda" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="badge-dollar-sign" class="lucide"></i>Moneda y tasas</a>
         <a href="#turnos" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="dice-5" class="lucide"></i>Turnos y mora</a>
+        <a href="#reputacion" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="star" class="lucide"></i>Reputación</a>
+        <a href="#dashboard" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="layout-dashboard" class="lucide"></i>Dashboard</a>
         <a href="#cuenta" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="id-card" class="lucide"></i>Registro y KYC</a>
         <a href="#admin" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="shield" class="lucide"></i>Super-admin</a>
         <a href="#solana" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="box" class="lucide"></i>Qué usa Solana</a>
@@ -134,6 +137,15 @@
       </div>
     </section>
 
+    <!-- PUBLICO/PRIVADO -->
+    <section id="publico" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="globe" class="lucide-lg brand-text"></i>Público o privado, y marketplace</h2>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="lock" class="lucide brand-text"></i>Privado</div><p class="text-sm" style="color:var(--ink-2)">Solo las personas que invites: amigos, familia, conocidos.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="store" class="lucide brand-text"></i>Público (marketplace)</div><p class="text-sm" style="color:var(--ink-2)">Aparece en un <b style="color:var(--ink)">marketplace</b> donde otros pueden verlo y pedir unirse. Meta a futuro; depende de la reputación.</p></div>
+      </div>
+    </section>
+
     <!-- METODO -->
     <section id="metodo" class="card p-7">
       <h2 class="text-lg font-bold flex items-center gap-2 mb-2"><i data-lucide="arrow-left-right" class="lucide-lg brand-text"></i>Método por recolecta: tradicional o cripto</h2>
@@ -168,6 +180,29 @@
       <div class="grid sm:grid-cols-2 gap-3">
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="shuffle" class="lucide brand-text"></i>Turnos</div><p class="text-sm" style="color:var(--ink-2)">El orden se define <b style="color:var(--ink)">al azar</b> (animación: dado, ruleta, carrusel) o <b style="color:var(--ink)">manual</b>. Siempre <b style="color:var(--ink)">público</b>: todos ven quién giró y a quién le tocó.</p></div>
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="bell-ring" class="lucide brand-text"></i>Mora</div><p class="text-sm" style="color:var(--ink-2)">Si alguien no aporta, la app <b style="color:var(--ink)">notifica al grupo, al moroso y al administrador</b>. <b style="color:var(--ink)">Multa opcional</b> configurable: por porcentaje o monto fijo, en USDC, SOL o Bs.</p></div>
+      </div>
+    </section>
+
+    <!-- REPUTACION -->
+    <section id="reputacion" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="star" class="lucide-lg brand-text"></i>Reputación y confianza</h2>
+      <p class="text-sm mb-3" style="color:var(--ink-2)">Con dinero no se juega: saber con quién te metes es esencial. Por eso la reputación está <b style="color:var(--ink)">desde el inicio</b>.</p>
+      <div class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm" style="color:var(--ink-2)">
+        <div class="flex gap-2"><i data-lucide="thumbs-up" class="lucide chk"></i>Al cerrar un bolso, cada quien valora a los demás: manito arriba/abajo + comentario.</div>
+        <div class="flex gap-2"><i data-lucide="star" class="lucide chk"></i>El perfil muestra la puntuación en estrellitas.</div>
+        <div class="flex gap-2"><i data-lucide="trending-down" class="lucide chk"></i>La reputación baja por retrasos y mora.</div>
+        <div class="flex gap-2"><i data-lucide="history" class="lucide chk"></i>Al unirte ves al organizador y su historial (sanes hechos, completados, montos, tipos).</div>
+      </div>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Referencia a estudiar: Cashea (app venezolana de cuotas) tiene un sistema de puntuación muy logrado.</span></p>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="layout-dashboard" class="lucide-lg brand-text"></i>Dashboard del usuario</h2>
+      <div class="grid sm:grid-cols-3 gap-3">
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="wallet" class="lucide brand-text"></i>Tu saldo</div><p class="text-sm" style="color:var(--ink-2)">Cuánto tienes en tu wallet, con equivalente en Bs.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="users" class="lucide brand-text"></i>Tus recolectas</div><p class="text-sm" style="color:var(--ink-2)">En qué bolsos/vacas estás, su estado y próximos vencimientos.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="star" class="lucide brand-text"></i>Tu reputación</div><p class="text-sm" style="color:var(--ink-2)">Tus estrellitas y accesos rápidos para crear o unirte.</p></div>
       </div>
     </section>
 

@@ -140,7 +140,13 @@ Para recolectas en modo tradicional, el backend (Postgres) guarda, sin nada on-c
 - **Producción seria:** **VPS propio en contenedor** (Docker), superficie cerrada, backups, cuando el proyecto madure y haya datos reales.
 - Almacenamiento ligero (capturas + texto). Secretos (API de tasas, claves de KYC, RPC) siempre en variables de entorno, nunca en el repo.
 
-## 11. Resumen de decisiones técnicas
+## 11. Reputación, analítica y marketplace
+
+- **Reputación:** tabla de valoraciones (`de_usuario`, `a_usuario`, `recolecta_id`, voto +1/−1, comentario, fecha) que se habilita al **cerrar** una recolecta. El perfil agrega positivos/negativos → puntuación → **estrellitas** (cálculo en backend). La **mora** genera ajustes negativos. El historial del organizador (sanes creados / completados / no concretados, montos, tipos público-privado y tradicional-cripto) se deriva de las recolectas. Todo off-chain.
+- **Analítica / UTM:** capturar parámetros **UTM** (source/medium/campaign) en registro e ingreso, guardados por usuario/sesión para medir adquisición y marketing. Datos sensibles aparte y cifrados; respetar privacidad.
+- **Marketplace (fase 3):** las recolectas **públicas** se listan con su reputación asociada; requiere reglas de permisos, moderación y antifraude antes de abrirse.
+
+## 12. Resumen de decisiones técnicas
 
 - Backend tradicional para todo lo que no es dinero; Solana solo para el bote opcional.
 - Stack: Next.js + TS + Tailwind + Postgres/Prisma + object storage + @solana/web3.js + RPC dedicado.
