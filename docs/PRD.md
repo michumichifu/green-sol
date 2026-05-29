@@ -143,7 +143,7 @@ Acceso interno separado para los responsables: administrar usuarios y recolectas
 
 ## 17. Identidad de marca y diseño
 
-- **Green Sol:** el sol (Solana es una estrella) en **verde** (dinero, organización, calma). Concepto astros/galaxia; ícono de sol que contrasta en claro y oscuro.
+- **Green Sol — doble sentido de "Sol":** por un lado **SOL**, el símbolo de **Solana**; por otro, el **Sol**, la estrella radiante. Un sol **verde** (las estrellas pueden ser azules, blancas, amarillas… o verdes), elegido porque el verde vende y representa **dinero, organización y calma**. Estética de **espacio y galaxias**; ícono de sol que contrasta en claro y oscuro.
 - **Modo light por defecto** — tanto en el PRD como en la app. La primera impresión transmite más confianza y seriedad en claro. El **modo dark es opcional**, con un botón de cambio fácil en el dashboard principal.
 - **Paleta:** verde de marca como base, con **acentos** donde aporten (no todo verde). Las **estrellitas de reputación van en dorado**, con buen contraste en ambos modos: dorado **más oscuro en light** (`#C8881A`) y **más claro en dark** (`#F5C84B`). Mismo criterio para otros íconos donde haga juego.
 
