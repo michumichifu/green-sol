@@ -38,7 +38,7 @@ Green Sol combina ambos mundos:
 | Mover fondos del bote | Solana (multifirma) | Que nadie pueda vaciarlo solo. |
 | Modo espejo | Solana (solo lectura, vía RPC) | Reflejar una wallet externa sin custodiarla. |
 
-La clave: **el nivel "sin cripto" de Green Sol es 100% web tradicional**. Solana solo entra en el nivel opcional de respaldo del bote.
+La clave: **el nivel "sin cripto" de Green Sol es 100% web tradicional**. Solana solo entra en el nivel opcional de respaldo del bote. Por eso Green Sol es una **app híbrida con componente dApp**, no una dApp pura: solo la parte que toca la blockchain (wallets, firmas, USDC, multifirma) es "dApp"; el resto es web2.
 
 ## 2. Stack recomendado
 

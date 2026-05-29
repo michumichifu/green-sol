@@ -21,6 +21,8 @@ Green Sol digitaliza y hace **transparente** una práctica que en Venezuela y La
 
 Cada recolecta puede ser **tradicional** (la app organiza y cada quien reporta pagos; el dinero va por fuera, en Bs o efectivo) o con **cripto** (USDC/SOL). Y como aquí se maneja dinero entre personas, el corazón de la confianza es un **sistema de reputación**: cada quien construye un historial visible (puntuación, estrellitas) que se gana o se pierde según su responsabilidad.
 
+Técnicamente, Green Sol es una **app híbrida con componente dApp**, no una dApp pura: la mayor parte funciona como una web tradicional (sin tocar una wallet), y la capa **dApp** sobre Solana (botes en USDC, multifirma, firmas) se activa solo cuando una recolecta elige cripto. Es una decisión de diseño para reducir fricción.
+
 > **Sobre el "MVP":** los tres tipos se desarrollan (por fases). El **san/bolso** y el **pote/vaca** son el gancho de promoción; dividir cuentas llega después. La **reputación se implementa desde el inicio** (no es opcional: con dinero no se juega).
 
 ## 2. Problema que resuelve
