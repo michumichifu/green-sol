@@ -84,13 +84,26 @@ Permite "registro con correo → wallet creada automáticamente, sin extensión"
 
 **Recomendación para Green Sol:** Web3Auth o Privy (consumo, Solana, login con correo, integración sencilla). Turnkey si en el futuro hace falta firma de alta frecuencia. Hacer una prueba de concepto pequeña en devnet antes de comprometerse (facilidad de integración, soporte Solana real, costo por usuario, recuperación de cuenta).
 
-## 5. El bote de grupo: USDC + multifirma
+## 5. Moneda, tasas y equivalencia en bolívares
+
+El valor siempre se guarda en **USDC** (o SOL); los bolívares son solo una **vista de equivalencia**, nunca el dato real. Cada monto se muestra con un tag en Bs según la tasa que el usuario elija:
+
+- **BCV**, **promedio USDT P2P** y **personalizada**.
+- En preferencias del usuario se fija la moneda por defecto (Bs/USDC) y la tasa de referencia.
+
+Las tasas se obtienen de una **API externa de consulta** (de un desarrollador venezolano en España) que entrega BCV, promedio USDT y otra referencia. Consideraciones de implementación:
+
+- Llamar la API desde el **backend** (no exponer credenciales en el frontend); cachear las tasas (p. ej. refrescar cada X minutos) para no consultar en cada vista.
+- Las tasas son **informativas**: nunca se usan para mover fondos, solo para mostrar el equivalente en Bs.
+- Pendiente: documentar endpoint/credenciales de la API (van en variables de entorno, NO en el repo).
+
+## 6. El bote de grupo: USDC + multifirma
 
 - **USDC** es el dólar digital con el que se respalda el bote (token SPL). En devnet se usa un USDC de prueba o un token propio de pruebas; en mainnet, el USDC real.
 - El bote es una **wallet multifirma** (vía Squads): mover fondos requiere varias aprobaciones de administradores. Ni la app ni un solo administrador pueden vaciarlo. Esto es lo que hace el ahorro en grupo seguro y confiable sin que la app custodie nada.
 - **Atribución de aportes:** para saber quién aportó, lo ideal es que los aportes salgan desde direcciones de usuarios registrados en la app.
 
-## 6. Diagrama de arquitectura
+## 7. Diagrama de arquitectura
 
 ```mermaid
 flowchart LR
@@ -108,7 +121,7 @@ flowchart LR
 
 Lectura: el nivel sin cripto solo usa Frontend + Backend + Storage. La capa Solana (RPC, USDC, multifirma, wallets) es opcional y se enchufa cuando el grupo quiere respaldar el bote.
 
-## 7. Resumen de decisiones técnicas
+## 8. Resumen de decisiones técnicas
 
 - Backend tradicional para todo lo que no es dinero; Solana solo para el bote opcional.
 - Stack: Next.js + TS + Tailwind + Postgres/Prisma + object storage + @solana/web3.js + RPC dedicado.

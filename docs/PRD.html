@@ -94,6 +94,7 @@
         <a href="#problema" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="alert-triangle" class="lucide"></i>Problema</a>
         <a href="#idea" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="lightbulb" class="lucide"></i>La idea</a>
         <a href="#custodia" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="shield-check" class="lucide"></i>Custodia</a>
+        <a href="#moneda" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="badge-dollar-sign" class="lucide"></i>Moneda y tasas</a>
         <a href="#solana" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="layers" class="lucide"></i>Qué usa Solana</a>
         <a href="#stack" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="code-2" class="lucide"></i>Stack</a>
         <a href="#seguridad" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="lock" class="lucide"></i>Seguridad</a>
@@ -170,6 +171,10 @@
           <h3 class="font-semibold flex items-center gap-2 mb-1"><i data-lucide="users" class="lucide brand-text"></i>Modo grupo (la vaca / el san)</h3>
           <p class="text-sm" style="color:var(--ink-2)">La misma meta, compartida. Cada quien aporta y todos ven el progreso y <b style="color:var(--ink)">quién aportó cuánto</b>. Es el corazón del producto: resuelve la coordinación, la transparencia y la confianza del bote común.</p>
         </div>
+        <div>
+          <h3 class="font-semibold flex items-center gap-2 mb-1"><i data-lucide="split" class="lucide brand-text"></i>Modo dividir cuentas</h3>
+          <p class="text-sm" style="color:var(--ink-2)">El mismo motor para <b style="color:var(--ink)">repartir un gasto a pagar</b> entre varios: cada quien ve cuánto le toca y cuánto ha pagado. Recolectar y dividir son la misma mecánica, por eso van unificadas.</p>
+        </div>
       </div>
     </section>
 
@@ -188,6 +193,18 @@
         </div>
       </div>
       <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Atribución de aportes: para saber quién aportó, lo ideal es que los aportes salgan desde direcciones de usuarios registrados.</span></p>
+    </section>
+
+    <!-- MONEDA -->
+    <section id="moneda" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="badge-dollar-sign" class="lucide-lg brand-text"></i>Moneda y equivalencia en bolívares</h2>
+      <p class="text-sm mb-4" style="color:var(--ink-2)">El valor real vive en <b style="color:var(--ink)">USDC</b> (o SOL). Los bolívares son solo una vista: cada monto muestra un tag con el equivalente en Bs a la tasa que tú elijas.</p>
+      <div class="grid sm:grid-cols-3 gap-3">
+        <div class="rounded-xl p-4" style="background:var(--paper-2); border:1px solid var(--line)"><div class="font-semibold mb-1">BCV</div><p class="text-sm" style="color:var(--ink-2)">Tasa oficial. No sigue al mercado real.</p></div>
+        <div class="rounded-xl p-4" style="background:var(--paper-2); border:1px solid var(--line)"><div class="font-semibold mb-1">Promedio USDT P2P</div><p class="text-sm" style="color:var(--ink-2)">La "tasa Binance" de referencia. Aproximada (varía por comerciante y monto).</p></div>
+        <div class="rounded-xl p-4" style="background:var(--paper-2); border:1px solid var(--line)"><div class="font-semibold mb-1">Personalizada</div><p class="text-sm" style="color:var(--ink-2)">Tú fijas tu propia tasa.</p></div>
+      </div>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Tasas vía API externa (dev venezolano en España), consultadas desde el backend y cacheadas. Solo informativas: nunca mueven fondos.</span></p>
     </section>
 
     <!-- SOLANA -->

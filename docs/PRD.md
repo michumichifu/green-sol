@@ -13,7 +13,7 @@ La versión visual para lectura rápida está en [PRD.html](PRD.html). Detalles 
 
 ## 1. Resumen ejecutivo
 
-Green Sol es una app para **organizar ahorros y metas**, sola o en grupo (la "vaca" / "san" de toda la vida), de forma **transparente**: cada quien ve cuánto se lleva ahorrado, cuánto falta para la meta y quién aportó.
+Green Sol es una app para **juntar y organizar dinero en grupo de forma transparente**: hacer una recolecta o ahorro común (la "vaca", el "san" o "bolso" de toda la vida) y también **dividir una cuenta o gasto a pagar** entre varias personas. Cada quien ve cuánto se lleva, cuánto falta y quién aportó o cuánto le toca.
 
 La clave del diseño es que funciona en **dos niveles**:
 
@@ -50,6 +50,20 @@ El usuario crea una **meta** (nombre, monto objetivo, foto opcional) y le da seg
 
 La misma meta, pero compartida. Varios participan, cada quien registra/aporta, y todos ven el progreso del bote y **quién aportó cuánto**. Es el corazón del producto: aquí Green Sol resuelve un problema real que una wallet o una cuenta de banco no resuelven (coordinación, transparencia y confianza del bote común).
 
+### Modo dividir cuentas (cuentas por pagar)
+
+El mismo motor sirve para **dividir una cuenta o un gasto** entre varias personas (una salida, un servicio compartido, un alquiler). En vez de juntar hacia una meta, se reparte un monto y cada quien ve **cuánto le toca** y cuánto ha pagado. Recolectar y dividir son la misma mecánica vista al derecho y al revés; por eso van **unificadas** en una sola app. (En Venezuela a la recolecta también se le dice *san*, *bolso* o *recolecta*.)
+
+### Moneda de referencia y tasas (contexto Venezuela)
+
+Las recolectas, ahorros y pagos se llevan en **USDC** (referente al dólar) — o en **SOL** para usuarios muy cripto. Pero como en Venezuela la gente piensa en bolívares, cada monto muestra además un **tag con el equivalente en Bs**, a la tasa que el usuario elija ver:
+
+- **BCV** — tasa oficial; no sigue al mercado real, casi no fluctúa.
+- **Promedio USDT P2P** — la "tasa Binance" que la gente usa de referencia. No es fija: varía por comerciante, condiciones y monto, así que se toma como **promedio aproximado**.
+- **Personalizada** — el usuario fija su propia tasa.
+
+El valor real **siempre vive en USDC/SOL**; las tasas son solo para *mostrar el equivalente* en Bs. Para obtenerlas se usará una **API externa de consulta** (de un desarrollador venezolano radicado en España) que entrega BCV, promedio USDT y otra referencia. Detalle de integración en [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md).
+
 ### Custodia: dos modalidades (cuando se activa la cripto)
 
 1. **Bote gestionado con multifirma.** El bote es una wallet que **exige varias aprobaciones para mover fondos** (ej. 2 de 3 administradores). No existe una llave secreta única que entregar o robar; **ni la app ni un solo administrador pueden vaciarlo**. La app coordina las firmas, no custodia. El creador es administrador y puede nombrar más.
@@ -68,11 +82,14 @@ La misma meta, pero compartida. Varios participan, cada quien registra/aporta, y
 ### 6.1 Cuenta y acceso
 - Registro/login con correo + contraseña. Wallet embebida no-custodial creada por detrás (solo si se usa la capa cripto).
 - Opción de conectar/importar wallet externa.
+- **Preferencias:** moneda por defecto (Bs o USDC) y tasa de referencia para el equivalente en Bs (BCV / promedio USDT / personalizada).
 
-### 6.2 Metas y registro (núcleo, sin cripto)
-- Crear meta: nombre, monto objetivo, foto opcional.
-- Registrar aportes; ver barra de progreso y monto faltante.
+### 6.2 Metas, recolectas y división (núcleo, sin cripto)
+- Crear meta/recolecta: nombre, monto objetivo, foto opcional.
+- **Modo dividir:** repartir un monto entre participantes y ver cuánto le toca y cuánto ha pagado cada uno.
+- Registrar aportes/pagos; ver barra de progreso y monto faltante.
 - En grupo: invitar por enlace, ver aportes por persona.
+- Mostrar cada monto con su **equivalente en Bs** según la tasa elegida.
 - Nota por meta: texto + nota de voz (audio).
 
 ### 6.3 Capa cripto (opcional)
@@ -94,6 +111,7 @@ La misma meta, pero compartida. Varios participan, cada quien registra/aporta, y
 | --- | --- | --- |
 | Cuentas, metas, registro de aportes, notas | No (web tradicional) | Login, metas, progreso, texto/audio |
 | Archivos pesados (audio, imágenes) | No (object storage) | Notas de voz, fotos |
+| Tasas y equivalencia en Bs | No (API externa) | BCV, promedio USDT, personalizada (solo para mostrar) |
 | Respaldo del bote en dólares digitales | Sí (Solana) | Saldo USDC, aportes verificables |
 | Mover fondos del bote | Sí (multifirma) | Retiros aprobados por administradores |
 | Reflejar una wallet externa | Sí (lectura RPC) | Modo espejo |
