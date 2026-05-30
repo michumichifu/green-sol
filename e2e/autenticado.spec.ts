@@ -11,9 +11,11 @@ test("flujo autenticado: dashboard con tasas y crear un san", async ({
   });
   expect(res.ok()).toBeTruthy();
 
-  // Dashboard muestra el correo del usuario
+  // Dashboard carga (hero de bienvenida)
   await page.goto("/dashboard");
-  await expect(page.getByText(correo)).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Tu ahorro/ }),
+  ).toBeVisible();
 
   // Crear un san
   await page.goto("/sanes/crear");

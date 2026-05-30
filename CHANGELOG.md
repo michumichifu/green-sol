@@ -4,6 +4,18 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.17] — 2026-05-30 — Rediseño del dashboard y la navegación de la app
+
+### Cambiado
+- **Dashboard rediseñado** (fintech limpio): hero de bienvenida con degradado de marca, saludo por nombre y reputación en estrellitas; accesos rápidos (nuevo ahorro / calculadora); tarjeta de **tasas de hoy**; lista de **"Tus ahorros"** (san/vaca con ícono, participantes y estado) con estado vacío y CTA.
+- **Barra inferior reorganizada a 3 ítems:** **Ahorro** (izquierda, ícono de billetera), **Inicio** (centro) y **Calculadora** (derecha). Salen "Avisos" y "Perfil".
+- **Cabecera superior nueva:** logo a la izquierda; a la derecha **campana** de avisos (con contador de no leídos y panel desplegable) e ícono de **configuración**.
+- **Panel lateral de configuración** (derecha→izquierda): perfil y datos de pago, seguridad y comunicaciones (próximamente), **toggle Super-admin ↔ usuario** (solo super-admin) y **Cerrar sesión** como última opción.
+- Se quitó el botón suelto de "Cerrar sesión" del dashboard.
+
+### Verificado
+- Build limpio; **E2E 4/4**.
+
 ## [0.0.16] — 2026-05-30 — Infografías del onboarding
 
 ### Añadido
