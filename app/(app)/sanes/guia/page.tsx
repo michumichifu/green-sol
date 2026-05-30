@@ -17,7 +17,7 @@ const METODOS: Metodo[] = [
     icon: RefreshCw,
     tag: "Por turnos",
     tagColor: "bg-brand/10 text-brand",
-    titulo: "San · Susi",
+    titulo: "San · Susi · Bolso",
     resumen:
       "Todos aportan cada ronda (semanal, quincenal o mensual) y, por turno, a cada quien le toca recibir el bote completo.",
     provecho:
@@ -28,9 +28,9 @@ const METODOS: Metodo[] = [
     icon: Target,
     tag: "Meta común",
     tagColor: "bg-gold/15 text-gold",
-    titulo: "Bolso · Vaca · Pote",
+    titulo: "Vaca · Pote",
     resumen:
-      "Todos juntan dinero en un mismo lugar hacia una meta o fin concreto; al llegar, se usa o se reparte. Sin turnos.",
+      "Varias personas juntan dinero hacia una meta; al llegar, se usa o se reparte. Sin turnos.",
     provecho:
       "Perfecto para un regalo, un viaje o una compra grande entre amigos o familia.",
   },
@@ -70,9 +70,20 @@ export default function GuiaPage() {
           return (
             <article
               key={m.titulo}
-              className="overflow-hidden rounded-3xl border bg-card shadow-sm"
+              className="space-y-3 rounded-3xl border bg-card p-4 shadow-sm"
             >
-              <div className="flex items-center justify-center bg-muted/40 py-4">
+              {/* Categoría */}
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${m.tagColor}`}
+              >
+                <Icon className="size-3.5" /> {m.tag}
+              </span>
+
+              {/* Título */}
+              <h2 className="text-lg font-bold">{m.titulo}</h2>
+
+              {/* Imagen (al centro) */}
+              <div className="flex items-center justify-center rounded-2xl bg-muted/40 py-4">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={m.img}
@@ -80,18 +91,14 @@ export default function GuiaPage() {
                   className="h-28 w-28 object-contain drop-shadow"
                 />
               </div>
-              <div className="space-y-2 p-4">
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${m.tagColor}`}
-                >
-                  <Icon className="size-3.5" /> {m.tag}
-                </span>
-                <h2 className="text-lg font-bold">{m.titulo}</h2>
-                <p className="text-sm text-muted-foreground">{m.resumen}</p>
-                <div className="flex items-start gap-2 rounded-xl bg-brand/5 p-3">
-                  <Sparkles className="mt-0.5 size-4 shrink-0 text-brand" />
-                  <p className="text-sm font-medium">{m.provecho}</p>
-                </div>
+
+              {/* Descripción */}
+              <p className="text-sm text-muted-foreground">{m.resumen}</p>
+
+              {/* Tip */}
+              <div className="flex items-start gap-2 rounded-xl bg-brand/5 p-3">
+                <Sparkles className="mt-0.5 size-4 shrink-0 text-brand" />
+                <p className="text-sm font-medium">{m.provecho}</p>
               </div>
             </article>
           );

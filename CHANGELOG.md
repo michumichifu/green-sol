@@ -4,7 +4,17 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
-## [0.0.28] — 2026-05-30 — Guía: imágenes y reclasificación (bolso = meta común)
+## [0.0.29] — 2026-05-30 — Guía: orden de tarjetas y clasificación correcta
+
+### Cambiado
+- Vuelve la clasificación correcta: **San · Susi · Bolso = por turnos**; **Vaca · Pote = meta común**.
+- **Orden dentro de cada tarjeta:** categoría (arriba) → título → imagen (al centro) → descripción → tip.
+
+### Pendiente
+- Imágenes nuevas y representativas por método (superprompt listo en _privado): rotación entre personas (turnos) vs pote llenándose hacia una meta.
+
+### Verificado
+- Build limpio.
 
 ### Cambiado
 - En la guía, el **bolso** pasa al grupo de **meta común**: "Bolso · Vaca · Pote" (todos juntan en un lugar con una finalidad). El método **por turnos** queda como "San · Susi".
