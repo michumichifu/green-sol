@@ -5,11 +5,15 @@ export type MonedaFiat = {
   pais: string;
 };
 
-// Monedas fiat (Latinoamérica + USD). El buscador permite filtrar por prefijo,
-// nombre o país. Venezuela y USD son las prioritarias del MVP.
+// MVP enfocado: cripto Solana + Fiat Venezuela (y USD, muy usado por venezolanos).
+// Las demás monedas/países de LatAm se reactivan más adelante (ver MONEDAS_FIAT_FUTURAS).
 export const MONEDAS_FIAT: MonedaFiat[] = [
-  { codigo: "VES", prefijo: "Bs", nombre: "Bolívar", pais: "Venezuela" },
+  { codigo: "VES", prefijo: "Bs", nombre: "Bolívares", pais: "Venezuela" },
   { codigo: "USD", prefijo: "$", nombre: "Dólar", pais: "Estados Unidos" },
+];
+
+// Pendientes de habilitar (métodos/bancos por definir país por país).
+export const MONEDAS_FIAT_FUTURAS: MonedaFiat[] = [
   { codigo: "MXN", prefijo: "$", nombre: "Peso", pais: "México" },
   { codigo: "COP", prefijo: "$", nombre: "Peso", pais: "Colombia" },
   { codigo: "ARS", prefijo: "$", nombre: "Peso", pais: "Argentina" },
@@ -26,7 +30,9 @@ export const MONEDAS_FIAT: MonedaFiat[] = [
 ];
 
 export function monedaFiat(codigo: string): MonedaFiat | undefined {
-  return MONEDAS_FIAT.find((m) => m.codigo === codigo);
+  return [...MONEDAS_FIAT, ...MONEDAS_FIAT_FUTURAS].find(
+    (m) => m.codigo === codigo,
+  );
 }
 
 // Métodos de pago disponibles por moneda fiat.

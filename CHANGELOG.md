@@ -4,6 +4,20 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.38] — 2026-05-30 — Formulario de método de pago pulido y enfoque VES/USD
+
+### Cambiado
+- **Formulario de método de pago:** **etiqueta encima de cada campo**; **nombre y apellido separados**; **cédula con prefijo V/E**; en pago móvil, **teléfono y cédula en una línea**; número de cuenta a ancho completo.
+- Botón **"Confirmar método de pago"** (color distinto, sin ícono +). Al guardar: **toast** de confirmación y el **formulario se limpia** (evita agregar duplicados).
+- "Bolívar" → **"Bolívares"**.
+- **Enfoque del MVP:** solo **Bolívares** y **USD** en el selector fiat (las demás monedas/países quedan en `MONEDAS_FIAT_FUTURAS` para reactivar luego). Prioridad: cripto Solana + Fiat Venezuela.
+
+### Añadido (backend)
+- Acción **`editarMetodoPago`** (la UI de edición se conecta a continuación).
+
+### Verificado
+- Build limpio; E2E 4/4.
+
 ## [0.0.37] — 2026-05-30 — Métodos de pago en el Perfil (rediseño, Fase 1)
 
 ### Cambiado

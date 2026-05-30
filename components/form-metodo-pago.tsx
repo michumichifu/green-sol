@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { ShieldAlert, Wallet, Plus, Banknote, Search } from "lucide-react";
-import { agregarMetodoPago } from "@/app/(app)/perfil/actions";
+import { useActionState, useEffect, useState } from "react";
+import { ShieldAlert, Wallet, Banknote, Search } from "lucide-react";
+import { toast } from "sonner";
+import {
+  agregarMetodoPago,
+  type EstadoMetodo,
+} from "@/app/(app)/perfil/actions";
 import {
   MONEDAS_FIAT,
   METODOS_POR_MONEDA,
@@ -14,14 +18,38 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+function Campo({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1">
+      <label className="text-xs font-medium text-muted-foreground">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 export function FormMetodoPago() {
+  const [estado, accion, pendiente] = useActionState<EstadoMetodo, FormData>(
+    agregarMetodoPago,
+    {},
+  );
+
   const [categoria, setCategoria] = useState("");
   const [moneda, setMoneda] = useState("");
   const [metodo, setMetodo] = useState("");
   const [q, setQ] = useState("");
   const [alias, setAlias] = useState("");
-  const [titular, setTitular] = useState("");
-  const [cedula, setCedula] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [cedulaPref, setCedulaPref] = useState("V");
+  const [cedulaNum, setCedulaNum] = useState("");
   const [banco, setBanco] = useState("");
   const [tipoCuenta, setTipoCuenta] = useState("");
   const [numeroCuenta, setNumeroCuenta] = useState("");
@@ -29,6 +57,34 @@ export function FormMetodoPago() {
   const [email, setEmail] = useState("");
   const [wallet, setWallet] = useState("");
   const [detalle, setDetalle] = useState("");
+
+  function limpiar() {
+    setCategoria("");
+    setMoneda("");
+    setMetodo("");
+    setQ("");
+    setAlias("");
+    setNombre("");
+    setApellido("");
+    setCedulaPref("V");
+    setCedulaNum("");
+    setBanco("");
+    setTipoCuenta("");
+    setNumeroCuenta("");
+    setTelefono("");
+    setEmail("");
+    setWallet("");
+    setDetalle("");
+  }
+
+  useEffect(() => {
+    if (estado.ok) {
+      toast.success("Método de pago agregado");
+      limpiar();
+    } else if (estado.error) {
+      toast.error(estado.error);
+    }
+  }, [estado]);
 
   const esVE = moneda === "VES";
   const esCripto = categoria === "cripto";
@@ -47,19 +103,50 @@ export function FormMetodoPago() {
       m.codigo.toLowerCase().includes(t),
   );
 
-  function elegirCategoria(c: string) {
-    setCategoria(c);
-    setMoneda("");
-    setMetodo("");
-  }
-  function elegirCripto(id: string) {
-    setMetodo(id);
-    setMoneda(id === "usdc" ? "USDC" : "SOL");
-  }
+  const titular = `${nombre} ${apellido}`.trim();
+  const cedula = cedulaNum.trim() ? `${cedulaPref}-${cedulaNum.trim()}` : "";
 
   const puedeAgregar = esCripto
     ? !!metodo && wallet.trim().length > 0
-    : !!moneda && !!metodo && titular.trim().length > 0;
+    : !!moneda && !!metodo && nombre.trim().length > 0;
+
+  const camposTitular = (
+    <>
+      <div className="grid grid-cols-2 gap-2">
+        <Campo label="Nombre">
+          <Input value={nombre} onChange={(e) => setNombre(e.target.value)} />
+        </Campo>
+        <Campo label="Apellido">
+          <Input
+            value={apellido}
+            onChange={(e) => setApellido(e.target.value)}
+          />
+        </Campo>
+      </div>
+    </>
+  );
+
+  const campoCedula = (
+    <Campo label="Cédula del titular">
+      <div className="flex gap-2">
+        <select
+          value={cedulaPref}
+          onChange={(e) => setCedulaPref(e.target.value)}
+          className="h-8 w-16 rounded-lg border bg-transparent px-2 text-sm"
+        >
+          <option value="V">V</option>
+          <option value="E">E</option>
+        </select>
+        <Input
+          value={cedulaNum}
+          onChange={(e) => setCedulaNum(e.target.value)}
+          inputMode="numeric"
+          placeholder="12345678"
+          className="flex-1"
+        />
+      </div>
+    </Campo>
+  );
 
   return (
     <div className="space-y-3">
@@ -75,7 +162,11 @@ export function FormMetodoPago() {
       <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
-          onClick={() => elegirCategoria("fiat")}
+          onClick={() => {
+            setCategoria("fiat");
+            setMoneda("");
+            setMetodo("");
+          }}
           className={cn(
             "flex items-center justify-center gap-2 rounded-xl border p-3 text-sm transition-colors",
             categoria === "fiat"
@@ -87,7 +178,11 @@ export function FormMetodoPago() {
         </button>
         <button
           type="button"
-          onClick={() => elegirCategoria("cripto")}
+          onClick={() => {
+            setCategoria("cripto");
+            setMoneda("");
+            setMetodo("");
+          }}
           className={cn(
             "flex items-center justify-center gap-2 rounded-xl border p-3 text-sm transition-colors",
             categoria === "cripto"
@@ -138,7 +233,7 @@ export function FormMetodoPago() {
 
       {/* Fiat → método */}
       {categoria === "fiat" && moneda && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <button
             type="button"
             onClick={() => {
@@ -176,7 +271,10 @@ export function FormMetodoPago() {
             <button
               key={c.id}
               type="button"
-              onClick={() => elegirCripto(c.id)}
+              onClick={() => {
+                setMetodo(c.id);
+                setMoneda(c.id === "usdc" ? "USDC" : "SOL");
+              }}
               className={cn(
                 "flex-1 rounded-xl border p-3 text-sm transition-colors",
                 metodo === c.id
@@ -192,7 +290,7 @@ export function FormMetodoPago() {
 
       {/* Campos del método */}
       {(esCripto ? metodo : moneda && metodo) && (
-        <form action={agregarMetodoPago} className="space-y-2.5">
+        <form action={accion} className="space-y-2.5 rounded-xl border p-3">
           <input type="hidden" name="categoria" value={categoria} />
           <input type="hidden" name="moneda" value={moneda} />
           <input type="hidden" name="metodo" value={metodo} />
@@ -209,16 +307,20 @@ export function FormMetodoPago() {
 
           {esCripto ? (
             <>
-              <Input
-                value={wallet}
-                onChange={(e) => setWallet(e.target.value)}
-                placeholder="Dirección de tu wallet (Solana)"
-              />
-              <Input
-                value={alias}
-                onChange={(e) => setAlias(e.target.value)}
-                placeholder="Alias (ej. Mi wallet Phantom)"
-              />
+              <Campo label="Dirección de tu wallet (Solana)">
+                <Input
+                  value={wallet}
+                  onChange={(e) => setWallet(e.target.value)}
+                  placeholder="Dirección pública"
+                />
+              </Campo>
+              <Campo label="Alias">
+                <Input
+                  value={alias}
+                  onChange={(e) => setAlias(e.target.value)}
+                  placeholder="Ej. Mi wallet Phantom"
+                />
+              </Campo>
               <p className="text-xs text-muted-foreground">
                 Wallet externa. La principal la entrega la app (próximamente).
               </p>
@@ -226,91 +328,113 @@ export function FormMetodoPago() {
           ) : (
             <>
               {(metodo === "transferencia" || metodo === "pago_movil") &&
-                esVE && <SelectBanco value={banco} onChange={setBanco} />}
+                esVE && (
+                  <Campo label="Banco">
+                    <SelectBanco value={banco} onChange={setBanco} />
+                  </Campo>
+                )}
               {(metodo === "transferencia" || metodo === "banco") && !esVE && (
-                <Input
-                  value={banco}
-                  onChange={(e) => setBanco(e.target.value)}
-                  placeholder="Banco"
-                />
+                <Campo label="Banco">
+                  <Input
+                    value={banco}
+                    onChange={(e) => setBanco(e.target.value)}
+                  />
+                </Campo>
               )}
               {metodo === "transferencia" && (
-                <div className="grid grid-cols-2 gap-2">
-                  {(["corriente", "ahorro"] as const).map((tc) => (
-                    <button
-                      key={tc}
-                      type="button"
-                      onClick={() => setTipoCuenta(tc)}
-                      className={cn(
-                        "rounded-lg border p-2 text-sm capitalize transition-colors",
-                        tipoCuenta === tc
-                          ? "border-brand bg-brand/5 text-brand"
-                          : "hover:border-brand/40",
-                      )}
-                    >
-                      {tc}
-                    </button>
-                  ))}
-                </div>
+                <Campo label="Tipo de cuenta">
+                  <div className="grid grid-cols-2 gap-2">
+                    {(["corriente", "ahorro"] as const).map((tc) => (
+                      <button
+                        key={tc}
+                        type="button"
+                        onClick={() => setTipoCuenta(tc)}
+                        className={cn(
+                          "rounded-lg border p-2 text-sm capitalize transition-colors",
+                          tipoCuenta === tc
+                            ? "border-brand bg-brand/5 text-brand"
+                            : "hover:border-brand/40",
+                        )}
+                      >
+                        {tc}
+                      </button>
+                    ))}
+                  </div>
+                </Campo>
               )}
               {(metodo === "transferencia" || metodo === "banco") && (
-                <Input
-                  value={numeroCuenta}
-                  onChange={(e) => setNumeroCuenta(e.target.value)}
-                  placeholder="Número de cuenta"
-                  inputMode="numeric"
-                />
+                <Campo label="Número de cuenta">
+                  <Input
+                    value={numeroCuenta}
+                    onChange={(e) => setNumeroCuenta(e.target.value)}
+                    inputMode="numeric"
+                  />
+                </Campo>
               )}
               {(metodo === "zelle" || metodo === "zinli") && (
-                <Input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={metodo === "zelle" ? "Email/teléfono de Zelle" : "Email/teléfono de Zinli"}
-                />
+                <Campo label="Email o teléfono">
+                  <Input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </Campo>
               )}
-              {(metodo === "pago_movil" || metodo === "walytech") && (
-                <Input
-                  value={telefono}
-                  onChange={(e) => setTelefono(e.target.value)}
-                  placeholder="Teléfono"
-                  inputMode="tel"
-                />
+
+              {camposTitular}
+
+              {/* Pago móvil: teléfono + cédula en una línea */}
+              {metodo === "pago_movil" ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <Campo label="Teléfono">
+                    <Input
+                      value={telefono}
+                      onChange={(e) => setTelefono(e.target.value)}
+                      inputMode="tel"
+                      placeholder="04xx..."
+                    />
+                  </Campo>
+                  {esVE && campoCedula}
+                </div>
+              ) : (
+                <>
+                  {metodo === "walytech" && (
+                    <Campo label="Teléfono">
+                      <Input
+                        value={telefono}
+                        onChange={(e) => setTelefono(e.target.value)}
+                        inputMode="tel"
+                      />
+                    </Campo>
+                  )}
+                  {esVE && campoCedula}
+                </>
               )}
-              <Input
-                value={titular}
-                onChange={(e) => setTitular(e.target.value)}
-                placeholder="Nombre y apellido del titular"
-              />
-              {esVE && (
-                <Input
-                  value={cedula}
-                  onChange={(e) => setCedula(e.target.value)}
-                  placeholder="Cédula del titular"
-                  inputMode="numeric"
-                />
-              )}
+
               {metodo === "efectivo" && (
-                <Input
-                  value={detalle}
-                  onChange={(e) => setDetalle(e.target.value)}
-                  placeholder="Nota (dónde/cómo entregar)"
-                />
+                <Campo label="Nota (dónde/cómo entregar)">
+                  <Input
+                    value={detalle}
+                    onChange={(e) => setDetalle(e.target.value)}
+                  />
+                </Campo>
               )}
-              <Input
-                value={alias}
-                onChange={(e) => setAlias(e.target.value)}
-                placeholder="Alias (opcional)"
-              />
+
+              <Campo label="Alias (opcional)">
+                <Input
+                  value={alias}
+                  onChange={(e) => setAlias(e.target.value)}
+                />
+              </Campo>
             </>
           )}
 
           <Button
             type="submit"
-            variant="outline"
+            variant="secondary"
             className="w-full"
-            disabled={!puedeAgregar}
+            disabled={!puedeAgregar || pendiente}
           >
-            <Plus className="size-4" /> Agregar método
+            {pendiente ? "Guardando..." : "Confirmar método de pago"}
           </Button>
         </form>
       )}

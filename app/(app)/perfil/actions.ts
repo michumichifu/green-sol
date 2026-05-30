@@ -51,32 +51,57 @@ export async function actualizarPerfil(
   return { ok: true };
 }
 
-export async function agregarMetodoPago(formData: FormData): Promise<void> {
+export type EstadoMetodo = { ok?: boolean; error?: string };
+
+function datosMetodo(formData: FormData) {
+  return {
+    alias: str(formData.get("alias")),
+    titular: str(formData.get("titular")),
+    cedula: str(formData.get("cedula")),
+    banco: str(formData.get("banco")),
+    tipoCuenta: str(formData.get("tipoCuenta")),
+    numeroCuenta: str(formData.get("numeroCuenta")),
+    telefono: str(formData.get("telefono")),
+    email: str(formData.get("email")),
+    wallet: str(formData.get("wallet")),
+    detalle: str(formData.get("detalle")),
+  };
+}
+
+export async function agregarMetodoPago(
+  _estado: EstadoMetodo,
+  formData: FormData,
+): Promise<EstadoMetodo> {
   const usuario = await obtenerUsuario();
-  if (!usuario) return;
+  if (!usuario) return { error: "Tu sesión expiró." };
   const categoria = str(formData.get("categoria"));
   const moneda = str(formData.get("moneda"));
   const metodo = str(formData.get("metodo"));
-  if (!categoria || !moneda || !metodo) return;
+  if (!categoria || !moneda || !metodo)
+    return { error: "Faltan datos del método." };
+
   await prisma.metodoPago.create({
-    data: {
-      usuarioId: usuario.id,
-      categoria,
-      moneda,
-      metodo,
-      alias: str(formData.get("alias")),
-      titular: str(formData.get("titular")),
-      cedula: str(formData.get("cedula")),
-      banco: str(formData.get("banco")),
-      tipoCuenta: str(formData.get("tipoCuenta")),
-      numeroCuenta: str(formData.get("numeroCuenta")),
-      telefono: str(formData.get("telefono")),
-      email: str(formData.get("email")),
-      wallet: str(formData.get("wallet")),
-      detalle: str(formData.get("detalle")),
-    },
+    data: { usuarioId: usuario.id, categoria, moneda, metodo, ...datosMetodo(formData) },
   });
   revalidatePath("/configuracion");
+  return { ok: true };
+}
+
+export async function editarMetodoPago(
+  _estado: EstadoMetodo,
+  formData: FormData,
+): Promise<EstadoMetodo> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return { error: "Tu sesión expiró." };
+  const id = str(formData.get("id"));
+  if (!id) return { error: "Método no encontrado." };
+  const res = await prisma.metodoPago.updateMany({
+    where: { id, usuarioId: usuario.id },
+    data: datosMetodo(formData),
+  });
+  if (res.count === 0) return { error: "Método no encontrado." };
+  revalidatePath("/configuracion");
+  return { ok: true };
 }
 
 export async function eliminarMetodoPago(id: string): Promise<void> {
