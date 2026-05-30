@@ -16,3 +16,5 @@ next-env.d.ts
 
 # Privado: entregas de clase, bitácora del proceso y borradores de tweets (no se sube a GitHub)
 _privado/
+
+/lib/generated/prisma

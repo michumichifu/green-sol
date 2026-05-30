@@ -1,0 +1,16 @@
+services:
+  db:
+    image: docker.io/postgres:16
+    container_name: greensol-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: greensol
+      POSTGRES_PASSWORD: greensol_dev
+      POSTGRES_DB: greensol
+    ports:
+      - "5433:5432"
+    volumes:
+      - greensol_pgdata:/var/lib/postgresql/data
+
+volumes:
+  greensol_pgdata:
