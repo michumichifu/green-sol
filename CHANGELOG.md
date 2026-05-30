@@ -4,6 +4,22 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.27] — 2026-05-30 — Sección Ahorros reestructurada: unirse, compartir y guía
+
+### Cambiado
+- **Landing de Ahorros** sin la palabra "sanes/vacas" como título: "Ahorros" + descripción y **3 acciones** (Crear · Unirme · Guía), con estado vacío que invita a crear o unirse, y la lista de "Tus ahorros".
+
+### Añadido
+- **Unirse a un ahorro** (`/sanes/unirse`): pega el **enlace** o el **código** (acepta `?codigo=`), muestra el ahorro encontrado (tipo, organizador, miembros) y te une. Acciones `buscarRecolecta` y `unirseARecolecta` (notifica al organizador).
+- **Compartir** desde el detalle: bloque con el **código** y botones **copiar enlace** y **compartir** (usa la hoja nativa del móvil si existe).
+- **Guía visual** (`/sanes/guia`): tarjetas escaneables con infografía de cada método (San/Susi/Bolso por turnos, Vaca/Pote meta común, Dividir cuenta) y cómo aprovecharlo.
+
+### Pendiente (documentado)
+- Asistente de creación con periodicidad/nº de manos y animación de sorteo, código corto legible y fechas de turno (en `docs/IDEAS_FUTURAS.md`).
+
+### Verificado
+- Build limpio; E2E 4/4.
+
 ## [0.0.26] — 2026-05-30 — Calculadora: compactar sin perder contenido
 
 ### Corregido

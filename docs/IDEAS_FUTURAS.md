@@ -20,5 +20,10 @@ Backlog de ideas de producto que **aún no se implementan**, para no perderlas.
 ## Dashboard
 - **Tarjeta de participación** (estilo Cashea): en cuántos sanes/vacas está activo el usuario, cuántos métodos de ahorro tiene en curso, resumen de su actividad.
 
+## Flujo de creación de ahorro (mejora pendiente — toca schema)
+- Asistente paso a paso: elegir **método** (san/susi/bolso vs vaca/pote) con infografía → tipo (privado/público) → **meta o aporte** → para el san: **nº de manos/miembros**, **periodicidad** (cada cuánto se gira la mano) → **animación de sorteo** de manos.
+- Requiere añadir a `Recolecta`: `frecuencia` (semanal/quincenal/mensual), `fechaInicio`, y opcional `cupoMiembros`. Con `fechaInicio` + `frecuencia` se generan las **fechas por turno** (alimenta el calendario de Pagos).
+- **Código de invitación corto y legible** (hoy se usa el `id`/cuid como código): añadir un campo `codigo` corto y único a `Recolecta`.
+
 ## Pagos
 - **Calendario de turnos con fechas:** hoy el modelo `Turno` solo tiene `posicion` y `cobrado`. Para mostrar "qué fecha te toca" hay que añadir fechas/periodicidad al san (fecha de inicio + frecuencia → fechas por posición).

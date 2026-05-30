@@ -12,6 +12,7 @@ import {
 } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CompartirAhorro } from "@/components/compartir-ahorro";
 
 export default async function DetalleRecolecta({
   params,
@@ -82,6 +83,10 @@ export default async function DetalleRecolecta({
           ))}
         </ul>
       </section>
+
+      {esParticipante && r.estado === "abierta" && (
+        <CompartirAhorro codigo={r.id} nombre={r.nombre} />
+      )}
 
       {r.tipo === "san" && r.turnos.length > 0 && (
         <section className="space-y-2">

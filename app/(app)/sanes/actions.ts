@@ -39,6 +39,96 @@ export async function crearRecolecta(
   redirect(`/sanes/${recolecta.id}`);
 }
 
+/** Extrae el id de un código pegado o de un enlace de invitación completo. */
+function limpiarCodigo(codigo: string): string {
+  return (
+    codigo.trim().split("?")[0].split("#")[0].split("/").pop()?.trim() ?? ""
+  );
+}
+
+export type ResultadoBusqueda = {
+  ok?: boolean;
+  error?: string;
+  recolecta?: {
+    id: string;
+    nombre: string;
+    tipo: string;
+    estado: string;
+    visibilidad: string;
+    organizador: string;
+    miembros: number;
+    yaUnido: boolean;
+    abierta: boolean;
+  };
+};
+
+/** Busca un ahorro por su código/enlace para mostrarlo antes de unirse. */
+export async function buscarRecolecta(
+  codigo: string,
+): Promise<ResultadoBusqueda> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return { error: "Inicia sesión." };
+  const id = limpiarCodigo(codigo);
+  if (!id) return { error: "Escribe un código o pega el enlace de invitación." };
+
+  const r = await prisma.recolecta.findUnique({
+    where: { id },
+    include: {
+      organizador: true,
+      _count: { select: { participantes: true } },
+    },
+  });
+  if (!r) return { error: "No encontramos ningún ahorro con ese código." };
+
+  const yaUnido = await prisma.participante.findUnique({
+    where: { recolectaId_usuarioId: { recolectaId: r.id, usuarioId: usuario.id } },
+  });
+
+  return {
+    ok: true,
+    recolecta: {
+      id: r.id,
+      nombre: r.nombre,
+      tipo: r.tipo,
+      estado: r.estado,
+      visibilidad: r.visibilidad,
+      organizador: r.organizador.nombre ?? r.organizador.correo,
+      miembros: r._count.participantes,
+      yaUnido: Boolean(yaUnido),
+      abierta: r.estado === "abierta",
+    },
+  };
+}
+
+/** Une al usuario a un ahorro por código/enlace y lo lleva al detalle. */
+export async function unirseARecolecta(
+  codigo: string,
+): Promise<{ error?: string }> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return { error: "Inicia sesión." };
+  const id = limpiarCodigo(codigo);
+  const r = await prisma.recolecta.findUnique({ where: { id } });
+  if (!r) return { error: "No encontramos ese ahorro." };
+  if (r.organizadorId === usuario.id) redirect(`/sanes/${r.id}`);
+  if (r.estado !== "abierta") {
+    return { error: "Este ahorro ya no admite nuevos miembros." };
+  }
+  try {
+    await prisma.participante.create({
+      data: { recolectaId: r.id, usuarioId: usuario.id },
+    });
+    await crearNotificacion(r.organizadorId, {
+      tipo: "union",
+      titulo: "Alguien se unió a tu ahorro",
+      cuerpo: `${usuario.nombre ?? usuario.correo} se unió a "${r.nombre}".`,
+      enlace: `/sanes/${r.id}`,
+    });
+  } catch {
+    // ya estaba unido
+  }
+  redirect(`/sanes/${r.id}`);
+}
+
 export async function invitarPorCorreo(
   recolectaId: string,
   formData: FormData,
