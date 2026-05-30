@@ -16,7 +16,7 @@ const items = [
 export function BottomNav() {
   const pathname = usePathname();
   return (
-    <nav className="z-30 border-t bg-background/95 backdrop-blur">
+    <nav className="z-30 border-t bg-background/95 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur">
       <ul className="mx-auto flex max-w-md items-stretch">
         {items.map(({ href, label, icon: Icon }) => {
           const activo =

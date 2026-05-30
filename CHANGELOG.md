@@ -4,6 +4,11 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.33] — 2026-05-30 — Barra inferior: respeta el área segura del dispositivo
+
+### Corregido
+- La **barra de navegación inferior** sube ~14 px además del `safe-area-inset-bottom`, para que la barra/indicador del sistema (Android/iPhone) no tape los botones.
+
 ## [0.0.32] — 2026-05-30 — Asistente de creación: claridad, anclaje al dólar y cálculo
 
 ### Cambiado (crear ahorro)
