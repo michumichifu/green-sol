@@ -69,7 +69,7 @@ export function CarruselOnboarding() {
   const ultima = indice === TARJETAS.length - 1;
 
   return (
-    <div className="relative flex h-dvh flex-col bg-gradient-to-br from-[#0a7d57] to-[#17cf92] text-white">
+    <div className="relative flex h-dvh flex-col bg-gradient-to-br from-[#075c43] to-[#14b078] text-white">
       <button
         type="button"
         onClick={() => setConfirmando(true)}
@@ -95,6 +95,7 @@ export function CarruselOnboarding() {
                 src="/green-sol-logo.svg"
                 alt="Green Sol"
                 className="size-28 drop-shadow-xl"
+                style={{ animation: "greensol-entrada 1.3s ease-out both" }}
               />
             ) : (
               t.icon && (

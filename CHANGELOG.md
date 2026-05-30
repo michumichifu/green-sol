@@ -4,6 +4,12 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.15] — 2026-05-30 — Animación de entrada del logo en el onboarding
+
+### Añadido
+- **Animación sutil del logo** al llegar al onboarding: cae desde arriba (rápido→lento), pausa breve y **gira una vez tipo ruleta**, luego queda quieto.
+- **Fondo verde del carrusel más profundo** para mayor contraste del logo.
+
 ## [0.0.14] — 2026-05-30 — Onboarding: ajustes de UX y sesión en la home
 
 ### Corregido

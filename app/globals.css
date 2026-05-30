@@ -155,3 +155,21 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Entrada del logo en el onboarding: cae desde arriba (rápido→lento), pausa y gira una vez. */
+@keyframes greensol-entrada {
+  0% {
+    transform: translateY(-130%) rotate(0deg);
+    opacity: 0;
+  }
+  35% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  48% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(0) rotate(360deg);
+  }
+}
