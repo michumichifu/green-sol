@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Green Sol — PRD v0.3 · Recolectas en grupo transparentes (san, bolso, vaca) sobre Solana</title>
+<title>Green Sol — PRD v0.5 · Ahorro en grupo transparente y puente al ahorro en cripto sobre Solana</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <link rel="preconnect" href="https://rsms.me/">
@@ -52,9 +52,9 @@
     <div class="w-9 h-9 rounded-full sun-logo flex items-center justify-center"><i data-lucide="sun" class="lucide-lg" style="color:white;"></i></div>
     <div class="flex flex-col leading-tight">
       <div class="font-semibold text-[15px]">Green Sol</div>
-      <div class="text-xs" style="color:var(--ink-3)">PRD · recolectas en grupo transparentes</div>
+      <div class="text-xs" style="color:var(--ink-3)">PRD · ahorro en grupo · puente al ahorro en cripto</div>
     </div>
-    <span class="ml-3 badge badge-brand"><i data-lucide="tag" class="lucide"></i>PRD v0.3</span>
+    <span class="ml-3 badge badge-brand"><i data-lucide="tag" class="lucide"></i>PRD v0.5</span>
     <span class="badge badge-muted hidden sm:inline-flex"><i data-lucide="calendar" class="lucide"></i>2026-05-29</span>
     <span class="badge badge-warn hidden md:inline-flex"><i data-lucide="flask-conical" class="lucide"></i>Fase 0 · documentación</span>
     <div class="ml-auto flex items-center gap-3">
@@ -75,15 +75,20 @@
         <a href="#publico" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="globe" class="lucide"></i>Público o privado</a>
         <a href="#metodo" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="arrow-left-right" class="lucide"></i>Tradicional o cripto</a>
         <a href="#moneda" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="badge-dollar-sign" class="lucide"></i>Moneda y tasas</a>
+        <a href="#calculadora" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="calculator" class="lucide"></i>Calculadora</a>
         <a href="#turnos" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="dice-5" class="lucide"></i>Turnos y mora</a>
         <a href="#reputacion" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="star" class="lucide"></i>Reputación</a>
         <a href="#dashboard" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="layout-dashboard" class="lucide"></i>Dashboard</a>
-        <a href="#cuenta" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="id-card" class="lucide"></i>Registro y KYC</a>
+        <a href="#navegacion" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="panel-bottom" class="lucide"></i>Navegación</a>
+        <a href="#notificaciones" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="bell" class="lucide"></i>Notificaciones</a>
+        <a href="#cuenta" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="user-cog" class="lucide"></i>Registro, perfil y roles</a>
         <a href="#admin" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="shield" class="lucide"></i>Super-admin</a>
         <a href="#solana" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="box" class="lucide"></i>Qué usa Solana</a>
+        <a href="#analitica" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="bar-chart-3" class="lucide"></i>Analítica / UTM</a>
         <a href="#seguridad" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="lock" class="lucide"></i>Seguridad</a>
         <a href="#roadmap" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="route" class="lucide"></i>Roadmap</a>
         <a href="#marca" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="palette" class="lucide"></i>Marca</a>
+        <a href="#despliegue" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="server" class="lucide"></i>Despliegue</a>
       </nav>
     </div>
   </aside>
@@ -98,23 +103,30 @@
           <div class="w-12 h-12 rounded-full sun-logo flex items-center justify-center"><i data-lucide="sun" class="lucide-lg" style="color:white;"></i></div>
           <div><h1 class="text-2xl font-bold">Green Sol</h1><p class="text-sm" style="color:var(--ink-3)">Solana Vibe Bootcamp · Venezuela</p></div>
         </div>
-        <p class="text-[15px] leading-relaxed" style="color:var(--ink-2)">App para <b style="color:var(--ink)">juntar dinero en grupo de forma transparente</b> — el san, bolso, pote o vaca de toda la vida. Todos ven quién aportó, a quién le toca y cuánto falta. Funciona con método <b style="color:var(--ink)">tradicional</b> (reportando pagos) o con <b style="color:var(--ink)">cripto opcional</b> sobre Solana, sin que la app custodie tu dinero a la fuerza.</p>
+        <p class="text-[15px] leading-relaxed" style="color:var(--ink-2)">App para <b style="color:var(--ink)">juntar dinero en grupo de forma transparente</b> — el san, bolso, pote o vaca de toda la vida — y dividir cuentas, con <b style="color:var(--ink)">reputación de usuarios</b>. Todos ven quién aportó, a quién le toca y cuánto falta. Funciona con método <b style="color:var(--ink)">tradicional</b> (reportando pagos) o con <b style="color:var(--ink)">cripto</b> sobre Solana, sin que la app custodie tu dinero a la fuerza.</p>
         <div class="grid sm:grid-cols-3 gap-3 mt-5">
           <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1 brand-text"><i data-lucide="repeat" class="lucide"></i>San / bolso</div><p class="text-sm" style="color:var(--ink-2)">Recolecta rotativa: por turnos, cada quien recibe el bote.</p></div>
           <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1 brand-text"><i data-lucide="target" class="lucide"></i>Pote / vaca</div><p class="text-sm" style="color:var(--ink-2)">Juntar hacia una meta común y luego gastar o repartir.</p></div>
           <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1 brand-text"><i data-lucide="split" class="lucide"></i>Dividir cuenta</div><p class="text-sm" style="color:var(--ink-2)">Repartir un gasto a pagar entre varios.</p></div>
         </div>
-        <p class="text-sm mt-4 p-3 rounded-lg flex gap-2" style="background:var(--paper-2); color:var(--ink-2); border:1px solid var(--line)"><i data-lucide="info" class="lucide brand-text" style="flex:0 0 auto"></i><span>Se construyen los tres (por fases). El <b style="color:var(--ink)">san/bolso</b> y el <b style="color:var(--ink)">pote/vaca</b> son el gancho de promoción; dividir cuentas llega en una fase posterior.</span></p>
+        <div class="sub p-4 mt-5" style="background:var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 30%, transparent)">
+          <div class="flex items-center gap-2 font-semibold brand-text mb-1"><i data-lucide="compass" class="lucide"></i>Posicionamiento: finalidad cripto-first</div>
+          <p class="text-sm" style="color:var(--ink-2)">Green Sol no es "una app que de paso funciona sin cripto". Su <b style="color:var(--ink)">finalidad es el ahorro en cripto sobre Solana</b> para la comunidad cripto hispana, y a la vez ser la <b style="color:var(--ink)">puerta de entrada</b> para quien aún no usa cripto: empieza con dinero fiat tradicional (lo que ya conoce) y <b style="color:var(--ink)">migra</b> a un ahorro en cripto ordenado, profesional y con control. El modo sin-cripto es el <b style="color:var(--ink)">puente que reduce la fricción</b>, no el destino.</p>
+        </div>
+        <p class="text-sm mt-4 leading-relaxed" style="color:var(--ink-2)">Técnicamente es una <b style="color:var(--ink)">app híbrida con componente dApp</b>, no una dApp pura: la mayor parte funciona como web tradicional (sin tocar una wallet) y la capa <b style="color:var(--ink)">dApp</b> sobre Solana (botes en USDC, multifirma, firmas) se activa cuando una recolecta elige cripto.</p>
+        <p class="text-sm mt-4 p-3 rounded-lg flex gap-2" style="background:var(--paper-2); color:var(--ink-2); border:1px solid var(--line)"><i data-lucide="info" class="lucide brand-text" style="flex:0 0 auto"></i><span>Sobre el "MVP": se construyen los tres tipos (por fases). El <b style="color:var(--ink)">san/bolso</b> y el <b style="color:var(--ink)">pote/vaca</b> son el gancho; dividir cuentas llega después. La <b style="color:var(--ink)">reputación se implementa desde el inicio</b> (no es opcional: con dinero no se juega).</span></p>
       </div>
     </section>
 
     <!-- PROBLEMA -->
     <section id="problema" class="card p-7">
       <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="alert-triangle" class="lucide-lg brand-text"></i>Problema que resuelve</h2>
-      <div class="grid sm:grid-cols-3 gap-3">
-        <div class="sub p-4"><i data-lucide="eye-off" class="lucide-lg brand-text"></i><p class="text-sm mt-2" style="color:var(--ink-2)">Los sanes y vacas se manejan <b style="color:var(--ink)">a ciegas</b>: alguien guarda el dinero y el resto confía, sin transparencia.</p></div>
-        <div class="sub p-4"><i data-lucide="trending-down" class="lucide-lg brand-text"></i><p class="text-sm mt-2" style="color:var(--ink-2)">Ahorrar en <b style="color:var(--ink)">bolívares no protege el valor</b>; la gente quiere dólares pero no sabe usar USDT/USDC.</p></div>
-        <div class="sub p-4"><i data-lucide="hand-coins" class="lucide-lg brand-text"></i><p class="text-sm mt-2" style="color:var(--ink-2)">Las apps que piden <b style="color:var(--ink)">"mete tu dinero aquí"</b> generan rechazo. Green Sol organiza, no custodia.</p></div>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="sub p-4"><i data-lucide="eye-off" class="lucide-lg brand-text"></i><p class="text-sm mt-2" style="color:var(--ink-2)">Los sanes y vacas se manejan <b style="color:var(--ink)">a ciegas</b>: alguien guarda el dinero y el resto confía; no hay forma de saber con quién te estás metiendo.</p></div>
+        <div class="sub p-4"><i data-lucide="trending-down" class="lucide-lg brand-text"></i><p class="text-sm mt-2" style="color:var(--ink-2)">Ahorrar en <b style="color:var(--ink)">bolívares no protege el valor</b> (inflación, tasa BCV irreal); la gente quiere dólares pero no sabe usar USDT/USDC.</p></div>
+        <div class="sub p-4"><i data-lucide="hand-coins" class="lucide-lg brand-text"></i><p class="text-sm mt-2" style="color:var(--ink-2)">Las apps que dicen <b style="color:var(--ink)">"mete tu dinero aquí"</b> generan rechazo. Green Sol organiza y da transparencia, no custodia a la fuerza.</p></div>
+        <div class="sub p-4"><i data-lucide="user-x" class="lucide-lg brand-text"></i><p class="text-sm mt-2" style="color:var(--ink-2)">El san tiene <b style="color:var(--ink)">muchos morosos e irresponsables</b>. Sin reputación no hay forma de prever quién cumplirá.</p></div>
+        <div class="sub p-4 sm:col-span-2"><i data-lucide="door-open" class="lucide-lg brand-text"></i><p class="text-sm mt-2" style="color:var(--ink-2)">Entrar a cripto <b style="color:var(--ink)">da miedo o parece complicado</b>. Falta un puente amable desde lo que la gente ya hace (san, vaca en Bs) hacia el ahorro en cripto.</p></div>
       </div>
     </section>
 
@@ -124,7 +136,7 @@
       <div class="space-y-4">
         <div>
           <h3 class="font-semibold flex items-center gap-2 mb-1"><i data-lucide="repeat" class="lucide brand-text"></i>San / bolso (rotativo) — gancho principal</h3>
-          <p class="text-sm" style="color:var(--ink-2)">Aporte periódico y reparto por turnos. Ejemplo: 5 personas, cada una recibe $100; dura 5 semanas; cada semana <b style="color:var(--ink)">todos aportan $20</b> y <b style="color:var(--ink)">a uno le toca cobrar</b> los $100. Quien cobra primero sigue aportando. Al final cada quien puso $100 y recibió $100. Ahorro disciplinado y muy popular.</p>
+          <p class="text-sm" style="color:var(--ink-2)">Aporte periódico y reparto por turnos. Ejemplo: 5 personas, cada una recibe $100; dura 5 semanas; cada semana <b style="color:var(--ink)">todos aportan $20</b> y <b style="color:var(--ink)">a uno le toca cobrar</b> los $100. Quien cobra primero sigue aportando. Ahorro disciplinado y muy popular.</p>
         </div>
         <div>
           <h3 class="font-semibold flex items-center gap-2 mb-1"><i data-lucide="target" class="lucide brand-text"></i>Pote / vaca (meta común)</h3>
@@ -132,18 +144,33 @@
         </div>
         <div>
           <h3 class="font-semibold flex items-center gap-2 mb-1"><i data-lucide="split" class="lucide brand-text"></i>Dividir una cuenta (fase posterior)</h3>
-          <p class="text-sm" style="color:var(--ink-2)">Repartir un gasto a pagar entre varios (la cena de $600 entre 12). Cada quien ve cuánto le toca.</p>
+          <p class="text-sm" style="color:var(--ink-2)">Repartir un gasto entre varios; cada quien ve cuánto le toca.</p>
         </div>
+      </div>
+    </section>
+
+    <!-- PRINCIPIO UX -->
+    <section id="ux" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="compass" class="lucide-lg brand-text"></i>Principio rector de UX</h2>
+      <p class="text-sm mb-3" style="color:var(--ink-2)">¿Reduce la fricción y la desconfianza de alguien que nunca ha usado cripto?</p>
+      <div class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm" style="color:var(--ink-2)">
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>La app <b style="color:var(--ink)">vale sin cripto</b>: registro transparente de la recolecta (puente de entrada).</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i><b style="color:var(--ink)">Cripto sobre Solana</b> como destino: respaldar/recibir en USDC/SOL, nunca custodiar a la fuerza.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i><b style="color:var(--ink)">Registro rápido</b>; cédula/KYC solo para funciones de dinero.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i><b style="color:var(--ink)">Transparencia pública</b> dentro del grupo: turnos, aportes, mora y reputación.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i><b style="color:var(--ink)">Lenguaje humano</b>, tooltips y guías claras.</div>
       </div>
     </section>
 
     <!-- PUBLICO/PRIVADO -->
     <section id="publico" class="card p-7">
       <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="globe" class="lucide-lg brand-text"></i>Público o privado, y marketplace</h2>
+      <p class="text-sm mb-4" style="color:var(--ink-2)">Al crear una recolecta se elige su visibilidad:</p>
       <div class="grid sm:grid-cols-2 gap-3">
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="lock" class="lucide brand-text"></i>Privado</div><p class="text-sm" style="color:var(--ink-2)">Solo las personas que invites: amigos, familia, conocidos.</p></div>
-        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="store" class="lucide brand-text"></i>Público (marketplace)</div><p class="text-sm" style="color:var(--ink-2)">Aparece en un <b style="color:var(--ink)">marketplace</b> donde otros pueden verlo y pedir unirse. Meta a futuro; depende de la reputación.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="store" class="lucide brand-text"></i>Público (marketplace)</div><p class="text-sm" style="color:var(--ink-2)">Aparece en un <b style="color:var(--ink)">marketplace</b> donde otros pueden verlo y pedir unirse.</p></div>
       </div>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>El marketplace público es una meta a futuro y ambiciosa, pero se diseña desde ya porque depende de la reputación: unirse a un bolso de desconocidos solo tiene sentido si puedes ver su historial y el del organizador.</span></p>
     </section>
 
     <!-- METODO -->
@@ -153,25 +180,58 @@
       <div class="grid sm:grid-cols-2 gap-3">
         <div class="sub p-4">
           <div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="banknote" class="lucide brand-text"></i>Tradicional</div>
-          <p class="text-sm" style="color:var(--ink-2)">La app organiza; el dinero va por fuera (efectivo, transferencia o pago móvil), en Bs o USDT. Se indican los <b style="color:var(--ink)">datos de la cuenta destino</b> (banco con código, titular, número, tipo) y cada quien <b style="color:var(--ink)">reporta su pago</b> con comprobante: referencia, fecha, monto y banco.</p>
+          <p class="text-sm" style="color:var(--ink-2)">La app organiza; el dinero va por fuera. Referencia en USDT y/o Bs, a la tasa que elijan. Métodos: efectivo (más para bolsos en dólares físicos), transferencia bancaria o pago móvil. Se indican los <b style="color:var(--ink)">datos de la cuenta destino</b> (tipo, banco con su código, titular, número, tipo de cuenta) y cada participante <b style="color:var(--ink)">reporta su pago</b>: comprobante (captura), referencia, fecha, monto, banco origen/destino.</p>
         </div>
         <div class="sub p-4" style="background:var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 30%, transparent)">
-          <div class="flex items-center gap-2 font-semibold brand-text mb-1"><i data-lucide="coins" class="lucide"></i>Cripto (Solana)</div>
-          <p class="text-sm" style="color:var(--ink-2)">Movimiento en <b style="color:var(--ink)">USDC/SOL</b>. El grupo elige <b style="color:var(--ink)">wallet de la app</b> (embebida, maneja saldo y transfiere sin extensión, estilo GMGN) o <b style="color:var(--ink)">autocustodia</b> (su dirección, la app refleja). El bote seguro usa <b style="color:var(--ink)">multifirma</b>.</p>
+          <div class="flex items-center gap-2 font-semibold brand-text mb-1"><i data-lucide="coins" class="lucide"></i>Cripto (sobre Solana)</div>
+          <p class="text-sm" style="color:var(--ink-2)">Referencia y movimiento en <b style="color:var(--ink)">USDC (o SOL)</b>. El grupo elige <b style="color:var(--ink)">wallet de la app</b> (embebida, maneja saldo y transfiere sin extensión, estilo GMGN) o <b style="color:var(--ink)">autocustodia / dirección externa</b> (la app refleja). El bote de grupo seguro usa <b style="color:var(--ink)">multifirma</b>.</p>
         </div>
       </div>
     </section>
 
     <!-- MONEDA -->
     <section id="moneda" class="card p-7">
-      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="badge-dollar-sign" class="lucide-lg brand-text"></i>Moneda y equivalencia en bolívares</h2>
-      <p class="text-sm mb-4" style="color:var(--ink-2)">Cada monto muestra un tag con el equivalente en Bs a la tasa que elijas. En preferencias se fija la moneda por defecto (Bs/USDC) y la tasa.</p>
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="badge-dollar-sign" class="lucide-lg brand-text"></i>Moneda, tasas y equivalencia en bolívares</h2>
+      <p class="text-sm mb-4" style="color:var(--ink-2)">Cada monto muestra un tag con el equivalente en Bs a la tasa elegida: <b style="color:var(--ink)">BCV</b>, <b style="color:var(--ink)">USDT</b> (mercado/cripto, aproximada) o <b style="color:var(--ink)">personalizada</b>. En preferencias: moneda por defecto (Bs/USDC) y tasa. Las tasas son <b style="color:var(--ink)">solo informativas</b>, nunca mueven fondos.</p>
       <div class="grid sm:grid-cols-3 gap-3">
         <div class="sub p-4"><div class="font-semibold mb-1">BCV</div><p class="text-sm" style="color:var(--ink-2)">Tasa oficial. No sigue al mercado real.</p></div>
         <div class="sub p-4"><div class="font-semibold mb-1">USDT</div><p class="text-sm" style="color:var(--ink-2)">Tasa de mercado/cripto. Aproximada (varía por comerciante y monto).</p></div>
         <div class="sub p-4"><div class="font-semibold mb-1">Personalizada</div><p class="text-sm" style="color:var(--ink-2)">Tú fijas tu propia tasa.</p></div>
       </div>
-      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Tasas vía API externa, consultadas desde el backend y cacheadas. Solo informativas: nunca mueven fondos.</span></p>
+
+      <h3 class="font-semibold flex items-center gap-2 mt-5 mb-2"><i data-lucide="cloud-download" class="lucide brand-text"></i>Fuentes de datos</h3>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="key-round" class="lucide brand-text"></i>BCV oficial y USDT P2P</div><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">API externa de tasas</b> de un proveedor venezolano. Es una API privada de uso propio: sus endpoints y la API key <b style="color:var(--ink)">no van en el repo</b> (Green Sol es open source); viven en <span class="mono">_privado/</span> y en variables de entorno.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="line-chart" class="lucide brand-text"></i>Precio de SOL / USDC</div><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">DexScreener</b> (API pública, sin key).</p></div>
+      </div>
+
+      <h3 class="font-semibold flex items-center gap-2 mt-5 mb-2"><i data-lucide="database" class="lucide brand-text"></i>Estrategia de consulta y caché global</h3>
+      <p class="text-sm mb-3" style="color:var(--ink-2)">Clave: no saturar las APIs. Nunca se llama por usuario ni por acción. Se hace <b style="color:var(--ink)">una consulta global</b> de la app, se <b style="color:var(--ink)">cachea</b> con su timestamp, y todos los usuarios, sanes y la calculadora <b style="color:var(--ink)">leen del caché</b>. Frecuencias (hora de Venezuela, VET = UTC−4):</p>
+      <div class="overflow-x-auto rounded-xl" style="border:1px solid var(--line)">
+        <table>
+          <thead><tr><th>Fuente</th><th>Refresco</th></tr></thead>
+          <tbody>
+            <tr><td>BCV</td><td><b>2× al día</b> (09:00 y 16:00 VET)</td></tr>
+            <tr><td>USDT (Binance)</td><td>cada <b>1–2 h</b></td></tr>
+            <tr><td>SOL/USDC (DexScreener)</td><td>cada <b>1–2 h</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="timer" class="lucide" style="flex:0 0 auto"></i><span>Implementado con un <b style="color:var(--ink-2)">cron / scheduled job</b> (Vercel Cron). El WebSocket de USDT del proveedor es opcional para una vista "en vivo" sin sumar llamadas REST.</span></p>
+      <p class="text-sm mt-3 p-3 rounded-lg flex gap-2" style="background:color-mix(in srgb, var(--warn) 12%, transparent); color:var(--ink-2); border:1px solid color-mix(in srgb, var(--warn) 30%, transparent)"><i data-lucide="scale" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><span><b style="color:var(--ink)">Aviso legal</b> (mostrar donde se vean tasas): los datos provienen de <a href="https://www.bcv.org.ve" class="brand-text underline">bcv.org.ve</a>; Green Sol no se responsabiliza por su veracidad ni actualización; el <b style="color:var(--ink)">BCV es el único ente autorizado</b> para modificar la tasa oficial en Venezuela.</span></p>
+    </section>
+
+    <!-- CALCULADORA -->
+    <section id="calculadora" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="calculator" class="lucide-lg brand-text"></i>Calculadora de cotizaciones</h2>
+      <p class="text-sm mb-4" style="color:var(--ink-2)">Herramienta clave accesible desde la <b style="color:var(--ink)">barra de navegación</b>. Convierte <b style="color:var(--ink)">en ambos sentidos</b> entre:</p>
+      <div class="grid sm:grid-cols-3 gap-3">
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="banknote" class="lucide brand-text"></i>Bolívares</div><p class="text-sm" style="color:var(--ink-2)">A tasa <b style="color:var(--ink)">BCV</b>, <b style="color:var(--ink)">USDT</b> o <b style="color:var(--ink)">personalizada</b>.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="circle-dollar-sign" class="lucide brand-text"></i>USDC</div><p class="text-sm" style="color:var(--ink-2)">≈ dólar digital.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="coins" class="lucide brand-text"></i>SOL</div><p class="text-sm" style="color:var(--ink-2)">A su precio del día vía DexScreener.</p></div>
+      </div>
+      <p class="text-sm mt-4" style="color:var(--ink-2)">Es más completa que las calculadoras de tasas venezolanas habituales (que solo hacen Bs↔USD): aquí se suma USDC y SOL, leyendo del <b style="color:var(--ink)">caché global</b> para no consultar las APIs en cada cálculo.</p>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Ejemplos: "¿cuántos Bs son 20 USDT a tasa BCV?", "¿cuántos Bs equivale 1 SOL?", "¿cuánto SOL son 50 USDC?".</span></p>
     </section>
 
     <!-- TURNOS -->
@@ -179,41 +239,104 @@
       <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="dice-5" class="lucide-lg brand-text"></i>Turnos del san y mora</h2>
       <div class="grid sm:grid-cols-2 gap-3">
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="shuffle" class="lucide brand-text"></i>Turnos</div><p class="text-sm" style="color:var(--ink-2)">El orden se define <b style="color:var(--ink)">al azar</b> (animación: dado, ruleta, carrusel) o <b style="color:var(--ink)">manual</b>. Siempre <b style="color:var(--ink)">público</b>: todos ven quién giró y a quién le tocó.</p></div>
-        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="bell-ring" class="lucide brand-text"></i>Mora</div><p class="text-sm" style="color:var(--ink-2)">Si alguien no aporta, la app <b style="color:var(--ink)">notifica al grupo, al moroso y al administrador</b>. <b style="color:var(--ink)">Multa opcional</b> configurable: por porcentaje o monto fijo, en USDC, SOL o Bs.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="bell-ring" class="lucide brand-text"></i>Mora</div><p class="text-sm" style="color:var(--ink-2)">La app <b style="color:var(--ink)">notifica al grupo, al moroso y al administrador</b>. <b style="color:var(--ink)">Multa por mora opcional</b> (porcentaje o monto fijo, en USDC/SOL/Bs). La mora también <b style="color:var(--ink)">baja la reputación</b>.</p></div>
       </div>
     </section>
 
     <!-- REPUTACION -->
     <section id="reputacion" class="card p-7">
-      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="star" class="lucide-lg" style="color:var(--gold)"></i>Reputación y confianza</h2>
-      <p class="text-sm mb-3" style="color:var(--ink-2)">Con dinero no se juega: saber con quién te metes es esencial. Por eso la reputación está <b style="color:var(--ink)">desde el inicio</b>.</p>
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="star" class="lucide-lg" style="color:var(--gold)"></i>Reputación y confianza (clave, desde el inicio)</h2>
+      <p class="text-sm mb-3" style="color:var(--ink-2)">Con dinero no se juega; saber con quién te metes es esencial.</p>
       <div class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm" style="color:var(--ink-2)">
-        <div class="flex gap-2"><i data-lucide="thumbs-up" class="lucide chk"></i>Al cerrar un bolso, cada quien valora a los demás: manito arriba/abajo + comentario.</div>
-        <div class="flex gap-2"><i data-lucide="star" class="lucide" style="color:var(--gold); flex:0 0 auto"></i>El perfil muestra la puntuación en estrellitas.</div>
-        <div class="flex gap-2"><i data-lucide="trending-down" class="lucide chk"></i>La reputación baja por retrasos y mora.</div>
-        <div class="flex gap-2"><i data-lucide="history" class="lucide chk"></i>Al unirte ves al organizador y su historial (sanes hechos, completados, montos, tipos).</div>
+        <div class="flex gap-2"><i data-lucide="thumbs-up" class="lucide chk"></i>Al cerrar un bolso, cada quien valora a los demás: <b style="color:var(--ink)">manito arriba (+1) o abajo (−1)</b> + comentario. Todo se almacena.</div>
+        <div class="flex gap-2"><i data-lucide="star" class="lucide" style="color:var(--gold); flex:0 0 auto"></i>El perfil muestra la puntuación (positivos vs negativos) y su equivalente en <b style="color:var(--ink)">estrellitas</b>.</div>
+        <div class="flex gap-2"><i data-lucide="trending-down" class="lucide chk"></i>La reputación <b style="color:var(--ink)">baja por retrasos y mora</b>.</div>
+        <div class="flex gap-2"><i data-lucide="history" class="lucide chk"></i>Al unirte ves al/los <b style="color:var(--ink)">organizador(es)</b> y su historial: sanes hechos, montos, completados vs no concretados, y de qué tipo (público/privado, tradicional/cripto, Bs/USDC/SOL). También quién más se unió y su reputación.</div>
+        <div class="flex gap-2"><i data-lucide="lock" class="lucide chk"></i>Aplica <b style="color:var(--ink)">incluso en planes privados</b>: ver quién entró y su puntuación.</div>
+        <div class="flex gap-2"><i data-lucide="handshake" class="lucide chk"></i>La plataforma presta la herramienta y la transparencia; <b style="color:var(--ink)">organizar y cumplir es responsabilidad de los usuarios</b>.</div>
       </div>
-      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Referencia a estudiar: Cashea (app venezolana de cuotas) tiene un sistema de puntuación muy logrado.</span></p>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Referencia a investigar: <b style="color:var(--ink-2)">Cashea</b> (app venezolana de cuotas) tiene un sistema de puntuación muy logrado. El modelo base de Green Sol es simple (manito +/−, estilo P2P de Binance), pero conviene estudiar Cashea para evolucionarlo.</span></p>
     </section>
 
     <!-- DASHBOARD -->
     <section id="dashboard" class="card p-7">
       <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="layout-dashboard" class="lucide-lg brand-text"></i>Dashboard del usuario</h2>
-      <div class="grid sm:grid-cols-3 gap-3">
-        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="wallet" class="lucide brand-text"></i>Tu saldo</div><p class="text-sm" style="color:var(--ink-2)">Cuánto tienes en tu wallet, con equivalente en Bs.</p></div>
-        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="users" class="lucide brand-text"></i>Tus recolectas</div><p class="text-sm" style="color:var(--ink-2)">En qué bolsos/vacas estás, su estado y próximos vencimientos.</p></div>
+      <p class="text-sm mb-4" style="color:var(--ink-2)">Pantalla principal con lo esencial de un vistazo.</p>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="trending-up" class="lucide brand-text"></i>Tasas del día (sutiles)</div><p class="text-sm" style="color:var(--ink-2)">BCV, USDT promedio y SOL/USDC, con su variación, mostradas de forma sutil <b style="color:var(--ink)">arriba de las tarjetas</b> (del caché global).</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="wallet" class="lucide brand-text"></i>Tu saldo</div><p class="text-sm" style="color:var(--ink-2)">Si tienes saldo en tu wallet (y cuánto), con equivalente en Bs.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="users" class="lucide brand-text"></i>Tus recolectas</div><p class="text-sm" style="color:var(--ink-2)">En qué bolsos/vacas/cuentas estás, su estado y próximos vencimientos.</p></div>
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="star" class="lucide" style="color:var(--gold)"></i>Tu reputación</div><p class="text-sm" style="color:var(--ink-2)">Tus estrellitas y accesos rápidos para crear o unirte.</p></div>
       </div>
     </section>
 
-    <!-- CUENTA / KYC -->
-    <section id="cuenta" class="card p-7">
-      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="id-card" class="lucide-lg brand-text"></i>Registro y verificación</h2>
-      <div class="space-y-2 text-sm" style="color:var(--ink-2)">
-        <p><b style="color:var(--ink)">Registro rápido</b> con correo (la wallet se crea por detrás). Sin cédula al inicio, para no poner barrera.</p>
-        <p><b style="color:var(--ink)">Perfil:</b> nacionalidad y, si es venezolano, documento (cédula/pasaporte) y número — datos contra estafas.</p>
-        <p><b style="color:var(--ink)">KYC:</b> no se exige para registrarse, pero <b style="color:var(--ink)">sí para las funciones de dinero</b>. Se hará con un proveedor tercero (documento + selfie/video), no manual. Al ser finanzas, el usuario verificado responde por su uso.</p>
+    <!-- NAVEGACION -->
+    <section id="navegacion" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="panel-bottom" class="lucide-lg brand-text"></i>Navegación (barra inferior)</h2>
+      <p class="text-sm mb-4" style="color:var(--ink-2)">La app usa un <b style="color:var(--ink)">menú de navegación inferior</b> (bottom nav, estilo app móvil) con los botones clave. Set previsto (a afinar con referencias visuales):</p>
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div class="sub p-4 text-center"><i data-lucide="layout-dashboard" class="lucide-lg brand-text mx-auto"></i><div class="text-sm font-semibold mt-2">Dashboard</div></div>
+        <div class="sub p-4 text-center"><i data-lucide="users" class="lucide-lg brand-text mx-auto"></i><div class="text-sm font-semibold mt-2">Sanes &amp; Vacas</div></div>
+        <div class="sub p-4 text-center"><i data-lucide="calculator" class="lucide-lg brand-text mx-auto"></i><div class="text-sm font-semibold mt-2">Calculadora</div></div>
+        <div class="sub p-4 text-center"><i data-lucide="bell" class="lucide-lg brand-text mx-auto"></i><div class="text-sm font-semibold mt-2">Notificaciones</div></div>
+        <div class="sub p-4 text-center"><i data-lucide="user" class="lucide-lg brand-text mx-auto"></i><div class="text-sm font-semibold mt-2">Perfil</div></div>
       </div>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="smartphone" class="lucide" style="flex:0 0 auto"></i><span>Diseño <b style="color:var(--ink-2)">responsive</b>: la barra inferior en móvil; en escritorio puede pasar a lateral o superior.</span></p>
+    </section>
+
+    <!-- NOTIFICACIONES -->
+    <section id="notificaciones" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="bell" class="lucide-lg brand-text"></i>Notificaciones y avisos</h2>
+      <p class="text-sm mb-4" style="color:var(--ink-2)">Dos planos complementarios.</p>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="sub p-4">
+          <div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="bell-dot" class="lucide brand-text"></i>Campanita — persistentes (por usuario)</div>
+          <p class="text-sm" style="color:var(--ink-2)">Bandeja (🔔) con estado leído/no leído, fecha, tipo y enlace al recurso. Orígenes:</p>
+          <ul class="text-sm mt-2 space-y-1" style="color:var(--ink-2)">
+            <li class="flex gap-2"><i data-lucide="megaphone" class="lucide chk"></i><span><b style="color:var(--ink)">Sistema / super-admin:</b> enviar notificaciones a <b style="color:var(--ink)">un usuario concreto</b> o <b style="color:var(--ink)">globales a todos</b> (broadcast).</span></li>
+            <li class="flex gap-2"><i data-lucide="activity" class="lucide chk"></i><span><b style="color:var(--ink)">Eventos de san/vaca:</b> "tal persona entró", "tal persona pagó — está al día", algo <b style="color:var(--ink)">completado</b> (turno, meta, cierre); y para el administrador: aviso de <b style="color:var(--ink)">moroso</b> o pago pendiente.</span></li>
+          </ul>
+        </div>
+        <div class="sub p-4">
+          <div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="message-square" class="lucide brand-text"></i>Toasts — efímeros (por acción)</div>
+          <p class="text-sm" style="color:var(--ink-2)">Para procesos de la app (ej. "san creado"). Aparecen y desaparecen. Código de color:</p>
+          <div class="overflow-x-auto rounded-xl mt-3" style="border:1px solid var(--line)">
+            <table>
+              <thead><tr><th>Color</th><th>Significado</th></tr></thead>
+              <tbody>
+                <tr><td><span class="badge" style="background:color-mix(in srgb, var(--ok) 14%, transparent); color:var(--ok)">🟢 Verde</span></td><td>Éxito / positivo (san creado, pago registrado)</td></tr>
+                <tr><td><span class="badge" style="background:color-mix(in srgb, var(--bad) 14%, transparent); color:var(--bad)">🔴 Rojo</span></td><td>Error / negativo</td></tr>
+                <tr><td><span class="badge" style="background:color-mix(in srgb, var(--warn) 16%, transparent); color:var(--warn)">🟠 Naranja</span></td><td>Advertencia / probable error</td></tr>
+                <tr><td><span class="badge" style="background:color-mix(in srgb, #2563EB 16%, transparent); color:#2563EB">🔵 Azul</span></td><td>Información neutra</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Para el MVP, notificaciones <b style="color:var(--ink-2)">in-app</b> son suficientes; correo/push pueden venir después.</span></p>
+    </section>
+
+    <!-- CUENTA / REGISTRO / PERFIL / ROLES -->
+    <section id="cuenta" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="user-cog" class="lucide-lg brand-text"></i>Registro, perfil y roles</h2>
+
+      <h3 class="font-semibold flex items-center gap-2 mb-2"><i data-lucide="log-in" class="lucide brand-text"></i>Registro y login</h3>
+      <div class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm mb-4" style="color:var(--ink-2)">
+        <div class="flex gap-2"><i data-lucide="key-round" class="lucide chk"></i><b style="color:var(--ink)">Correo + contraseña.</b> Política de contraseña segura: al menos <b style="color:var(--ink)">una mayúscula, un número y un símbolo</b> (además de letras), con <b style="color:var(--ink)">generador de contraseña aleatoria</b> opcional.</div>
+        <div class="flex gap-2"><i data-lucide="mail-check" class="lucide chk"></i><b style="color:var(--ink)">Verificación por correo</b> (email de confirmación). Se usará un <b style="color:var(--ink)">dominio de prueba</b> y un <b style="color:var(--ink)">servidor de correos propio</b>.</div>
+        <div class="flex gap-2"><i data-lucide="user-plus" class="lucide chk"></i>Sin cédula al inicio, para no poner barrera.</div>
+        <div class="flex gap-2"><i data-lucide="chrome" class="lucide chk"></i><b style="color:var(--ink)">A futuro (no MVP):</b> registro / vinculación con <b style="color:var(--ink)">Google</b> (OAuth); un usuario por correo podrá vincular su Google después.</div>
+      </div>
+
+      <h3 class="font-semibold flex items-center gap-2 mb-2"><i data-lucide="user" class="lucide brand-text"></i>Perfil y configuración (por pestañas)</h3>
+      <div class="grid sm:grid-cols-3 gap-3 mb-4">
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="at-sign" class="lucide brand-text"></i>Cuenta</div><p class="text-sm" style="color:var(--ink-2)">Cambiar correo principal y contraseña.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="image" class="lucide brand-text"></i>Perfil</div><p class="text-sm" style="color:var(--ink-2)">Foto, nombre y apellido, <b style="color:var(--ink)">nombre de usuario</b>; nacionalidad y, si es venezolano, documento (cédula/pasaporte) y número.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="wallet" class="lucide brand-text"></i>Datos de pago</div><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">Tradicional:</b> efectivo (dólar físico), transferencia bancaria (Bs), pago móvil (Bs). <b style="color:var(--ink)">Cripto:</b> wallet <b style="color:var(--ink)">USDT</b> y/o wallet <b style="color:var(--ink)">Solana</b> (USDC/SOL) — se incentiva Solana para que haya consulta entre la wallet y la app.</p></div>
+      </div>
+
+      <p class="text-sm p-3 rounded-lg flex gap-2 mb-3" style="background:var(--paper-2); color:var(--ink-2); border:1px solid var(--line)"><i data-lucide="scan-face" class="lucide brand-text" style="flex:0 0 auto"></i><span><b style="color:var(--ink)">KYC:</b> no para registrarse, pero <b style="color:var(--ink)">sí para funciones de dinero</b>, vía proveedor tercero (documento + selfie/video), no manual.</span></p>
+      <p class="text-sm flex gap-2" style="color:var(--ink-3)"><i data-lucide="users-round" class="lucide" style="flex:0 0 auto"></i><span><b style="color:var(--ink-2)">Roles:</b> usuario, administrador de grupo y super-admin.</span></p>
     </section>
 
     <!-- SUPER-ADMIN -->
@@ -221,10 +344,11 @@
       <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="shield" class="lucide-lg brand-text"></i>Panel super-admin</h2>
       <p class="text-sm mb-3" style="color:var(--ink-2)">Acceso interno separado para los responsables de la plataforma:</p>
       <div class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm" style="color:var(--ink-2)">
-        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Administrar usuarios y grupos/recolectas.</div>
-        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Ver métodos de pago y documentos subidos.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Administrar usuarios y recolectas.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Ver métodos de pago y documentos subidos (cédula, pasaporte, comprobantes).</div>
         <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Comprobaciones manuales anti-estafa.</div>
-        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Acceso aparte del de los usuarios.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i><b style="color:var(--ink)">Enviar notificaciones</b> (a un usuario o globales).</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Mayor control de seguridad y acceso aparte del de los usuarios.</div>
       </div>
     </section>
 
@@ -236,9 +360,9 @@
         <table>
           <thead><tr><th>Capa</th><th>¿On-chain?</th><th>Ejemplos</th></tr></thead>
           <tbody>
-            <tr><td>Cuentas, recolectas, turnos, reportes</td><td><span class="badge badge-muted">No · web tradicional</span></td><td>Login, grupos, progreso</td></tr>
-            <tr><td>Archivos (comprobantes, audio, fotos)</td><td><span class="badge badge-muted">No · object storage</span></td><td>Capturas, notas de voz</td></tr>
-            <tr><td>Tasas y equivalencia en Bs</td><td><span class="badge badge-muted">No · API externa</span></td><td>BCV, USDT, personalizada</td></tr>
+            <tr><td>Cuentas, recolectas, turnos, reportes, reputación, notificaciones, UTM</td><td><span class="badge badge-muted">No · web tradicional</span></td><td>Login, grupos, progreso, valoraciones, campanita</td></tr>
+            <tr><td>Archivos pesados (comprobantes, audio, fotos)</td><td><span class="badge badge-muted">No · object storage</span></td><td>Capturas, notas de voz</td></tr>
+            <tr><td>Tasas, equivalencia en Bs y calculadora</td><td><span class="badge badge-muted">No · APIs externas + caché</span></td><td>BCV, USDT, SOL/USDC</td></tr>
             <tr><td>Recolecta con cripto (saldo del bote)</td><td><span class="badge badge-brand">Sí · Solana</span></td><td>USDC/SOL verificable</td></tr>
             <tr><td>Mover fondos del bote cripto</td><td><span class="badge badge-brand">Sí · multifirma</span></td><td>Retiros aprobados</td></tr>
             <tr><td>Reflejar wallet externa</td><td><span class="badge badge-brand">Sí · lectura RPC</span></td><td>Modo espejo</td></tr>
@@ -247,15 +371,25 @@
       </div>
     </section>
 
+    <!-- ANALITICA / UTM -->
+    <section id="analitica" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="bar-chart-3" class="lucide-lg brand-text"></i>Datos y analítica (control interno)</h2>
+      <div class="grid sm:grid-cols-3 gap-3">
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="link" class="lucide brand-text"></i>UTM por usuario</div><p class="text-sm" style="color:var(--ink-2)">De cada usuario (registro, ingreso, campañas) para medir adquisición y para marketing.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="gauge" class="lucide brand-text"></i>Métricas de uso</div><p class="text-sm" style="color:var(--ink-2)">Sanes creados, completados, no concretados, montos, tipos — útiles para el negocio y para mostrar parte al usuario como reputación/historial.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="shield-check" class="lucide brand-text"></i>Privacidad</div><p class="text-sm" style="color:var(--ink-2)">Todo respetando privacidad y con datos sensibles protegidos.</p></div>
+      </div>
+    </section>
+
     <!-- SEGURIDAD -->
     <section id="seguridad" class="card p-7">
       <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="lock" class="lucide-lg brand-text"></i>Seguridad: la regla de oro</h2>
-      <p class="text-[15px] p-4 rounded-xl mb-4" style="background:var(--brand-soft); color:var(--ink); border:1px solid color-mix(in srgb, var(--brand) 30%, transparent)"><b>Green Sol no tiene la llave secreta del dinero de nadie ni del bote de un grupo.</b> Confianza, cumplimiento legal y seguridad, todo de una.</p>
+      <p class="text-[15px] p-4 rounded-xl mb-4" style="background:var(--brand-soft); color:var(--ink); border:1px solid color-mix(in srgb, var(--brand) 30%, transparent)"><b>Green Sol no tiene la llave secreta del dinero de nadie ni del bote de un grupo.</b> Confianza por diseño: no-custodial por defecto.</p>
       <div class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm" style="color:var(--ink-2)">
         <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Bote de grupo con multifirma o modo espejo.</div>
-        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Comprobantes y datos personales cifrados.</div>
-        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Secretos solo en variables de entorno.</div>
-        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Toda transacción se simula antes de firmar.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Datos personales y comprobantes cifrados, con acceso restringido.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i><b style="color:var(--ink)">Secretos, API keys, webhooks y detalles de APIs privadas nunca en el repo</b> (open source): variables de entorno y <span class="mono">_privado/</span>.</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Responsive escritorio→móvil, accesibilidad e i18n (español por defecto).</div>
       </div>
     </section>
 
@@ -264,24 +398,52 @@
       <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="route" class="lucide-lg brand-text"></i>Roadmap por fases</h2>
       <div class="space-y-3">
         <div class="flex gap-3"><span class="badge badge-ok" style="flex:0 0 auto">Fase 0</span><p class="text-sm" style="color:var(--ink-2)">Documentación (actual).</p></div>
-        <div class="flex gap-3"><span class="badge badge-brand" style="flex:0 0 auto">Fase 1</span><p class="text-sm" style="color:var(--ink-2)">MVP gancho (tradicional, sin cripto): bienvenida, registro, preferencias, crear san/bolso y pote/vaca, cuenta destino, reporte de pagos, turnos y avisos de mora. Pruebas en Vercel.</p></div>
-        <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 2</span><p class="text-sm" style="color:var(--ink-2)">Capa cripto: wallet embebida, USDC/SOL, multifirma o modo espejo, tasas vía API, multas por mora.</p></div>
-        <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 3</span><p class="text-sm" style="color:var(--ink-2)">Dividir cuentas, KYC con proveedor, panel super-admin completo, despliegue en VPS (contenedor).</p></div>
+        <div class="flex gap-3"><span class="badge badge-brand" style="flex:0 0 auto">Fase 1</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">MVP gancho (tradicional).</b> Entrega de <b style="color:var(--ink)">primera versión: 1 de junio de 2026, 5:30 p.m.</b> (tarea del bootcamp: tuit con screenshot/video + URL). Incluye: bienvenida, registro/login (correo + clave segura + verificación), preferencias, dashboard con <b style="color:var(--ink)">tasas en vivo</b>, <b style="color:var(--ink)">calculadora</b>, <b style="color:var(--ink)">bottom nav</b>, crear san/bolso y pote/vaca (público/privado), cuenta destino, reporte de pagos, turnos, avisos de mora, <b style="color:var(--ink)">notificaciones (toasts + campanita básica)</b> y <b style="color:var(--ink)">reputación básica</b> (manito +/−, estrellitas). Pruebas en Vercel.</p></div>
+        <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 2</span><p class="text-sm" style="color:var(--ink-2)">Capa cripto: wallet embebida, USDC/SOL, multifirma o modo espejo, multas por mora, <b style="color:var(--ink)">integración wallet Solana ↔ app</b>.</p></div>
+        <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 3</span><p class="text-sm" style="color:var(--ink-2)">Confianza y escala: dividir cuentas, KYC con proveedor, panel super-admin completo, <b style="color:var(--ink)">marketplace público</b>, <b style="color:var(--ink)">login con Google</b>, despliegue en VPS.</p></div>
         <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 4</span><p class="text-sm" style="color:var(--ink-2)">App móvil Android/iOS.</p></div>
       </div>
+      <p class="text-sm mt-4 p-3 rounded-lg flex gap-2" style="background:color-mix(in srgb, var(--warn) 12%, transparent); color:var(--ink-2); border:1px solid color-mix(in srgb, var(--warn) 30%, transparent)"><i data-lucide="flag" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><span><b style="color:var(--ink)">Nota de alcance MVP (1-jun):</b> priorizar lo <b style="color:var(--ink)">mostrable</b> para el screenshot/video. Mayor impacto con menor esfuerzo: dashboard con tasas reales + calculadora (APIs ya disponibles), bottom nav, y el flujo de crear un san (UI). Registro con verificación de correo y notificaciones completas pueden ir parciales si el tiempo aprieta.</span></p>
     </section>
 
     <!-- MARCA -->
     <section id="marca" class="card p-7">
-      <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="palette" class="lucide-lg brand-text"></i>Identidad de marca</h2>
-      <div class="flex items-center gap-4">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="palette" class="lucide-lg brand-text"></i>Identidad de marca y diseño</h2>
+      <div class="flex items-center gap-4 mb-5">
         <div class="w-16 h-16 rounded-full sun-logo flex items-center justify-center"><i data-lucide="sun" class="lucide" style="color:white; width:30px; height:30px;"></i></div>
-        <p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">Green Sol</b> juega con el doble sentido de "Sol": por un lado <b style="color:var(--ink)">SOL</b>, el símbolo de Solana; por otro, el <b style="color:var(--ink)">Sol</b>, la estrella radiante. Un sol <b class="brand-text">verde</b> (las estrellas pueden ser de muchos colores), elegido porque el verde vende y representa dinero, organización y calma. Estética de <b style="color:var(--ink)">espacio y galaxias</b>.</p>
+        <p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">Green Sol</b> juega con el doble sentido de "Sol": por un lado <b style="color:var(--ink)">SOL</b>, el símbolo de Solana; por otro, el <b style="color:var(--ink)">Sol</b>, la estrella radiante. Un sol <b class="brand-text">verde</b> (las estrellas pueden ser de muchos colores), elegido porque el verde vende y representa dinero, organización y calma. Estética de <b style="color:var(--ink)">espacio y galaxias</b>; ícono de sol que contrasta en claro y oscuro.</p>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="sub p-4">
+          <div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="badge-check" class="lucide brand-text"></i>Logo</div>
+          <p class="text-sm" style="color:var(--ink-2)">Badge circular verde (degradado radial <span class="mono">#14C98A → #0E9F6E</span>) con el <b style="color:var(--ink)">ícono <span class="mono">sun</span> de Lucide en blanco</b> (círculo hueco + 8 rayos de puntas redondeadas) y un <b style="color:var(--ink)">halo verde claro</b>. Funciona en claro y oscuro. Asset: <span class="mono">assets/green-sol-logo.svg</span>.</p>
+        </div>
+        <div class="sub p-4">
+          <div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="swatch-book" class="lucide brand-text"></i>Paleta</div>
+          <p class="text-sm mb-2" style="color:var(--ink-2)">Verde de marca como base (<span class="mono">#0E9F6E</span> light / <span class="mono">#1DCB8E</span> dark), con acentos donde aporten. Estrellitas de reputación en dorado: <span class="mono">#C8881A</span> light / <span class="mono">#F5C84B</span> dark. Para redes, degradado de Solana (morado → azul → verde).</p>
+          <div class="flex gap-2 flex-wrap">
+            <span class="w-8 h-8 rounded-lg" style="background:#0E9F6E" title="#0E9F6E"></span>
+            <span class="w-8 h-8 rounded-lg" style="background:#1DCB8E" title="#1DCB8E"></span>
+            <span class="w-8 h-8 rounded-lg" style="background:#C8881A" title="#C8881A"></span>
+            <span class="w-8 h-8 rounded-lg" style="background:#F5C84B" title="#F5C84B"></span>
+            <span class="w-8 h-8 rounded-lg" style="background:linear-gradient(90deg,#9D4EEE,#5882D1,#0BC595)" title="Degradado Solana"></span>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="sun-moon" class="lucide" style="flex:0 0 auto"></i><span><b style="color:var(--ink-2)">Modo light por defecto</b> (PRD y app): mejor primera impresión y confianza. El <b style="color:var(--ink-2)">modo dark es opcional</b>, con un botón de cambio fácil en el dashboard.</span></p>
+    </section>
+
+    <!-- DESPLIEGUE -->
+    <section id="despliegue" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="server" class="lucide-lg brand-text"></i>Despliegue</h2>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="rocket" class="lucide brand-text"></i>Pruebas / MVP</div><p class="text-sm" style="color:var(--ink-2)">Vercel (cuenta y proyecto vinculados con GitHub; auto-redeploy en cada push) + Postgres gestionada + object storage.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="container" class="lucide brand-text"></i>Producción</div><p class="text-sm" style="color:var(--ink-2)">VPS propio en contenedor cerrado cuando madure.</p></div>
       </div>
     </section>
 
     <footer class="pt-2 pb-10 text-center text-xs" style="color:var(--ink-3)">
-      Green Sol · Solana Vibe Bootcamp Venezuela · PRD v0.3 · <span class="mono">2026-05-29</span> · <a href="https://github.com/michumichifu/green-sol" class="brand-text underline">github.com/michumichifu/green-sol</a>
+      Green Sol · Solana Vibe Bootcamp Venezuela · PRD v0.5 · <span class="mono">2026-05-29</span> · <a href="https://github.com/michumichifu/green-sol" class="brand-text underline">github.com/michumichifu/green-sol</a>
     </footer>
 
   </main>

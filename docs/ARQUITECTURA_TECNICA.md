@@ -91,11 +91,11 @@ El valor siempre se guarda en **USDC** (o SOL); los bolívares son solo una **vi
 - **BCV**, **promedio USDT P2P** y **personalizada**.
 - En preferencias del usuario se fija la moneda por defecto (Bs/USDC) y la tasa de referencia.
 
-Las tasas se obtienen de una **API externa de consulta** (de un desarrollador venezolano en España) que entrega BCV, promedio USDT y otra referencia. Consideraciones de implementación:
+Las tasas se obtienen de **APIs externas**: una **API privada de tasas** (BCV oficial + USDT P2P) y **DexScreener** (precio SOL/USDC, pública). Uso, caché y seguridad en **[INTEGRACIONES_API.md](INTEGRACIONES_API.md)**; detalle privado (endpoints + key) en `_privado/integraciones-privadas.md` (no se sube al repo). Resumen:
 
-- Llamar la API desde el **backend** (no exponer credenciales en el frontend); cachear las tasas (p. ej. refrescar cada X minutos) para no consultar en cada vista.
+- Llamar desde el **backend** y **cachear globalmente** (una consulta para toda la app, no por usuario): BCV 2×/día (09:00 y 16:00 VET), USDT y SOL cada 1–2 h. El san y la calculadora leen del caché.
 - Las tasas son **informativas**: nunca se usan para mover fondos, solo para mostrar el equivalente en Bs.
-- Pendiente: documentar endpoint/credenciales de la API (van en variables de entorno, NO en el repo).
+- Credenciales en **variables de entorno**, **NO en el repo** (Green Sol es open source).
 
 ## 6. El bote de grupo: USDC + multifirma
 
@@ -128,11 +128,14 @@ Para recolectas en modo tradicional, el backend (Postgres) guarda, sin nada on-c
 - **Cuentas destino del grupo:** tipo (pago móvil / cuenta bancaria), banco (con su código), titular, número y tipo de cuenta. Visibles para el grupo, para pagar a tiempo.
 - **Reportes de pago por participante:** comprobante (imagen en object storage), número de referencia, fecha, monto, banco origen/destino y la tasa aplicada.
 
-## 9. Verificación de identidad (KYC) y roles
+## 9. Autenticación, KYC y roles
 
-- **Registro rápido** sin cédula. KYC se exige solo para **funciones de dinero** (como hacen los exchanges).
-- KYC con **proveedor tercero** (verificación automática de documento + selfie/video); ellos almacenan esa parte. No construir KYC propio ni hacerlo manual.
-- **Roles:** usuario, administrador de grupo, y **super-admin** con un panel interno (ruta y credenciales aparte, permisos estrictos) para auditar usuarios, grupos, métodos de pago y documentos, y frenar estafas.
+- **Registro/login** con **correo + contraseña**. Política de contraseña segura (mínimo: una mayúscula, un número, un símbolo) validada en cliente y servidor, con **generador aleatorio** opcional. Hash con **Argon2/bcrypt**; nunca guardar la contraseña en claro.
+- **Verificación por correo:** token de confirmación enviado vía **servidor de correo propio** sobre un **dominio de prueba** (SMTP en variables de entorno). Cuenta no verificada → acceso limitado.
+- **A futuro:** OAuth con **Google** (vincular a cuenta existente o registro directo); la app de Google se gestiona a nivel super-admin.
+- **Datos de pago del perfil** (off-chain, cifrados): métodos tradicionales (efectivo, transferencia Bs, pago móvil) y direcciones de wallet (USDT/Binance, Solana). Las wallet de Solana habilitan consulta de saldo vía RPC (modo espejo).
+- **Registro rápido** sin cédula. **KYC** solo para **funciones de dinero** (como los exchanges), con **proveedor tercero** (documento + selfie/video); ellos almacenan esa parte. No construir KYC propio ni manual.
+- **Roles:** usuario, administrador de grupo, y **super-admin** con un panel interno (ruta y credenciales aparte, permisos estrictos) para auditar usuarios, grupos, métodos de pago y documentos, enviar notificaciones y frenar estafas.
 
 ## 10. Despliegue y operación
 
@@ -143,6 +146,8 @@ Para recolectas en modo tradicional, el backend (Postgres) guarda, sin nada on-c
 ## 11. Reputación, analítica y marketplace
 
 - **Reputación:** tabla de valoraciones (`de_usuario`, `a_usuario`, `recolecta_id`, voto +1/−1, comentario, fecha) que se habilita al **cerrar** una recolecta. El perfil agrega positivos/negativos → puntuación → **estrellitas** (cálculo en backend). La **mora** genera ajustes negativos. El historial del organizador (sanes creados / completados / no concretados, montos, tipos público-privado y tradicional-cripto) se deriva de las recolectas. Todo off-chain.
+- **Notificaciones:** tabla `notificaciones` (`usuario_destino`, `tipo`, `titulo`, `cuerpo`, `recurso_id`/enlace, `leida`, `fecha`) para la **campanita** (persistentes). Se crean por **eventos** (entró al san, pagó/al día, moroso, completado) y por **broadcast** del super-admin (a un usuario o a todos). Los **toasts** (éxito/error/advertencia/info) son solo de UI (frontend), no se persisten. Push/correo: fase posterior.
+- **Tasas y calculadora:** un **scheduled job** (Vercel Cron) refresca el caché de tasas (BCV 2×/día; USDT y SOL cada 1–2 h) desde las APIs externas; toda la app y la calculadora leen del caché, nunca de la API en cada vista. Detalle en [INTEGRACIONES_API.md](INTEGRACIONES_API.md).
 - **Analítica / UTM:** capturar parámetros **UTM** (source/medium/campaign) en registro e ingreso, guardados por usuario/sesión para medir adquisición y marketing. Datos sensibles aparte y cifrados; respetar privacidad.
 - **Marketplace (fase 3):** las recolectas **públicas** se listan con su reputación asociada; requiere reglas de permisos, moderación y antifraude antes de abrirse.
 
