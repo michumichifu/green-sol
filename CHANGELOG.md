@@ -4,6 +4,14 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.14] — 2026-05-30 — Onboarding: ajustes de UX y sesión en la home
+
+### Corregido
+- **Barra de scroll horizontal oculta** en el carrusel (no se veía en móvil, sí en escritorio).
+- **Controles centrados:** dots al centro, "Anterior" a la izquierda y "Siguiente" a la derecha.
+- **Logo SVG real** en la tarjeta de intro; **fondo degradado verde** con más contraste.
+- La **home (`/`) detecta la sesión**: si hay sesión activa, redirige al onboarding o al dashboard (ya no muestra el login al usuario logueado).
+
 ## [0.0.13] — 2026-05-30 — Onboarding como carrusel a pantalla completa
 
 ### Cambiado

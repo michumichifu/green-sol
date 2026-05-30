@@ -1,6 +1,14 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { obtenerUsuario } from "@/lib/auth/session";
+import { debeMostrarOnboarding } from "@/lib/onboarding";
 
-export default function Home() {
+export default async function Home() {
+  const usuario = await obtenerUsuario();
+  if (usuario) {
+    redirect(debeMostrarOnboarding(usuario) ? "/onboarding" : "/dashboard");
+  }
+
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}

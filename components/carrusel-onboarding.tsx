@@ -3,11 +3,11 @@
 import { useRef, useState } from "react";
 import {
   X,
-  Sun,
   Repeat,
   Target,
   Split,
   Calculator,
+  ChevronLeft,
   ChevronRight,
   type LucideIcon,
 } from "lucide-react";
@@ -15,11 +15,11 @@ import { cerrarOnboarding } from "@/app/(auth)/actions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-type Tarjeta = { icon: LucideIcon; titulo: string; texto: string };
+type Tarjeta = { icon?: LucideIcon; logo?: boolean; titulo: string; texto: string };
 
 const TARJETAS: Tarjeta[] = [
   {
-    icon: Sun,
+    logo: true,
     titulo: "¿Cómo funciona Green Sol?",
     texto:
       "Una plataforma para llevar tus métodos de ahorro —solo o en grupo— de forma fácil, rápida y transparente.",
@@ -69,7 +69,7 @@ export function CarruselOnboarding() {
   const ultima = indice === TARJETAS.length - 1;
 
   return (
-    <div className="relative flex h-dvh flex-col bg-gradient-to-br from-brand to-brand-2 text-white">
+    <div className="relative flex h-dvh flex-col bg-gradient-to-br from-[#0a7d57] to-[#17cf92] text-white">
       <button
         type="button"
         onClick={() => setConfirmando(true)}
@@ -82,16 +82,27 @@ export function CarruselOnboarding() {
       <div
         ref={scrollRef}
         onScroll={onScroll}
-        className="flex flex-1 snap-x snap-mandatory overflow-x-auto"
+        className="scrollbar-hide flex flex-1 snap-x snap-mandatory overflow-x-auto"
       >
         {TARJETAS.map((t, i) => (
           <section
             key={i}
             className="flex w-full shrink-0 snap-center flex-col items-center justify-center gap-6 px-8 text-center"
           >
-            <div className="flex size-24 items-center justify-center rounded-3xl bg-white/15 shadow-lg">
-              <t.icon className="size-12" strokeWidth={1.8} />
-            </div>
+            {t.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src="/green-sol-logo.svg"
+                alt="Green Sol"
+                className="size-28 drop-shadow-xl"
+              />
+            ) : (
+              t.icon && (
+                <div className="flex size-24 items-center justify-center rounded-3xl bg-white/15 shadow-lg">
+                  <t.icon className="size-12" strokeWidth={1.8} />
+                </div>
+              )
+            )}
             <h2 className="text-2xl font-bold sm:text-3xl">{t.titulo}</h2>
             <p className="max-w-sm text-base leading-relaxed text-white/90">
               {t.texto}
@@ -111,8 +122,19 @@ export function CarruselOnboarding() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between px-6 pb-8 pt-2">
-        <div className="flex gap-2">
+      <div className="grid grid-cols-3 items-center px-6 pb-8 pt-2">
+        <div className="justify-self-start">
+          {indice > 0 && (
+            <button
+              type="button"
+              onClick={() => irA(indice - 1)}
+              className="flex items-center gap-1 text-sm font-medium"
+            >
+              <ChevronLeft className="size-4" /> Anterior
+            </button>
+          )}
+        </div>
+        <div className="flex justify-center gap-2">
           {TARJETAS.map((_, i) => (
             <button
               key={i}
@@ -126,17 +148,17 @@ export function CarruselOnboarding() {
             />
           ))}
         </div>
-        {!ultima ? (
-          <button
-            type="button"
-            onClick={() => irA(indice + 1)}
-            className="flex items-center gap-1 text-sm font-medium"
-          >
-            Siguiente <ChevronRight className="size-4" />
-          </button>
-        ) : (
-          <span className="w-16" />
-        )}
+        <div className="justify-self-end">
+          {!ultima && (
+            <button
+              type="button"
+              onClick={() => irA(indice + 1)}
+              className="flex items-center gap-1 text-sm font-medium"
+            >
+              Siguiente <ChevronRight className="size-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {confirmando && (
