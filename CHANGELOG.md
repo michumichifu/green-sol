@@ -4,6 +4,18 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.22] — 2026-05-30 — Notch despejado y nombre de usuario con disponibilidad en vivo
+
+### Corregido
+- **Cabecera tapada por el notch:** ahora baja con un **mínimo fijo** además del área segura (los simuladores de navegador no reportan `safe-area`), y se añadió `viewport-fit=cover` para que funcione el área segura en dispositivos reales.
+
+### Añadido
+- **Disponibilidad de nombre de usuario en vivo** (registro y configuración): mientras escribes valida formato, longitud y **si ya está en uso** (endpoint `/api/usuario-disponible`), con indicador ✓ / ✗ y mensaje.
+- **Límites:** nombre de usuario de **3 a 15 caracteres** (validado en cliente, en el schema de registro y en el servidor al editar el perfil).
+
+### Verificado
+- Build limpio; **E2E 4/4**.
+
 ## [0.0.21] — 2026-05-30 — Nivel en la cabecera, lista negra de palabras y arreglo del Input
 
 ### Corregido

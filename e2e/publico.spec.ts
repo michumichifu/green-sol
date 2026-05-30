@@ -16,7 +16,7 @@ test("el registro por fases lleva a la verificación por OTP", async ({
   page,
 }) => {
   const correo = `e2e_${Date.now()}@test.local`;
-  const usuario = `e2e${Date.now()}`;
+  const usuario = `e2e${Date.now().toString().slice(-9)}`;
   await page.goto("/registro");
 
   // Paso 1: credenciales

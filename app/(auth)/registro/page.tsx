@@ -7,6 +7,7 @@ import { registrarse, type EstadoAuth } from "../actions";
 import { registroPaso1Schema } from "@/lib/validations/auth";
 import { PAISES } from "@/lib/paises";
 import { CampoContrasena } from "@/components/campo-contrasena";
+import { CampoUsuario } from "@/components/campo-usuario";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,7 @@ export default function RegistroPage() {
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [confirmar, setConfirmar] = useState("");
+  const [nombreUsuario, setNombreUsuario] = useState("");
   const [errorPaso1, setErrorPaso1] = useState<string | null>(null);
 
   function continuar() {
@@ -104,15 +106,12 @@ export default function RegistroPage() {
               <Info className="size-3.5 text-muted-foreground" />
             </span>
           </Label>
-          <Input
+          <CampoUsuario
             id="nombreUsuario"
             name="nombreUsuario"
-            placeholder="seudónimo con el que te verán"
-            autoComplete="username"
+            value={nombreUsuario}
+            onChange={setNombreUsuario}
           />
-          <p className="text-xs text-muted-foreground">
-            Es tu apodo público; puede ser tu nombre o un seudónimo.
-          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="pais">País</Label>

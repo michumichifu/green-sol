@@ -30,6 +30,7 @@ export const registroCompletoSchema = z
     nombreUsuario: z
       .string()
       .min(3, "Mínimo 3 caracteres")
+      .max(15, "Máximo 15 caracteres")
       .regex(/^[a-zA-Z0-9_]+$/, "Solo letras, números y guion bajo"),
     pais: z.string().min(2, "Elige tu país"),
   })

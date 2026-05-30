@@ -143,7 +143,7 @@ export default async function AdminPage() {
   const restricciones = await obtenerRestriccionesTexto();
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
+    <main className="mx-auto max-w-3xl space-y-6 px-4 pb-6 sm:px-6 pt-[max(2.75rem,calc(env(safe-area-inset-top)+1.5rem))]">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold sm:text-2xl">Panel super-admin</h1>
         <Link href="/dashboard" className="text-sm text-brand underline">

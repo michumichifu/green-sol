@@ -5,6 +5,7 @@ import {
   actualizarPerfil,
   type EstadoPerfil,
 } from "@/app/(app)/perfil/actions";
+import { CampoUsuario } from "@/components/campo-usuario";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,11 +57,11 @@ export function FormDatos({
       </div>
       <div className="space-y-1">
         <Label htmlFor="nombreUsuario">Nombre de usuario</Label>
-        <Input
+        <CampoUsuario
           id="nombreUsuario"
           name="nombreUsuario"
           value={nombreUsuario}
-          onChange={(e) => setNombreUsuario(e.target.value)}
+          onChange={setNombreUsuario}
         />
       </div>
       {estado.error && <p className="text-sm text-destructive">{estado.error}</p>}

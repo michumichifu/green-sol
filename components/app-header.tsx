@@ -27,7 +27,7 @@ export function AppHeader({
   const [verNotis, setVerNotis] = useState(false);
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/90 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.85rem)] backdrop-blur">
+    <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/90 px-4 pb-3 pt-[max(2.75rem,calc(env(safe-area-inset-top)+0.6rem))] backdrop-blur">
       <div className="flex items-center gap-2.5">
         <Link href="/dashboard" aria-label="Inicio">
           {/* eslint-disable-next-line @next/next/no-img-element */}

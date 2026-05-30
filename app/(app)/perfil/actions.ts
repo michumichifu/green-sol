@@ -24,6 +24,15 @@ export async function actualizarPerfil(
   const apellido = str(formData.get("apellido"));
   const nombreUsuario = str(formData.get("nombreUsuario"));
 
+  if (nombreUsuario) {
+    if (nombreUsuario.length < 3 || nombreUsuario.length > 15) {
+      return { error: "El nombre de usuario debe tener entre 3 y 15 caracteres." };
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(nombreUsuario)) {
+      return { error: "El nombre de usuario solo admite letras, números y guion bajo." };
+    }
+  }
+
   // El super-admin queda exento de la lista negra de palabras.
   if (usuario.rol !== "super_admin") {
     const err = await validarRestricciones({ nombre, apellido, nombreUsuario });
