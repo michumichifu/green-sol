@@ -25,16 +25,9 @@ export default async function AppLayout({
   ]);
 
   return (
-    <div className="flex min-h-dvh flex-1 flex-col bg-muted/30">
-      <AppHeader
-        nombre={usuario.nombre ?? ""}
-        nombreUsuario={usuario.nombreUsuario ?? ""}
-        correo={usuario.correo}
-        esAdmin={usuario.rol === "super_admin"}
-        notis={notisRaw}
-        noLeidas={noLeidas}
-      />
-      <div className="flex-1 pb-20">{children}</div>
+    <div className="flex h-dvh flex-col bg-muted/30">
+      <AppHeader notis={notisRaw} noLeidas={noLeidas} />
+      <div className="flex-1 overflow-y-auto">{children}</div>
       <BottomNav />
     </div>
   );

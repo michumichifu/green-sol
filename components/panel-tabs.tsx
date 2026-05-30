@@ -6,11 +6,13 @@ import { cn } from "@/lib/utils";
 export function PanelTabs({
   tabs,
   children,
+  inicial = 0,
 }: {
   tabs: string[];
   children: ReactNode;
+  inicial?: number;
 }) {
-  const [activo, setActivo] = useState(0);
+  const [activo, setActivo] = useState(inicial);
   const secciones = Children.toArray(children);
 
   return (

@@ -4,6 +4,29 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.20] — 2026-05-30 — Navegación nueva (Pagos/Perfil), puntos y niveles, sin scroll fantasma
+
+### Corregido
+- **Scroll fantasma en móvil** que ocultaba el saludo: el shell ahora es de **altura fija** y solo scrollea el contenido central.
+- **Tasas compactas:** cada una en 2 líneas (p. ej. "BCV / USD" arriba y la cotización debajo).
+
+### Cambiado (navegación)
+- **Menú inferior a 5 ítems:** Ahorro · Pagos · **Inicio** (centro) · Calculadora · **Perfil** (derecha).
+- Se quitó el **engranaje** de la cabecera (solo queda la **campana** de avisos). La configuración dejó de ser un drawer y ahora es una **sección** propia.
+- **Transición de fade** suave al cambiar de pestaña.
+
+### Añadido (secciones)
+- **Perfil** (hub): tarjeta de identidad (nombre, @usuario, **nivel** y **puntos**) + menú (Tu recompensa, Tus datos, Métodos de pago, Centro de ayuda, Configuración, Panel super-admin si aplica, Cerrar sesión).
+- **Configuración** (`/configuracion`): pestañas Datos · Pagos (métodos) · Seguridad · Avisos, con **toggle a super-admin**. Acepta `?tab=`.
+- **Recompensa** (`/recompensa`): puntos, nivel y **progreso al siguiente**, con adelanto del **sistema de referidos**.
+- **Centro de ayuda** (`/ayuda`) y **Pagos** (`/pagos`): aportes por confirmar/rechazados y ahorros activos con tu turno.
+
+### Cambiado (reputación)
+- **Puntos = estrellitas** (acumulado, ya no ratio de 5) con **niveles**: Nuevo → Confiable → Destacado → Estrella → Leyenda.
+
+### Idea futura
+- Documentado en `docs/IDEAS_FUTURAS.md`: **referidos** (+40 pts, máx. 5, cuentas nuevas), **club de canje**, **tarjeta de participación** en el dashboard y **calendario de turnos con fechas**.
+
 ## [0.0.19] — 2026-05-30 — Dashboard compacto, drawer pulido y panel super-admin con métricas
 
 ### Cambiado (dashboard)

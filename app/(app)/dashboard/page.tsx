@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
-import { obtenerReputacion } from "@/lib/reputacion";
+import { obtenerReputacion, nivelPorReputacion } from "@/lib/reputacion";
 import { TasasResumen } from "@/components/tasas-resumen";
 import { cn } from "@/lib/utils";
 
@@ -19,24 +19,6 @@ const ESTADO_ESTILO: Record<string, string> = {
   activa: "bg-brand/10 text-brand",
   cerrada: "bg-gold/15 text-gold",
 };
-
-function Estrellas({ valor }: { valor: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          className={cn(
-            "size-4",
-            i < Math.round(valor)
-              ? "fill-gold text-gold"
-              : "text-muted-foreground/30",
-          )}
-        />
-      ))}
-    </div>
-  );
-}
 
 export default async function DashboardPage() {
   const usuario = await obtenerUsuario();
@@ -51,6 +33,7 @@ export default async function DashboardPage() {
   ]);
 
   const nombre = usuario?.nombre?.split(" ")[0] ?? "";
+  const nivel = nivelPorReputacion(reputacion);
 
   return (
     <main className="mx-auto max-w-md space-y-5 px-5 py-6">
@@ -61,14 +44,17 @@ export default async function DashboardPage() {
           <p className="text-base font-semibold">
             ¡Hola{nombre ? `, ${nombre}` : ""}! 👋
           </p>
-          <div className="flex flex-col items-end gap-0.5">
-            <Estrellas valor={reputacion.estrellas} />
-            <span className="text-[10px] text-white/80">
-              {reputacion.total > 0
-                ? `${reputacion.estrellas} · ${reputacion.total} valoración(es)`
-                : "Sin valoraciones aún"}
+          <Link
+            href="/perfil"
+            className="flex flex-col items-end gap-0.5"
+          >
+            <span className="flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-sm font-bold">
+              <Star className="size-3.5 fill-gold text-gold" /> {nivel.puntos}
             </span>
-          </div>
+            <span className="text-[10px] text-white/80">
+              Nivel {nivel.actual.nombre}
+            </span>
+          </Link>
         </div>
         <h1 className="mt-2 text-xl font-bold leading-tight">
           Tu ahorro, claro y en orden.

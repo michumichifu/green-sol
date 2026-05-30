@@ -15,9 +15,10 @@ function Tasa({
 }) {
   return (
     <div className="rounded-lg border bg-card p-2">
-      <div className="text-muted-foreground">{label}</div>
+      <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        {label} / {sub}
+      </div>
       <div className="text-sm font-semibold text-foreground">{valor}</div>
-      <div className="text-[10px] text-muted-foreground">{sub}</div>
     </div>
   );
 }
