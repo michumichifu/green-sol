@@ -4,6 +4,15 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.18] — 2026-05-30 — Onboarding: "no volver a mostrar" y pantalla de carga
+
+### Añadido
+- **Checkbox "No volver a mostrar más"** en el popup de saltar el introductorio: al marcarlo se **descarta por completo** (no se vuelve a mostrar), sin tener que cerrarlo varias veces.
+- **Pantalla de carga** (~2.5 s) al pulsar **Saltar** o **Empezar**: el logo **cae de arriba al centro y gira una vez** (animación `greensol-entrada`), dando sensación de "primera carga" antes de entrar al dashboard.
+
+### Cambiado
+- `cerrarOnboarding(noMostrarMas)`: si es `true`, fija `onboardingCerrado` al tope (descarte definitivo); si no, cuenta un cierre como antes.
+
 ## [0.0.17] — 2026-05-30 — Rediseño del dashboard y la navegación de la app
 
 ### Cambiado

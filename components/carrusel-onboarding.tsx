@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { cerrarOnboarding } from "@/app/(auth)/actions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,8 @@ const TARJETAS: Tarjeta[] = [
 export function CarruselOnboarding() {
   const [indice, setIndice] = useState(0);
   const [confirmando, setConfirmando] = useState(false);
+  const [noMostrar, setNoMostrar] = useState(false);
+  const [cargando, setCargando] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   function irA(i: number) {
@@ -57,7 +59,30 @@ export function CarruselOnboarding() {
     setIndice(Math.round(cont.scrollLeft / cont.clientWidth));
   }
 
+  // Muestra la pantalla de carga (logo que cae y gira) y luego cierra.
+  async function finalizar(noMostrarMas: boolean) {
+    setConfirmando(false);
+    setCargando(true);
+    await new Promise((r) => setTimeout(r, 2500));
+    await cerrarOnboarding(noMostrarMas);
+  }
+
   const ultima = indice === TARJETAS.length - 1;
+
+  if (cargando) {
+    return (
+      <div className="flex h-dvh flex-col items-center justify-center bg-gradient-to-br from-[#075c43] to-[#14b078]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/green-sol-logo.svg"
+          alt="Green Sol"
+          className="size-28 drop-shadow-xl"
+          style={{ animation: "greensol-entrada 2.4s ease-out both" }}
+        />
+        <p className="mt-8 text-sm font-medium text-white/80">Preparando todo…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex h-dvh flex-col bg-gradient-to-br from-[#075c43] to-[#14b078] text-white">
@@ -96,15 +121,14 @@ export function CarruselOnboarding() {
               {t.texto}
             </p>
             {i === TARJETAS.length - 1 && (
-              <form action={cerrarOnboarding}>
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="bg-white text-brand hover:bg-white/90"
-                >
-                  Empezar
-                </Button>
-              </form>
+              <Button
+                type="button"
+                size="lg"
+                onClick={() => finalizar(false)}
+                className="bg-white text-brand hover:bg-white/90"
+              >
+                Empezar
+              </Button>
             )}
           </section>
         ))}
@@ -157,6 +181,25 @@ export function CarruselOnboarding() {
               Es rápido y te ayuda a entender la app. Puedes saltarlo si ya la
               conoces.
             </p>
+
+            <button
+              type="button"
+              onClick={() => setNoMostrar((v) => !v)}
+              className="flex w-full items-center gap-2.5 rounded-xl border bg-muted/40 p-3 text-left text-sm"
+            >
+              <span
+                className={cn(
+                  "flex size-5 shrink-0 items-center justify-center rounded-md border transition-colors",
+                  noMostrar
+                    ? "border-brand bg-brand text-white"
+                    : "border-muted-foreground/40",
+                )}
+              >
+                {noMostrar && <Check className="size-3.5" strokeWidth={3} />}
+              </span>
+              No volver a mostrar más
+            </button>
+
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -165,11 +208,12 @@ export function CarruselOnboarding() {
               >
                 Seguir viendo
               </Button>
-              <form action={cerrarOnboarding} className="flex-1">
-                <Button type="submit" className="w-full">
-                  Saltar
-                </Button>
-              </form>
+              <Button
+                className="flex-1"
+                onClick={() => finalizar(noMostrar)}
+              >
+                Saltar
+              </Button>
             </div>
           </div>
         </div>

@@ -156,13 +156,19 @@ export async function cerrarSesionAction() {
   redirect("/login");
 }
 
-/** Cuenta un cierre del introductorio y lleva al dashboard. */
-export async function cerrarOnboarding() {
+/**
+ * Cierra el introductorio y lleva al dashboard.
+ * Si `noMostrarMas` es true, lo descarta por completo (no se vuelve a mostrar);
+ * si no, solo cuenta un cierre más.
+ */
+export async function cerrarOnboarding(noMostrarMas?: boolean) {
   const usuario = await obtenerUsuario();
   if (usuario) {
     await prisma.usuario.update({
       where: { id: usuario.id },
-      data: { onboardingCerrado: { increment: 1 } },
+      data: noMostrarMas
+        ? { onboardingCerrado: 3 }
+        : { onboardingCerrado: { increment: 1 } },
     });
   }
   redirect("/dashboard");
