@@ -1,7 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
-import { invitarPorCorreo, generarTurnos } from "../actions";
+import {
+  invitarPorCorreo,
+  generarTurnos,
+  reportarPago,
+  resolverAporte,
+} from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -22,6 +27,10 @@ export default async function DetalleRecolecta({
         include: { participante: { include: { usuario: true } } },
         orderBy: { posicion: "asc" },
       },
+      aportes: {
+        include: { participante: { include: { usuario: true } } },
+        orderBy: { creadoEn: "desc" },
+      },
     },
   });
   if (!r) notFound();
@@ -31,6 +40,7 @@ export default async function DetalleRecolecta({
   const esOrganizador = r.organizadorId === usuario.id;
   const invitar = invitarPorCorreo.bind(null, r.id);
   const generar = generarTurnos.bind(null, r.id);
+  const reportar = reportarPago.bind(null, r.id);
 
   return (
     <main className="mx-auto max-w-md space-y-6 px-6 py-8">
@@ -80,6 +90,70 @@ export default async function DetalleRecolecta({
               </li>
             ))}
           </ol>
+        </section>
+      )}
+
+      {esParticipante && (
+        <form action={reportar} className="space-y-2 rounded-xl border p-4">
+          <h2 className="font-semibold">Reportar un pago</h2>
+          <div className="flex gap-2">
+            <Input
+              name="monto"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="Monto USD"
+              required
+            />
+            <Input name="referencia" placeholder="Referencia" />
+          </div>
+          <Button type="submit" variant="outline" className="w-full">
+            Reportar pago
+          </Button>
+        </form>
+      )}
+
+      {r.aportes.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="font-semibold">Pagos reportados</h2>
+          <ul className="space-y-1 text-sm">
+            {r.aportes.map((a) => {
+              const confirmar = resolverAporte.bind(null, a.id, true);
+              const rechazar = resolverAporte.bind(null, a.id, false);
+              return (
+                <li
+                  key={a.id}
+                  className="rounded-lg border bg-card px-3 py-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span>{a.participante.usuario.correo}</span>
+                    <span>
+                      ${a.monto} · {a.estado}
+                    </span>
+                  </div>
+                  {a.referencia && (
+                    <p className="text-xs text-muted-foreground">
+                      Ref: {a.referencia}
+                    </p>
+                  )}
+                  {esOrganizador && a.estado === "reportado" && (
+                    <div className="mt-1 flex gap-2">
+                      <form action={confirmar}>
+                        <Button type="submit" size="sm" variant="outline">
+                          Confirmar
+                        </Button>
+                      </form>
+                      <form action={rechazar}>
+                        <Button type="submit" size="sm" variant="ghost">
+                          Rechazar
+                        </Button>
+                      </form>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </section>
       )}
 

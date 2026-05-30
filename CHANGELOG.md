@@ -4,6 +4,19 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.5] — 2026-05-30 — Bloque 4: notificaciones y pagos
+
+### Añadido
+- Modelos `Notificacion` y `Aporte` (estado reportado/confirmado/rechazado).
+- **Notificaciones persistentes (campanita):** página de avisos con leído/no leído y "marcar leídas".
+- **Toasts** disponibles (sonner con colores: verde/rojo/naranja/azul) montados en toda la app.
+- **Reportar pago** (participante): monto + referencia; notifica al organizador.
+- **Confirmar/rechazar pago** (organizador); notifica al participante.
+- **Notificaciones automáticas** en eventos: invitación, sorteo de turnos, pago reportado, pago resuelto.
+
+### Pendiente
+- Subida de comprobante (archivo) y multa por mora; método cripto.
+
 ## [0.0.4] — 2026-05-30 — Bloque 3: sanes y vacas
 
 ### Añadido

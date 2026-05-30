@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { crearRecolectaSchema } from "@/lib/validations/recolecta";
+import { crearNotificacion, notificarVarios } from "@/lib/notificaciones";
 
 export type EstadoRecolecta = { error?: string };
 
@@ -59,6 +60,12 @@ export async function invitarPorCorreo(
     await prisma.participante.create({
       data: { recolectaId, usuarioId: invitado.id },
     });
+    await crearNotificacion(invitado.id, {
+      tipo: "invitacion",
+      titulo: "Te uniste a una recolecta",
+      cuerpo: `Ahora participas en "${recolecta.nombre}".`,
+      enlace: `/sanes/${recolectaId}`,
+    });
     revalidatePath(`/sanes/${recolectaId}`);
   } catch {
     // ya estaba en la recolecta
@@ -95,5 +102,74 @@ export async function generarTurnos(recolectaId: string): Promise<void> {
       data: { estado: "activa" },
     }),
   ]);
+  await notificarVarios(
+    recolecta.participantes
+      .map((p) => p.usuarioId)
+      .filter((id) => id !== usuario.id),
+    {
+      tipo: "turnos",
+      titulo: "Se sortearon los turnos",
+      cuerpo: `Ya hay orden de turnos en "${recolecta.nombre}".`,
+      enlace: `/sanes/${recolectaId}`,
+    },
+  );
   revalidatePath(`/sanes/${recolectaId}`);
+}
+
+export async function reportarPago(
+  recolectaId: string,
+  formData: FormData,
+): Promise<void> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return;
+  const participante = await prisma.participante.findUnique({
+    where: { recolectaId_usuarioId: { recolectaId, usuarioId: usuario.id } },
+  });
+  if (!participante) return;
+
+  const monto = Number(formData.get("monto"));
+  const referencia =
+    String(formData.get("referencia") ?? "").trim() || null;
+  if (!monto || monto <= 0) return;
+
+  await prisma.aporte.create({
+    data: { recolectaId, participanteId: participante.id, monto, referencia },
+  });
+  const recolecta = await prisma.recolecta.findUnique({
+    where: { id: recolectaId },
+  });
+  if (recolecta) {
+    await crearNotificacion(recolecta.organizadorId, {
+      tipo: "pago_reportado",
+      titulo: "Nuevo pago reportado",
+      cuerpo: `${usuario.correo} reportó $${monto} en "${recolecta.nombre}".`,
+      enlace: `/sanes/${recolectaId}`,
+    });
+  }
+  revalidatePath(`/sanes/${recolectaId}`);
+}
+
+export async function resolverAporte(
+  aporteId: string,
+  confirmar: boolean,
+): Promise<void> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return;
+  const aporte = await prisma.aporte.findUnique({
+    where: { id: aporteId },
+    include: { recolecta: true, participante: true },
+  });
+  if (!aporte || aporte.recolecta.organizadorId !== usuario.id) return;
+
+  await prisma.aporte.update({
+    where: { id: aporteId },
+    data: { estado: confirmar ? "confirmado" : "rechazado" },
+  });
+  await crearNotificacion(aporte.participante.usuarioId, {
+    tipo: "pago_resuelto",
+    titulo: confirmar ? "Tu pago fue confirmado" : "Tu pago fue rechazado",
+    cuerpo: `En "${aporte.recolecta.nombre}".`,
+    enlace: `/sanes/${aporte.recolectaId}`,
+  });
+  revalidatePath(`/sanes/${aporte.recolectaId}`);
 }

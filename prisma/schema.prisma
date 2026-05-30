@@ -21,6 +21,7 @@ model Usuario {
   codigosOtp       CodigoOtp[]
   organizadas      Recolecta[]    @relation("organizadas")
   participaciones  Participante[]
+  notificaciones   Notificacion[]
 }
 
 model Sesion {
@@ -64,6 +65,7 @@ model Recolecta {
   creadaEn      DateTime        @default(now())
   participantes Participante[]
   turnos        Turno[]
+  aportes       Aporte[]
 }
 
 model Participante {
@@ -74,6 +76,7 @@ model Participante {
   usuario     Usuario   @relation(fields: [usuarioId], references: [id])
   unidoEn     DateTime  @default(now())
   turno       Turno?
+  aportes     Aporte[]
 
   @@unique([recolectaId, usuarioId])
 }
@@ -86,6 +89,31 @@ model Turno {
   participante   Participante @relation(fields: [participanteId], references: [id], onDelete: Cascade)
   posicion       Int
   cobrado        Boolean      @default(false)
+}
+
+model Aporte {
+  id             String       @id @default(cuid())
+  recolectaId    String
+  recolecta      Recolecta    @relation(fields: [recolectaId], references: [id], onDelete: Cascade)
+  participanteId String
+  participante   Participante @relation(fields: [participanteId], references: [id], onDelete: Cascade)
+  monto          Float
+  referencia     String?
+  comprobanteUrl String?
+  estado         EstadoAporte @default(reportado)
+  creadoEn       DateTime     @default(now())
+}
+
+model Notificacion {
+  id        String   @id @default(cuid())
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tipo      String
+  titulo    String
+  cuerpo    String?
+  enlace    String?
+  leida     Boolean  @default(false)
+  creadaEn  DateTime @default(now())
 }
 
 enum Rol {
@@ -118,4 +146,10 @@ enum EstadoRecolecta {
   abierta
   activa
   cerrada
+}
+
+enum EstadoAporte {
+  reportado
+  confirmado
+  rechazado
 }
