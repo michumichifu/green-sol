@@ -70,6 +70,8 @@ model Recolecta {
   moneda        String          @default("USD")
   montoAporte   Float?
   meta          Float?
+  frecuencia    String?
+  cupoMiembros  Int?
   estado        EstadoRecolecta @default(abierta)
   organizadorId String
   organizador   Usuario         @relation("organizadas", fields: [organizadorId], references: [id])

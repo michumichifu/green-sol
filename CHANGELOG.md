@@ -4,6 +4,19 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.30] — 2026-05-30 — Asistente de creación de ahorro por pasos
+
+### Añadido
+- **Crear ahorro como asistente por fases:** tipo (Susi·San·Bolso por turnos / Vaca·Pote meta común) → nombre → visibilidad → **moneda** (Bs BCV, Bs paralelo, USDT, USDC, Solana) → detalles según tipo (san: **aporte por turno + frecuencia + nº de manos**; vaca: **meta**) → resumen y confirmar. Barra de progreso y validación por paso.
+- Campos nuevos en `Recolecta`: `frecuencia` y `cupoMiembros` (migración). El detalle muestra moneda, frecuencia y manos.
+- Imágenes de la guía actualizadas (Susi por turnos, Pote meta común).
+
+### Corregido
+- El "Siguiente" del asistente ya no envía el formulario por accidente (el form vive solo en el paso final).
+
+### Verificado
+- Build limpio; E2E 4/4.
+
 ## [0.0.29] — 2026-05-30 — Guía: orden de tarjetas y clasificación correcta
 
 ### Cambiado

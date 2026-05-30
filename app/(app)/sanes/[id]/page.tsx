@@ -13,6 +13,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CompartirAhorro } from "@/components/compartir-ahorro";
+import {
+  MONEDA_RECOLECTA,
+  FRECUENCIA_LABEL,
+} from "@/lib/validations/recolecta";
 
 export default async function DetalleRecolecta({
   params,
@@ -42,6 +46,7 @@ export default async function DetalleRecolecta({
   const esParticipante = r.participantes.some((p) => p.usuarioId === usuario.id);
   if (!esParticipante && r.visibilidad === "privado") notFound();
   const esOrganizador = r.organizadorId === usuario.id;
+  const sim = MONEDA_RECOLECTA[r.moneda]?.simbolo ?? "$";
   const invitar = invitarPorCorreo.bind(null, r.id);
   const generar = generarTurnos.bind(null, r.id);
   const reportar = reportarPago.bind(null, r.id);
@@ -55,9 +60,18 @@ export default async function DetalleRecolecta({
           <span className="text-xs uppercase text-brand">{r.tipo}</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          {r.tipo === "san" ? `Aporte: $${r.montoAporte}` : `Meta: $${r.meta}`} ·{" "}
-          {r.estado} · {r.visibilidad}
+          {r.tipo === "san"
+            ? `Aporte: ${sim} ${r.montoAporte}`
+            : `Meta: ${sim} ${r.meta}`}{" "}
+          · {r.estado} · {r.visibilidad}
         </p>
+        {r.tipo === "san" && (r.frecuencia || r.cupoMiembros) && (
+          <p className="text-xs text-muted-foreground">
+            {r.frecuencia ? FRECUENCIA_LABEL[r.frecuencia] : ""}
+            {r.frecuencia && r.cupoMiembros ? " · " : ""}
+            {r.cupoMiembros ? `${r.cupoMiembros} manos` : ""}
+          </p>
+        )}
       </div>
 
       <section className="space-y-2">

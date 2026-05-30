@@ -20,19 +20,26 @@ export async function crearRecolecta(
     tipo: formData.get("tipo"),
     nombre: formData.get("nombre"),
     visibilidad: formData.get("visibilidad"),
+    moneda: formData.get("moneda"),
     monto: formData.get("monto"),
+    frecuencia: formData.get("frecuencia") || undefined,
+    cupoMiembros: formData.get("cupoMiembros") || undefined,
   });
   if (!datos.success) return { error: datos.error.issues[0].message };
-  const { tipo, nombre, visibilidad, monto } = datos.data;
+  const { tipo, nombre, visibilidad, moneda, monto, frecuencia, cupoMiembros } =
+    datos.data;
 
   const recolecta = await prisma.recolecta.create({
     data: {
       tipo,
       nombre,
       visibilidad,
+      moneda,
       organizadorId: usuario.id,
       montoAporte: tipo === "san" ? monto : null,
       meta: tipo === "vaca" ? monto : null,
+      frecuencia: tipo === "san" ? frecuencia : null,
+      cupoMiembros: tipo === "san" ? cupoMiembros : null,
       participantes: { create: { usuarioId: usuario.id } },
     },
   });
