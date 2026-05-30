@@ -178,6 +178,8 @@ Dos planos complementarios:
 
 Acceso interno separado para los responsables: administrar usuarios y recolectas, ver métodos de pago y documentos subidos (cédula, pasaporte, comprobantes), hacer comprobaciones manuales anti-estafa, **enviar notificaciones** (a un usuario o globales, sección 13), y mayor control de seguridad.
 
+> **Configuración de integraciones (futuro, no MVP):** desde el panel, el super-admin podrá almacenar y gestionar **API keys** —de tasas y de **IA** (Claude, Gemini, DeepSeek)— en variables de entorno/secretos cifrados, asignar su **uso** (solo super-admin o global para usuarios) y **elegir el modelo** por sección, de cara a integraciones de IA futuras. Es una idea concreta para más adelante; no se construye ahora.
+
 ## 16. Qué usa Solana y qué no
 
 | Capa | ¿On-chain? | Ejemplos |
