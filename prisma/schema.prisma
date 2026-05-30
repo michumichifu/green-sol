@@ -22,7 +22,8 @@ model Usuario {
   fotoUrl          String?
   pais             String?
   monedaPreferida  String?
-  onboardingVisto  Boolean        @default(false)
+  onboardingCerrado Int           @default(0)
+  ingresos          Int           @default(0)
   creadoEn         DateTime       @default(now())
   sesiones         Sesion[]
   codigosOtp       CodigoOtp[]

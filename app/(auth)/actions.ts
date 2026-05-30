@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { hashContrasena, verificarContrasena } from "@/lib/auth/password";
 import { crearYEnviarOtp, validarOtp } from "@/lib/auth/otp";
 import { crearSesion, cerrarSesion, obtenerUsuario } from "@/lib/auth/session";
+import { debeMostrarOnboarding } from "@/lib/onboarding";
 import {
   registroCompletoSchema,
   loginSchema,
@@ -95,11 +96,12 @@ export async function verificar(
 
   await prisma.usuario.update({
     where: { id: usuario.id },
-    data: { correoVerificado: true },
+    data: { correoVerificado: true, ingresos: { increment: 1 } },
   });
   (await cookies()).delete(PENDIENTE);
   await crearSesion(usuario.id);
-  redirect(usuario.onboardingVisto ? "/dashboard" : "/onboarding");
+  // Tras crear la cuenta siempre se muestra el introductorio.
+  redirect("/onboarding");
 }
 
 export async function reenviarCodigo(): Promise<void> {
@@ -141,8 +143,12 @@ export async function iniciarSesion(
     redirect("/verificar");
   }
 
+  const actualizado = await prisma.usuario.update({
+    where: { id: usuario.id },
+    data: { ingresos: { increment: 1 } },
+  });
   await crearSesion(usuario.id);
-  redirect(usuario.onboardingVisto ? "/dashboard" : "/onboarding");
+  redirect(debeMostrarOnboarding(actualizado) ? "/onboarding" : "/dashboard");
 }
 
 export async function cerrarSesionAction() {
@@ -150,12 +156,13 @@ export async function cerrarSesionAction() {
   redirect("/login");
 }
 
-export async function marcarOnboardingVisto() {
+/** Cuenta un cierre del introductorio y lleva al dashboard. */
+export async function cerrarOnboarding() {
   const usuario = await obtenerUsuario();
   if (usuario) {
     await prisma.usuario.update({
       where: { id: usuario.id },
-      data: { onboardingVisto: true },
+      data: { onboardingCerrado: { increment: 1 } },
     });
   }
   redirect("/dashboard");

@@ -4,6 +4,18 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.13] — 2026-05-30 — Onboarding como carrusel a pantalla completa
+
+### Cambiado
+- Onboarding rediseñado como **carrusel de tarjetas a pantalla completa**, deslizable, con **fondo verde de marca** (degradado) y X de cerrar.
+- Tarjetas: intro general + **san/susi/bolso** (por turnos, "el corazón de la app") + vaca/pote (meta) + dividir cuenta + calculadora.
+- **X arriba-derecha con popup de confirmación** para saltar.
+- **Lógica inteligente:** se deja de mostrar tras cerrarlo 3 veces o ingresar más de 7 veces. Aparece tras crear cuenta y en logins mientras aplique. Campos `onboardingCerrado`, `ingresos` (reemplazan `onboardingVisto`).
+- Íconos grandes como placeholder; las infografías SVG se integran cuando estén.
+
+### Verificado
+- Build limpio; E2E 4/4.
+
 ## [0.0.12] — 2026-05-30 — Registro por fases, onboarding y animación
 
 ### Añadido
