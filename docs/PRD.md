@@ -2,9 +2,9 @@
 
 > Proyecto del Solana Vibe Bootcamp (Venezuela). App para **gestionar el ahorro en grupo de forma transparente** (san, bolso, pote, vaca) y dividir cuentas, con **reputación de usuarios**. Método tradicional o cripto sobre Solana, sin que la app custodie dinero a la fuerza. **La finalidad es servir de puente al ahorro en cripto** para la comunidad hispana.
 
-- **Versión:** 0.6 (planificación de desarrollo: auth con OTP por correo y login por wallet, wallet embebida no-custodial + onboarding de respaldo, super-admin con gestión de usuarios y SMTP, capa cripto integrada al plan). Diseño de implementación en [superpowers/specs/2026-05-29-green-sol-mvp-design.md](superpowers/specs/2026-05-29-green-sol-mvp-design.md).
-- **Fecha:** 2026-05-29
-- **Fase:** 0 — Documentación previa al desarrollo (entrega de primera versión: **1 de junio de 2026, 5:30 p.m.**)
+- **Versión:** 0.7 (núcleo del MVP **construido y verificado**: bloques 0–6, app v0.0.9). Estado de desarrollo en [CHANGELOG.md](../CHANGELOG.md); diseño en [superpowers/specs/2026-05-29-green-sol-mvp-design.md](superpowers/specs/2026-05-29-green-sol-mvp-design.md).
+- **Fecha:** 2026-05-30
+- **Fase:** 1 — MVP en construcción. **Núcleo tradicional construido** (auth con OTP, sanes/vacas, tasas en vivo, calculadora, notificaciones, pagos, reputación, perfil, super-admin), verificado con build + tests unitarios + E2E (Playwright). Pendiente: capa cripto (bloque 7) y despliegue. Entrega de primera versión: **1 de junio de 2026, 5:30 p.m.**
 - **Nombre:** Green Sol (sol verde). Descartado: Cochino.
 
 Versión visual: [PRD.html](PRD.html). Técnica: [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md), [INTEGRACIONES_API.md](INTEGRACIONES_API.md) y [SEGURIDAD_Y_WALLETS.md](SEGURIDAD_Y_WALLETS.md).
@@ -214,8 +214,8 @@ Acceso interno separado para los responsables. Panel **completo**:
 
 ## 19. Roadmap por fases
 
-- **Fase 0 — Documentación (actual).**
-- **Fase 1 — MVP gancho (tradicional).** Entrega de **primera versión: 1 de junio de 2026, 5:30 p.m.** (tarea del bootcamp: tuit con screenshot/video + URL). Incluye: bienvenida, registro/login (correo + clave segura + verificación), preferencias, dashboard con **tasas en vivo**, **calculadora**, **bottom nav**, crear san/bolso y pote/vaca (público/privado), cuenta destino, reporte de pagos, turnos, avisos de mora, **notificaciones (toasts + campanita básica)** y **reputación básica** (manito +/−, estrellitas). Pruebas en Vercel. *(El alcance exacto del entregable del 1-jun se prioriza por impacto visual; ver nota abajo.)*
+- **Fase 0 — Documentación. Completada.**
+- **Fase 1 — MVP gancho (tradicional). Núcleo construido y verificado (app v0.0.9).** Bloques 0–6 hechos (build + tests unitarios + E2E con Playwright): bienvenida, registro/login (correo + clave segura + **OTP por correo**), dashboard con **tasas en vivo**, **calculadora**, **bottom nav**, crear san/bolso y pote/vaca (público/privado), reporte de pagos, turnos, **notificaciones (toasts + campanita)**, **reputación** (manito +/−, estrellitas) y **super-admin** (usuarios + SMTP). Entrega de primera versión: **1 de junio de 2026, 5:30 p.m.** Pendiente de esta fase: **despliegue** (Vercel + base de datos en el VPS).
 - **Fase 2 — Capa cripto (enseguida tras el núcleo, en devnet):** wallet embebida **no-custodial** + onboarding de respaldo, login con wallet (Phantom/Solflare), USDC/SOL, depósitos/retiros/transferencias, multifirma o modo espejo, multas por mora. Alto estándar de seguridad web3; devnet antes de dinero real.
 - **Fase 3 — Confianza y escala:** dividir cuentas, KYC con proveedor, panel super-admin completo, **marketplace público**, login con Google, despliegue en VPS.
 - **Fase 4 — Móvil:** Android/iOS.

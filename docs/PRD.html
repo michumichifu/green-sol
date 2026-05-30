@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Green Sol — PRD v0.6 · Ahorro en grupo transparente y puente al ahorro en cripto sobre Solana</title>
+<title>Green Sol — PRD v0.7 · Ahorro en grupo transparente y puente al ahorro en cripto sobre Solana</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <link rel="preconnect" href="https://rsms.me/">
@@ -54,9 +54,9 @@
       <div class="font-semibold text-[15px]">Green Sol</div>
       <div class="text-xs" style="color:var(--ink-3)">PRD · ahorro en grupo · puente al ahorro en cripto</div>
     </div>
-    <span class="ml-3 badge badge-brand"><i data-lucide="tag" class="lucide"></i>PRD v0.6</span>
-    <span class="badge badge-muted hidden sm:inline-flex"><i data-lucide="calendar" class="lucide"></i>2026-05-29</span>
-    <span class="badge badge-warn hidden md:inline-flex"><i data-lucide="flask-conical" class="lucide"></i>Fase 0 · documentación</span>
+    <span class="ml-3 badge badge-brand"><i data-lucide="tag" class="lucide"></i>PRD v0.7</span>
+    <span class="badge badge-muted hidden sm:inline-flex"><i data-lucide="calendar" class="lucide"></i>2026-05-30</span>
+    <span class="badge badge-ok hidden md:inline-flex"><i data-lucide="hammer" class="lucide"></i>Fase 1 · núcleo construido</span>
     <div class="ml-auto flex items-center gap-3">
       <a href="https://github.com/michumichifu/green-sol" target="_blank" class="badge badge-brand"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>Repo</a>
       <button id="themeBtn" class="w-9 h-9 rounded-lg flex items-center justify-center border" style="border-color:var(--line); color:var(--ink-2)" title="Cambiar tema"><i data-lucide="moon" class="lucide"></i></button>
@@ -406,8 +406,8 @@
     <section id="roadmap" class="card p-7">
       <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="route" class="lucide-lg brand-text"></i>Roadmap por fases</h2>
       <div class="space-y-3">
-        <div class="flex gap-3"><span class="badge badge-ok" style="flex:0 0 auto">Fase 0</span><p class="text-sm" style="color:var(--ink-2)">Documentación (actual).</p></div>
-        <div class="flex gap-3"><span class="badge badge-brand" style="flex:0 0 auto">Fase 1</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">MVP gancho (tradicional).</b> Entrega de <b style="color:var(--ink)">primera versión: 1 de junio de 2026, 5:30 p.m.</b> (tarea del bootcamp: tuit con screenshot/video + URL). Incluye: bienvenida, registro/login (correo + clave segura + verificación), preferencias, dashboard con <b style="color:var(--ink)">tasas en vivo</b>, <b style="color:var(--ink)">calculadora</b>, <b style="color:var(--ink)">bottom nav</b>, crear san/bolso y pote/vaca (público/privado), cuenta destino, reporte de pagos, turnos, avisos de mora, <b style="color:var(--ink)">notificaciones (toasts + campanita básica)</b> y <b style="color:var(--ink)">reputación básica</b> (manito +/−, estrellitas). Pruebas en Vercel.</p></div>
+        <div class="flex gap-3"><span class="badge badge-ok" style="flex:0 0 auto">Fase 0</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">Documentación. Completada.</b></p></div>
+        <div class="flex gap-3"><span class="badge badge-brand" style="flex:0 0 auto">Fase 1</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">MVP gancho (tradicional). Núcleo construido y verificado (app v0.0.9).</b> Bloques 0–6 hechos con build + tests unitarios + E2E (Playwright): bienvenida, registro/login (correo + clave segura + <b style="color:var(--ink)">OTP por correo</b>), dashboard con <b style="color:var(--ink)">tasas en vivo</b>, <b style="color:var(--ink)">calculadora</b>, <b style="color:var(--ink)">bottom nav</b>, crear san/bolso y pote/vaca (público/privado), reporte de pagos, turnos, <b style="color:var(--ink)">notificaciones (toasts + campanita)</b>, <b style="color:var(--ink)">reputación</b> (estrellitas) y <b style="color:var(--ink)">super-admin</b> (usuarios + SMTP). Entrega de <b style="color:var(--ink)">primera versión: 1 de junio de 2026, 5:30 p.m.</b> Pendiente de esta fase: <b style="color:var(--ink)">despliegue</b> (Vercel + base de datos en el VPS).</p></div>
         <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 2</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">Capa cripto (enseguida tras el núcleo, en devnet):</b> wallet embebida <b style="color:var(--ink)">no-custodial</b> + onboarding de respaldo, <b style="color:var(--ink)">login con wallet</b> (Phantom/Solflare), USDC/SOL, depósitos/retiros/transferencias, multifirma o modo espejo, multas por mora. <b style="color:var(--ink)">Alto estándar de seguridad web3</b>; devnet antes de dinero real.</p></div>
         <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 3</span><p class="text-sm" style="color:var(--ink-2)">Confianza y escala: dividir cuentas, KYC con proveedor, panel super-admin completo, <b style="color:var(--ink)">marketplace público</b>, <b style="color:var(--ink)">login con Google</b>, despliegue en VPS.</p></div>
         <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 4</span><p class="text-sm" style="color:var(--ink-2)">App móvil Android/iOS.</p></div>
@@ -452,7 +452,7 @@
     </section>
 
     <footer class="pt-2 pb-10 text-center text-xs" style="color:var(--ink-3)">
-      Green Sol · Solana Vibe Bootcamp Venezuela · PRD v0.6 · <span class="mono">2026-05-29</span> · <a href="https://github.com/michumichifu/green-sol" class="brand-text underline">github.com/michumichifu/green-sol</a>
+      Green Sol · Solana Vibe Bootcamp Venezuela · PRD v0.7 · <span class="mono">2026-05-30</span> · <a href="https://github.com/michumichifu/green-sol" class="brand-text underline">github.com/michumichifu/green-sol</a>
     </footer>
 
   </main>
