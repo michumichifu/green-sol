@@ -1,11 +1,14 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
 import {
   invitarPorCorreo,
   generarTurnos,
   reportarPago,
   resolverAporte,
+  cerrarRecolecta,
+  valorar,
 } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +44,7 @@ export default async function DetalleRecolecta({
   const invitar = invitarPorCorreo.bind(null, r.id);
   const generar = generarTurnos.bind(null, r.id);
   const reportar = reportarPago.bind(null, r.id);
+  const cerrar = cerrarRecolecta.bind(null, r.id);
 
   return (
     <main className="mx-auto max-w-md space-y-6 px-6 py-8">
@@ -157,6 +161,43 @@ export default async function DetalleRecolecta({
         </section>
       )}
 
+      {r.estado === "cerrada" && esParticipante && (
+        <section className="space-y-2 rounded-xl border p-4">
+          <h2 className="font-semibold">Valorar participantes</h2>
+          <p className="text-xs text-muted-foreground">
+            Califica tu experiencia con cada uno.
+          </p>
+          <ul className="space-y-1 text-sm">
+            {r.participantes
+              .filter((p) => p.usuarioId !== usuario.id)
+              .map((p) => {
+                const arriba = valorar.bind(null, r.id, p.usuarioId, 1);
+                const abajo = valorar.bind(null, r.id, p.usuarioId, -1);
+                return (
+                  <li
+                    key={p.id}
+                    className="flex items-center justify-between rounded-lg border bg-card px-3 py-2"
+                  >
+                    <span>{p.usuario.correo}</span>
+                    <div className="flex gap-2">
+                      <form action={arriba}>
+                        <Button type="submit" size="sm" variant="outline">
+                          <ThumbsUp className="size-4" />
+                        </Button>
+                      </form>
+                      <form action={abajo}>
+                        <Button type="submit" size="sm" variant="ghost">
+                          <ThumbsDown className="size-4" />
+                        </Button>
+                      </form>
+                    </div>
+                  </li>
+                );
+              })}
+          </ul>
+        </section>
+      )}
+
       {esOrganizador && (
         <section className="space-y-3 rounded-xl border p-4">
           <h2 className="font-semibold">Administrar</h2>
@@ -175,6 +216,13 @@ export default async function DetalleRecolecta({
             <form action={generar}>
               <Button type="submit" className="w-full">
                 Sortear turnos e iniciar
+              </Button>
+            </form>
+          )}
+          {r.estado !== "cerrada" && (
+            <form action={cerrar}>
+              <Button type="submit" variant="ghost" className="w-full">
+                Cerrar recolecta
               </Button>
             </form>
           )}

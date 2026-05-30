@@ -4,6 +4,15 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.6] — 2026-05-30 — Bloque 5: reputación y perfil
+
+### Añadido
+- Modelos `Valoracion` (manito +/−) y `MetodoPago`; campos de perfil en `Usuario` (nombre, apellido, nombre de usuario, foto).
+- **Cerrar recolecta** (organizador), que habilita la valoración.
+- **Valorar** (manito arriba/abajo) a los demás participantes al cerrar.
+- **Reputación** calculada (positivos/negativos → estrellitas doradas) mostrada en el perfil.
+- **Perfil editable:** datos personales + datos de pago (efectivo, transferencia, pago móvil, wallet USDT, wallet Solana).
+
 ## [0.0.5] — 2026-05-30 — Bloque 4: notificaciones y pagos
 
 ### Añadido

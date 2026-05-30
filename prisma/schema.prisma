@@ -16,12 +16,19 @@ model Usuario {
   hashContrasena   String?
   correoVerificado Boolean        @default(false)
   rol              Rol            @default(usuario)
+  nombre           String?
+  apellido         String?
+  nombreUsuario    String?        @unique
+  fotoUrl          String?
   creadoEn         DateTime       @default(now())
   sesiones         Sesion[]
   codigosOtp       CodigoOtp[]
   organizadas      Recolecta[]    @relation("organizadas")
   participaciones  Participante[]
   notificaciones   Notificacion[]
+  metodosPago      MetodoPago[]
+  valoracionesDadas     Valoracion[] @relation("dadas")
+  valoracionesRecibidas Valoracion[] @relation("recibidas")
 }
 
 model Sesion {
@@ -45,7 +52,7 @@ model CodigoOtp {
 
 model TasaCache {
   id          String   @id @default(cuid())
-  fuente      String   @unique // "bcv" | "usdt" | "sol"
+  fuente      String   @unique
   datos       Json
   actualizado DateTime @default(now())
 }
@@ -57,8 +64,8 @@ model Recolecta {
   visibilidad   Visibilidad     @default(privado)
   metodo        MetodoRecolecta @default(tradicional)
   moneda        String          @default("USD")
-  montoAporte   Float? // san: aporte por turno
-  meta          Float? // vaca: meta total
+  montoAporte   Float?
+  meta          Float?
   estado        EstadoRecolecta @default(abierta)
   organizadorId String
   organizador   Usuario         @relation("organizadas", fields: [organizadorId], references: [id])
@@ -66,6 +73,7 @@ model Recolecta {
   participantes Participante[]
   turnos        Turno[]
   aportes       Aporte[]
+  valoraciones  Valoracion[]
 }
 
 model Participante {
@@ -116,6 +124,30 @@ model Notificacion {
   creadaEn  DateTime @default(now())
 }
 
+model MetodoPago {
+  id        String         @id @default(cuid())
+  usuarioId String
+  usuario   Usuario        @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tipo      TipoMetodoPago
+  detalle   String
+  creadoEn  DateTime       @default(now())
+}
+
+model Valoracion {
+  id          String    @id @default(cuid())
+  recolectaId String
+  recolecta   Recolecta @relation(fields: [recolectaId], references: [id], onDelete: Cascade)
+  deUsuarioId String
+  deUsuario   Usuario   @relation("dadas", fields: [deUsuarioId], references: [id])
+  aUsuarioId  String
+  aUsuario    Usuario   @relation("recibidas", fields: [aUsuarioId], references: [id])
+  voto        Int
+  comentario  String?
+  creadaEn    DateTime  @default(now())
+
+  @@unique([recolectaId, deUsuarioId, aUsuarioId])
+}
+
 enum Rol {
   usuario
   admin_grupo
@@ -152,4 +184,12 @@ enum EstadoAporte {
   reportado
   confirmado
   rechazado
+}
+
+enum TipoMetodoPago {
+  efectivo
+  transferencia_bs
+  pago_movil
+  wallet_usdt
+  wallet_solana
 }

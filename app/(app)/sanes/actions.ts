@@ -173,3 +173,67 @@ export async function resolverAporte(
   });
   revalidatePath(`/sanes/${aporte.recolectaId}`);
 }
+
+export async function cerrarRecolecta(recolectaId: string): Promise<void> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return;
+  const recolecta = await prisma.recolecta.findUnique({
+    where: { id: recolectaId },
+    include: { participantes: true },
+  });
+  if (
+    !recolecta ||
+    recolecta.organizadorId !== usuario.id ||
+    recolecta.estado === "cerrada"
+  ) {
+    return;
+  }
+  await prisma.recolecta.update({
+    where: { id: recolectaId },
+    data: { estado: "cerrada" },
+  });
+  await notificarVarios(
+    recolecta.participantes.map((p) => p.usuarioId),
+    {
+      tipo: "cierre",
+      titulo: "Recolecta cerrada",
+      cuerpo: `"${recolecta.nombre}" se cerró. Valora a los demás participantes.`,
+      enlace: `/sanes/${recolectaId}`,
+    },
+  );
+  revalidatePath(`/sanes/${recolectaId}`);
+}
+
+export async function valorar(
+  recolectaId: string,
+  aUsuarioId: string,
+  voto: number,
+): Promise<void> {
+  const usuario = await obtenerUsuario();
+  if (!usuario || usuario.id === aUsuarioId) return;
+  const recolecta = await prisma.recolecta.findUnique({
+    where: { id: recolectaId },
+    include: { participantes: true },
+  });
+  if (!recolecta || recolecta.estado !== "cerrada") return;
+  const ids = recolecta.participantes.map((p) => p.usuarioId);
+  if (!ids.includes(usuario.id) || !ids.includes(aUsuarioId)) return;
+
+  await prisma.valoracion.upsert({
+    where: {
+      recolectaId_deUsuarioId_aUsuarioId: {
+        recolectaId,
+        deUsuarioId: usuario.id,
+        aUsuarioId,
+      },
+    },
+    create: {
+      recolectaId,
+      deUsuarioId: usuario.id,
+      aUsuarioId,
+      voto: voto > 0 ? 1 : -1,
+    },
+    update: { voto: voto > 0 ? 1 : -1 },
+  });
+  revalidatePath(`/sanes/${recolectaId}`);
+}
