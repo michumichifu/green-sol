@@ -9,6 +9,7 @@ import {
 } from "@/app/(app)/perfil/actions";
 import {
   MONEDAS_FIAT,
+  MONEDAS_FIAT_FUTURAS,
   METODOS_POR_MONEDA,
   METODOS_GENERICOS,
   CRIPTO_OPCIONES,
@@ -94,14 +95,14 @@ export function FormMetodoPago() {
       : [];
 
   const t = q.trim().toLowerCase();
-  const monedasFiltradas = MONEDAS_FIAT.filter(
-    (m) =>
-      !t ||
-      m.prefijo.toLowerCase().includes(t) ||
-      m.nombre.toLowerCase().includes(t) ||
-      m.pais.toLowerCase().includes(t) ||
-      m.codigo.toLowerCase().includes(t),
-  );
+  const coincide = (m: { prefijo: string; nombre: string; pais: string; codigo: string }) =>
+    !t ||
+    m.prefijo.toLowerCase().includes(t) ||
+    m.nombre.toLowerCase().includes(t) ||
+    m.pais.toLowerCase().includes(t) ||
+    m.codigo.toLowerCase().includes(t);
+  const fiatDisponibles = MONEDAS_FIAT.filter(coincide);
+  const fiatFuturas = MONEDAS_FIAT_FUTURAS.filter(coincide);
 
   const titular = `${nombre} ${apellido}`.trim();
   const cedula = cedulaNum.trim() ? `${cedulaPref}-${cedulaNum.trim()}` : "";
@@ -208,7 +209,7 @@ export function FormMetodoPago() {
             />
           </div>
           <ul className="max-h-48 space-y-0.5 overflow-y-auto">
-            {monedasFiltradas.map((m) => (
+            {fiatDisponibles.map((m) => (
               <li key={m.codigo}>
                 <button
                   type="button"
@@ -225,6 +226,25 @@ export function FormMetodoPago() {
                     {m.nombre} · {m.pais}
                   </span>
                 </button>
+              </li>
+            ))}
+            {fiatFuturas.map((m) => (
+              <li key={m.codigo}>
+                <div
+                  className="flex w-full cursor-not-allowed items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm opacity-50"
+                  aria-disabled="true"
+                  title="Disponible próximamente"
+                >
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {m.prefijo}
+                  </span>
+                  <span className="flex-1">
+                    {m.nombre} · {m.pais}
+                  </span>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase">
+                    Pronto
+                  </span>
+                </div>
               </li>
             ))}
           </ul>
