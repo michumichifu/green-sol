@@ -4,6 +4,12 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.34] — 2026-05-30 — Asistente: "Personalizar" y duración en días y semanas
+
+### Cambiado
+- El botón "A medida" del paso de frecuencia ahora dice **"Personalizar"**.
+- La **duración estimada** se muestra en **días y su equivalente en semanas** (p. ej. "~75 días (≈11 semanas) · 5 turnos").
+
 ## [0.0.33] — 2026-05-30 — Barra inferior: respeta el área segura del dispositivo
 
 ### Corregido

@@ -67,6 +67,7 @@ export default function CrearPage() {
   const aportePersona =
     nParticipantes > 0 ? Number(monto) / nParticipantes : 0;
   const duracionDias = nParticipantes * frecuenciaDias;
+  const duracionSemanas = duracionDias > 0 ? Math.round(duracionDias / 7) : 0;
 
   const puedeSeguir = (() => {
     switch (paso) {
@@ -389,13 +390,13 @@ export default function CrearPage() {
                         type="button"
                         onClick={() => setFrecId("personalizado")}
                         className={cn(
-                          "rounded-xl border p-2 text-xs transition-colors",
+                          "rounded-xl border p-2 text-xs leading-tight transition-colors",
                           frecId === "personalizado"
                             ? "border-brand bg-brand/5 text-brand"
                             : "hover:border-brand/40",
                         )}
                       >
-                        A medida
+                        Personalizar
                       </button>
                     </div>
                     {frecId === "personalizado" && (
@@ -413,9 +414,14 @@ export default function CrearPage() {
 
                   {duracionDias > 0 && (
                     <div className="flex items-center gap-2 rounded-xl border p-3 text-sm">
-                      <CalendarClock className="size-4 text-brand" />
-                      Duración estimada: <b>~{duracionDias} días</b> (
-                      {nParticipantes} turnos).
+                      <CalendarClock className="size-4 shrink-0 text-brand" />
+                      <span>
+                        Duración estimada:{" "}
+                        <b>
+                          ~{duracionDias} días (≈{duracionSemanas} semanas)
+                        </b>{" "}
+                        · {nParticipantes} turnos.
+                      </span>
                     </div>
                   )}
                 </>
@@ -482,7 +488,7 @@ export default function CrearPage() {
                     <Resumen k="Frecuencia" v={frecuenciaLabel} />
                     <Resumen
                       k="Duración estimada"
-                      v={`~${duracionDias} días`}
+                      v={`~${duracionDias} días (≈${duracionSemanas} sem)`}
                     />
                   </>
                 ) : (
