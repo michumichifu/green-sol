@@ -14,6 +14,12 @@ next-env.d.ts
 *.tsbuildinfo
 .env*.local
 
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/.playwright/
+
 # Privado: entregas de clase, bitácora del proceso y borradores de tweets (no se sube a GitHub)
 _privado/
 

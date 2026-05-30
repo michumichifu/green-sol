@@ -4,6 +4,20 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.9] — 2026-05-30 — QA end-to-end con Playwright
+
+### Añadido
+- **Playwright** con pruebas E2E del flujo real en navegador:
+  - La home muestra la marca y el botón lleva a registro.
+  - El registro lleva a la verificación por OTP.
+  - El dashboard sin sesión redirige a login.
+  - Flujo autenticado: dashboard + crear un san.
+- Endpoint `/api/test/sesion` (solo desarrollo) para autenticar en los E2E.
+- Script `npm run e2e`.
+
+### Verificado
+- 4/4 tests E2E pasan; 6/6 tests unitarios pasan.
+
 ## [0.0.8] — 2026-05-30 — Correcciones críticas (botón de inicio, deploy Vercel, hidratación)
 
 ### Corregido
