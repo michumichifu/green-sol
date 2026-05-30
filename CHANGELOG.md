@@ -4,6 +4,14 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.40] — 2026-05-30 — Editar métodos de pago
+
+### Añadido
+- Cada método de pago en **Perfil → Pagos** ahora tiene **Editar** (✏️): despliega un formulario en línea con los campos precargados (según el método), guarda con confirmación (toast) y se cierra. También **Quitar**.
+
+### Verificado
+- Build limpio; E2E 4/4.
+
 ## [0.0.39] — 2026-05-30 — Asistente del san: elegir método de pago del perfil (Fase 2)
 
 ### Cambiado
