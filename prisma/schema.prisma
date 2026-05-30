@@ -50,3 +50,10 @@ enum OtpProposito {
   verificacion
   reset_contrasena
 }
+
+model TasaCache {
+  id          String   @id @default(cuid())
+  fuente      String   @unique // "bcv" | "usdt" | "sol"
+  datos       Json
+  actualizado DateTime @default(now())
+}

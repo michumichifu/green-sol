@@ -4,6 +4,19 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.3] — 2026-05-30 — Bloque 2: tasas en vivo y calculadora
+
+### Añadido
+- **Servicio de tasas:** BCV (CDN público), USDT (API privada con key) y SOL/USDC (DexScreener), normalizados a un shape simple.
+- **Caché global de tasas** en base de datos (modelo `TasaCache`): toda la app y la calculadora leen del caché, sin consultar las APIs por usuario.
+- **Endpoint protegido de cron** (`/api/cron/tasas`) para refrescar el caché (se programará en Vercel Cron: BCV 2×/día, USDT y SOL cada 1–2 h).
+- **Resumen de tasas del día** en el dashboard (BCV, USDT, SOL).
+- **Calculadora:** convierte entre Bs (BCV/USDT), USDC y SOL con las tasas del día.
+- Placeholders de las pestañas Sanes, Avisos y Perfil para la navegación.
+
+### Verificado
+- El cron refresca correctamente las tres fuentes con datos reales (`bcv: ok, usdt: ok, sol: ok`).
+
 ## [0.0.2] — 2026-05-30 — Bloque 1: autenticación
 
 Sistema de autenticación propio (sin librería externa), con verificación por OTP y sesión por cookie.
