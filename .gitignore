@@ -6,5 +6,13 @@ dist/
 build/
 *.log
 
+# Next.js
+.next/
+/out/
+next-env.d.ts
+.vercel
+*.tsbuildinfo
+.env*.local
+
 # Privado: entregas de clase, bitácora del proceso y borradores de tweets (no se sube a GitHub)
 _privado/
