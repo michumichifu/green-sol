@@ -44,6 +44,24 @@ export async function crearRecolecta(
   const aportePorPersona =
     tipo === "san" && cupoMiembros ? monto / cupoMiembros : null;
 
+  // Datos de pago del organizador (a dónde pagan los participantes).
+  const s = (k: string) => String(formData.get(k) ?? "").trim() || null;
+  const metodoPago = s("metodoPago");
+  const datosPago = metodoPago
+    ? {
+        create: {
+          tipo: metodoPago,
+          banco: s("banco"),
+          tipoCuenta: s("tipoCuenta"),
+          numeroCuenta: s("numeroCuenta"),
+          titular: s("titular"),
+          cedula: s("cedula"),
+          telefono: s("telefono"),
+          wallet: s("wallet"),
+        },
+      }
+    : undefined;
+
   const recolecta = await prisma.recolecta.create({
     data: {
       tipo,
@@ -58,6 +76,7 @@ export async function crearRecolecta(
       frecuenciaDias: tipo === "san" ? (frecuenciaDias ?? null) : null,
       cupoMiembros: tipo === "san" ? cupoMiembros : null,
       participantes: { create: { usuarioId: usuario.id } },
+      datosPago,
     },
   });
   redirect(`/sanes/${recolecta.id}`);

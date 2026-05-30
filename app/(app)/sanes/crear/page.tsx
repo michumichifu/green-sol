@@ -11,6 +11,10 @@ import {
   Check,
   Info,
   CalendarClock,
+  Banknote,
+  Smartphone,
+  ShieldAlert,
+  Wallet,
 } from "lucide-react";
 import { crearRecolecta, type EstadoRecolecta } from "../actions";
 import {
@@ -18,11 +22,12 @@ import {
   MONEDA_RECOLECTA,
   FRECUENCIAS_PRESET,
 } from "@/lib/validations/recolecta";
+import { SelectBanco } from "@/components/select-banco";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const TOTAL = 6;
+const TOTAL = 7;
 
 function fmt(n: number) {
   if (!isFinite(n)) return "0";
@@ -50,10 +55,21 @@ export default function CrearPage() {
   const [frecId, setFrecId] = useState(""); // preset id o "personalizado"
   const [dias, setDias] = useState("");
   const [verTip, setVerTip] = useState(false);
+  // Método de pago del organizador
+  const [metodoPago, setMetodoPago] = useState("");
+  const [banco, setBanco] = useState("");
+  const [tipoCuenta, setTipoCuenta] = useState("");
+  const [numeroCuenta, setNumeroCuenta] = useState("");
+  const [titular, setTitular] = useState("");
+  const [cedula, setCedula] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [wallet, setWallet] = useState("");
 
   const esSan = tipo === "san";
   const info = moneda ? MONEDA_RECOLECTA[moneda] : null;
   const ancla = info?.ancla ?? "";
+  const esBolivares = !!info?.enBolivares;
+  const esCripto = !!info && !info.enBolivares;
 
   const preset = FRECUENCIAS_PRESET.find((f) => f.id === frecId);
   const frecuenciaDias =
@@ -83,6 +99,24 @@ export default function CrearPage() {
         if (!(Number(monto) > 0)) return false;
         if (!esSan) return true;
         return nParticipantes >= 2 && frecuenciaDias >= 1;
+      case 5:
+        if (esCripto) return wallet.trim().length > 0;
+        if (metodoPago === "transferencia")
+          return (
+            !!banco &&
+            !!tipoCuenta &&
+            numeroCuenta.trim().length > 0 &&
+            titular.trim().length > 0 &&
+            cedula.trim().length > 0
+          );
+        if (metodoPago === "pago_movil")
+          return (
+            !!banco &&
+            titular.trim().length > 0 &&
+            telefono.trim().length > 0 &&
+            cedula.trim().length > 0
+          );
+        return false;
       default:
         return true;
     }
@@ -456,8 +490,151 @@ export default function CrearPage() {
             </div>
           )}
 
-          {/* Paso 5: resumen */}
+          {/* Paso 5: método de pago del organizador */}
           {paso === 5 && (
+            <div className="space-y-4">
+              <div className="flex gap-2 rounded-xl border border-gold/40 bg-gold/5 p-3 text-xs">
+                <ShieldAlert className="size-4 shrink-0 text-gold" />
+                <span>
+                  Los datos deben ser <b>tuyos</b> (titular de la cuenta) y de{" "}
+                  <b>persona natural</b>, no de empresas. Usar datos de terceros
+                  puede acarrear sanciones.
+                </span>
+              </div>
+
+              {esCripto ? (
+                <div className="space-y-2">
+                  <label htmlFor="wallet-v" className="text-sm font-medium">
+                    Tu dirección de wallet ({info?.simbolo})
+                  </label>
+                  <div className="relative">
+                    <Wallet className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand" />
+                    <Input
+                      id="wallet-v"
+                      value={wallet}
+                      onChange={(e) => setWallet(e.target.value)}
+                      placeholder="Dirección de Solana"
+                      className="pl-9"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Aquí recibirás los aportes. Debe ser tu wallet.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <p className="text-sm font-medium">
+                    ¿Cómo recibirás los pagos?
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setMetodoPago("transferencia")}
+                      className={cn(
+                        "flex flex-col items-center gap-1 rounded-xl border p-3 text-sm transition-colors",
+                        metodoPago === "transferencia"
+                          ? "border-brand bg-brand/5 text-brand"
+                          : "hover:border-brand/40",
+                      )}
+                    >
+                      <Banknote className="size-5" />
+                      Transferencia
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMetodoPago("pago_movil")}
+                      className={cn(
+                        "flex flex-col items-center gap-1 rounded-xl border p-3 text-sm transition-colors",
+                        metodoPago === "pago_movil"
+                          ? "border-brand bg-brand/5 text-brand"
+                          : "hover:border-brand/40",
+                      )}
+                    >
+                      <Smartphone className="size-5" />
+                      Pago móvil
+                    </button>
+                  </div>
+
+                  {metodoPago === "transferencia" && (
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <label className="text-sm font-medium">Banco</label>
+                        <SelectBanco value={banco} onChange={setBanco} />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-sm font-medium">
+                          Tipo de cuenta
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {(["corriente", "ahorro"] as const).map((tc) => (
+                            <button
+                              key={tc}
+                              type="button"
+                              onClick={() => setTipoCuenta(tc)}
+                              className={cn(
+                                "rounded-xl border p-2 text-sm capitalize transition-colors",
+                                tipoCuenta === tc
+                                  ? "border-brand bg-brand/5 text-brand"
+                                  : "hover:border-brand/40",
+                              )}
+                            >
+                              {tc}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <Input
+                        value={numeroCuenta}
+                        onChange={(e) => setNumeroCuenta(e.target.value)}
+                        inputMode="numeric"
+                        placeholder="Número de cuenta (20 dígitos)"
+                      />
+                      <Input
+                        value={titular}
+                        onChange={(e) => setTitular(e.target.value)}
+                        placeholder="Nombre y apellido del titular"
+                      />
+                      <Input
+                        value={cedula}
+                        onChange={(e) => setCedula(e.target.value)}
+                        inputMode="numeric"
+                        placeholder="Cédula del titular"
+                      />
+                    </div>
+                  )}
+
+                  {metodoPago === "pago_movil" && (
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <label className="text-sm font-medium">Banco</label>
+                        <SelectBanco value={banco} onChange={setBanco} />
+                      </div>
+                      <Input
+                        value={titular}
+                        onChange={(e) => setTitular(e.target.value)}
+                        placeholder="Nombre y apellido del titular"
+                      />
+                      <Input
+                        value={telefono}
+                        onChange={(e) => setTelefono(e.target.value)}
+                        inputMode="tel"
+                        placeholder="Teléfono (04xx-xxxxxxx)"
+                      />
+                      <Input
+                        value={cedula}
+                        onChange={(e) => setCedula(e.target.value)}
+                        inputMode="numeric"
+                        placeholder="Cédula del titular"
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Paso 6: resumen */}
+          {paso === 6 && (
             <div className="space-y-3">
               <p className="text-sm font-medium">Revisa y confirma</p>
               <dl className="space-y-2 rounded-2xl border bg-card p-4 text-sm">
@@ -494,6 +671,14 @@ export default function CrearPage() {
                 ) : (
                   <Resumen k="Meta" v={`${ancla} ${fmt(Number(monto))}`} />
                 )}
+                <Resumen
+                  k="Recibe en"
+                  v={
+                    esCripto
+                      ? `Wallet ${info?.simbolo}`
+                      : `${metodoPago === "transferencia" ? "Transferencia" : "Pago móvil"}${banco ? ` · ${banco}` : ""}`
+                  }
+                />
               </dl>
               {estado.error && (
                 <p className="text-sm text-destructive">{estado.error}</p>
@@ -536,6 +721,18 @@ export default function CrearPage() {
                 name="cupoMiembros"
                 value={esSan ? cupo : ""}
               />
+              <input
+                type="hidden"
+                name="metodoPago"
+                value={esCripto ? "wallet" : metodoPago}
+              />
+              <input type="hidden" name="banco" value={banco} />
+              <input type="hidden" name="tipoCuenta" value={tipoCuenta} />
+              <input type="hidden" name="numeroCuenta" value={numeroCuenta} />
+              <input type="hidden" name="titular" value={titular} />
+              <input type="hidden" name="cedula" value={cedula} />
+              <input type="hidden" name="telefono" value={telefono} />
+              <input type="hidden" name="wallet" value={wallet} />
               <Button type="submit" className="w-full" disabled={pendiente}>
                 <Check className="size-4" />{" "}
                 {pendiente ? "Creando..." : "Crear ahorro"}

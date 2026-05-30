@@ -4,6 +4,18 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.35] — 2026-05-30 — Asistente: paso de método de pago del organizador
+
+### Añadido
+- **Nuevo paso "Método de pago"** (antes de confirmar): tarjeta de **advertencia** (datos del titular, persona natural, no terceros ni empresas).
+  - **Bolívares:** elegir **Transferencia** o **Pago móvil**; banco con **selector buscable** (bancos venezolanos por código), tipo de cuenta, número, titular y cédula (o teléfono en pago móvil).
+  - **Cripto (USDC/SOL):** dirección de **wallet**.
+- Modelo `DatosPagoRecolecta` (migración) + listado `lib/bancos-venezuela.ts` (25 bancos por código).
+- El **detalle del ahorro muestra a los participantes a dónde pagar** (con la nota de tasa del día en bolívares).
+
+### Verificado
+- Build limpio; E2E 4/4.
+
 ## [0.0.34] — 2026-05-30 — Asistente: "Personalizar" y duración en días y semanas
 
 ### Cambiado

@@ -82,6 +82,21 @@ model Recolecta {
   turnos        Turno[]
   aportes       Aporte[]
   valoraciones  Valoracion[]
+  datosPago     DatosPagoRecolecta?
+}
+
+model DatosPagoRecolecta {
+  id           String    @id @default(cuid())
+  recolectaId  String    @unique
+  recolecta    Recolecta @relation(fields: [recolectaId], references: [id], onDelete: Cascade)
+  tipo         String // transferencia | pago_movil | wallet
+  banco        String? // código del banco (transferencia / pago_movil)
+  tipoCuenta   String? // corriente | ahorro
+  numeroCuenta String?
+  titular      String?
+  cedula       String?
+  telefono     String?
+  wallet       String? // dirección (cripto)
 }
 
 model Participante {
