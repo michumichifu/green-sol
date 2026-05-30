@@ -148,12 +148,24 @@ model Notificacion {
 }
 
 model MetodoPago {
-  id        String         @id @default(cuid())
-  usuarioId String
-  usuario   Usuario        @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  tipo      TipoMetodoPago
-  detalle   String
-  creadoEn  DateTime       @default(now())
+  id           String   @id @default(cuid())
+  usuarioId    String
+  usuario      Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  categoria    String // fiat | cripto
+  moneda       String // VES | USD | ... | USDC | SOL
+  metodo       String // transferencia | pago_movil | efectivo | zelle | zinli | walytech | banco | usdc | sol
+  alias        String?
+  titular      String?
+  cedula       String?
+  banco        String?
+  tipoCuenta   String?
+  numeroCuenta String?
+  telefono     String?
+  email        String?
+  wallet       String?
+  detalle      String?
+  principal    Boolean  @default(false)
+  creadoEn     DateTime @default(now())
 }
 
 model Valoracion {
@@ -212,12 +224,4 @@ enum EstadoAporte {
   reportado
   confirmado
   rechazado
-}
-
-enum TipoMetodoPago {
-  efectivo
-  transferencia_bs
-  pago_movil
-  wallet_usdt
-  wallet_solana
 }

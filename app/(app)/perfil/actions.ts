@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { TipoMetodoPago } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { validarRestricciones } from "@/lib/restricciones";
@@ -52,24 +51,32 @@ export async function actualizarPerfil(
   return { ok: true };
 }
 
-const TIPOS: TipoMetodoPago[] = [
-  "efectivo",
-  "transferencia_bs",
-  "pago_movil",
-  "wallet_usdt",
-  "wallet_solana",
-];
-
 export async function agregarMetodoPago(formData: FormData): Promise<void> {
   const usuario = await obtenerUsuario();
   if (!usuario) return;
-  const tipo = String(formData.get("tipo") ?? "") as TipoMetodoPago;
-  const detalle = str(formData.get("detalle"));
-  if (!TIPOS.includes(tipo) || !detalle) return;
+  const categoria = str(formData.get("categoria"));
+  const moneda = str(formData.get("moneda"));
+  const metodo = str(formData.get("metodo"));
+  if (!categoria || !moneda || !metodo) return;
   await prisma.metodoPago.create({
-    data: { usuarioId: usuario.id, tipo, detalle },
+    data: {
+      usuarioId: usuario.id,
+      categoria,
+      moneda,
+      metodo,
+      alias: str(formData.get("alias")),
+      titular: str(formData.get("titular")),
+      cedula: str(formData.get("cedula")),
+      banco: str(formData.get("banco")),
+      tipoCuenta: str(formData.get("tipoCuenta")),
+      numeroCuenta: str(formData.get("numeroCuenta")),
+      telefono: str(formData.get("telefono")),
+      email: str(formData.get("email")),
+      wallet: str(formData.get("wallet")),
+      detalle: str(formData.get("detalle")),
+    },
   });
-  revalidatePath("/perfil");
+  revalidatePath("/configuracion");
 }
 
 export async function eliminarMetodoPago(id: string): Promise<void> {

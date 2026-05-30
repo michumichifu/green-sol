@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { obtenerConfigSmtp, obtenerConfigApp } from "@/lib/config";
 import { obtenerRestriccionesTexto } from "@/lib/restricciones";
+import { METODO_LABEL } from "@/lib/monedas";
 import {
   cambiarRol,
   guardarSmtp,
@@ -22,13 +23,6 @@ const CAMPOS_SMTP: [string, string][] = [
   ["SMTP_FROM", "Remitente"],
   ["SMTP_SECURE", "Seguro (true/false)"],
 ];
-const METODO_PAGO_LABEL: Record<string, string> = {
-  efectivo: "Efectivo",
-  transferencia_bs: "Transferencia Bs",
-  pago_movil: "Pago móvil",
-  wallet_usdt: "Wallet USDT",
-  wallet_solana: "Wallet Solana",
-};
 const METODO_RECOLECTA_LABEL: Record<string, string> = {
   tradicional: "Tradicional",
   cripto: "Cripto",
@@ -135,7 +129,7 @@ export default async function AdminPage() {
     }),
     prisma.recolecta.groupBy({ by: ["moneda"], _count: { _all: true } }),
     prisma.recolecta.groupBy({ by: ["metodo"], _count: { _all: true } }),
-    prisma.metodoPago.groupBy({ by: ["tipo"], _count: { _all: true } }),
+    prisma.metodoPago.groupBy({ by: ["metodo"], _count: { _all: true } }),
     prisma.usuario.findMany({ orderBy: { creadoEn: "desc" }, take: 100 }),
     obtenerConfigSmtp(),
     obtenerConfigApp(),
@@ -215,7 +209,7 @@ export default async function AdminPage() {
           <ListaConteo
             titulo="Métodos de pago registrados"
             datos={porMetodoPago.map((m) => ({
-              label: METODO_PAGO_LABEL[m.tipo] ?? m.tipo,
+              label: METODO_LABEL[m.metodo] ?? m.metodo,
               valor: m._count._all,
             }))}
           />

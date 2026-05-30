@@ -4,6 +4,22 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.37] — 2026-05-30 — Métodos de pago en el Perfil (rediseño, Fase 1)
+
+### Cambiado
+- **Modelo `MetodoPago` rediseñado** (migración): `categoria` (fiat/cripto), `moneda`, `metodo`, `alias`, `titular`, `cedula`, `banco`, `tipoCuenta`, `numeroCuenta`, `telefono`, `email`, `wallet`, `principal`, `detalle`. Se eliminó el enum `TipoMetodoPago`.
+- **Perfil → Configuración → Pagos** rehecho: crear método con el flujo **Fiat/Cripto → moneda (buscable) → método → datos**.
+  - **Fiat:** Bolívares (transferencia/pago móvil con banco buscable, cuenta, titular, cédula) · USD (efectivo, Zelle, Zinli, WalyTech, banco) · otras monedas (genéricos).
+  - **Cripto:** USDC o SOL → dirección de wallet **externa** + alias. (La wallet **principal** la entregará la integración cripto, no editable.)
+  - **Prohibición** clara: datos del titular, persona natural; no terceros ni empresas.
+- Listado de métodos etiquetado (método · moneda · datos). Panel admin: ranking de métodos por `metodo`.
+
+### Pendiente (Fase 2)
+- El asistente del san pasa a **seleccionar** un método del perfil (filtrado por moneda) y a **bloquear** si no hay ninguno compatible.
+
+### Verificado
+- Build limpio; E2E 4/4.
+
 ## [0.0.36] — 2026-05-30 — Cimientos y plan del rediseño de métodos de pago
 
 ### Añadido
