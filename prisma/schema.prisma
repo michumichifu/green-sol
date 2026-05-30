@@ -11,16 +11,42 @@ datasource db {
 }
 
 model Usuario {
-  id               String   @id @default(cuid())
-  correo           String   @unique
+  id               String      @id @default(cuid())
+  correo           String      @unique
   hashContrasena   String?
-  correoVerificado Boolean  @default(false)
-  rol              Rol      @default(usuario)
-  creadoEn         DateTime @default(now())
+  correoVerificado Boolean     @default(false)
+  rol              Rol         @default(usuario)
+  creadoEn         DateTime    @default(now())
+  sesiones         Sesion[]
+  codigosOtp       CodigoOtp[]
+}
+
+model Sesion {
+  id        String   @id @default(cuid())
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  expiraEn  DateTime
+  creadaEn  DateTime @default(now())
+}
+
+model CodigoOtp {
+  id         String       @id @default(cuid())
+  usuarioId  String
+  usuario    Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  hashCodigo String
+  proposito  OtpProposito
+  expiraEn   DateTime
+  usado      Boolean      @default(false)
+  creadoEn   DateTime     @default(now())
 }
 
 enum Rol {
   usuario
   admin_grupo
   super_admin
+}
+
+enum OtpProposito {
+  verificacion
+  reset_contrasena
 }

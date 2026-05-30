@@ -4,6 +4,22 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.2] — 2026-05-30 — Bloque 1: autenticación
+
+Sistema de autenticación propio (sin librería externa), con verificación por OTP y sesión por cookie.
+
+### Añadido
+- Registro y login con **correo + contraseña** (política segura: mayúscula, número, símbolo) y **generador de contraseña**.
+- **Verificación de cuenta por OTP** de 6 dígitos al correo (en desarrollo se imprime en consola; en producción usa SMTP por variables de entorno).
+- **Sesiones propias** en base de datos con cookie httpOnly; contraseñas hasheadas con **Argon2**.
+- Modelos Prisma `Sesion` y `CodigoOtp`; relaciones en `Usuario`.
+- Pantallas de registro, login y verificación con la identidad de marca.
+- **Layout protegido** (redirige a `/login` sin sesión) y **barra de navegación inferior** (Inicio, Sanes, Calculadora, Avisos, Perfil).
+- Tests de la política de contraseña, hash y generador.
+
+### Pendiente
+- SMTP real (datos de Luis). Login con wallet y métodos combinables llegan en el bloque cripto.
+
 ## [0.0.1] — 2026-05-30 — Bloque 0: cimientos
 
 Primer hito: el esqueleto del proyecto corre en local con base de datos, identidad de marca, framework de tests y verificación de salud de la base de datos.
