@@ -1,12 +1,10 @@
 import Link from "next/link";
-import { Sun } from "lucide-react";
 
 export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
-      <div className="flex size-16 items-center justify-center rounded-full bg-brand text-white shadow-lg shadow-brand/30">
-        <Sun className="size-8" strokeWidth={2} />
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/green-sol-logo.svg" alt="Green Sol" className="size-20" />
       <div className="space-y-3">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
           Green Sol
@@ -27,7 +25,32 @@ export default function Home() {
           Ya tengo cuenta
         </Link>
       </div>
-      <p className="text-sm text-muted-foreground">
+      <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo-solana-1.png"
+            alt="Solana"
+            className="size-4 rounded-full"
+          />
+          Sobre Solana
+        </span>
+        <a
+          href="https://github.com/michumichifu/green-sol"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 hover:text-foreground"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo-github-1.webp"
+            alt="GitHub"
+            className="size-4 dark:invert"
+          />
+          Open source
+        </a>
+      </div>
+      <p className="text-xs text-muted-foreground">
         Solana Vibe Bootcamp · Venezuela
       </p>
     </main>

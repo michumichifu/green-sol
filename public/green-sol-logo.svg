@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="sunDisc" cx="0.35" cy="0.30" r="0.85">
+      <stop offset="0%" stop-color="#14C98A"/>
+      <stop offset="70%" stop-color="#0E9F6E"/>
+      <stop offset="100%" stop-color="#0E9F6E"/>
+    </radialGradient>
+  </defs>
+  <!-- halo exterior suave -->
+  <circle cx="128" cy="128" r="104" fill="#0E9F6E" fill-opacity="0.18"/>
+  <!-- disco con degradado radial (highlight arriba-izquierda) -->
+  <circle cx="128" cy="128" r="88" fill="url(#sunDisc)"/>
+  <!-- icono Lucide "sun" en BLANCO: circulo hueco + 8 rayos, puntas redondeadas -->
+  <g transform="translate(128 128) scale(4.6) translate(-12 -12)" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M12 2v2"/>
+    <path d="M12 20v2"/>
+    <path d="m4.93 4.93 1.41 1.41"/>
+    <path d="m17.66 17.66 1.41 1.41"/>
+    <path d="M2 12h2"/>
+    <path d="M20 12h2"/>
+    <path d="m6.34 17.66-1.41 1.41"/>
+    <path d="m19.07 4.93-1.41 1.41"/>
+  </g>
+</svg>

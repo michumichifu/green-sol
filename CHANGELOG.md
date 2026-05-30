@@ -4,6 +4,16 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.10] — 2026-05-30 — Logos de marca en la app
+
+### Añadido
+- **Logo principal de Green Sol** (badge con degradado, el "detalle" 3D) en la pantalla de inicio y en las pantallas de auth (login/registro/verificar), reemplazando el ícono plano.
+- Íconos de **Solana** y **GitHub** (open source, con enlace al repo) en el pie de la bienvenida.
+- Assets de logo copiados a `public/`.
+
+### Verificado
+- Build limpio; E2E 4/4 y unitarios 6/6 pasan.
+
 ## [0.0.9] — 2026-05-30 — QA end-to-end con Playwright
 
 ### Añadido
