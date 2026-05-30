@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Green Sol — PRD v0.5 · Ahorro en grupo transparente y puente al ahorro en cripto sobre Solana</title>
+<title>Green Sol — PRD v0.6 · Ahorro en grupo transparente y puente al ahorro en cripto sobre Solana</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <link rel="preconnect" href="https://rsms.me/">
@@ -54,7 +54,7 @@
       <div class="font-semibold text-[15px]">Green Sol</div>
       <div class="text-xs" style="color:var(--ink-3)">PRD · ahorro en grupo · puente al ahorro en cripto</div>
     </div>
-    <span class="ml-3 badge badge-brand"><i data-lucide="tag" class="lucide"></i>PRD v0.5</span>
+    <span class="ml-3 badge badge-brand"><i data-lucide="tag" class="lucide"></i>PRD v0.6</span>
     <span class="badge badge-muted hidden sm:inline-flex"><i data-lucide="calendar" class="lucide"></i>2026-05-29</span>
     <span class="badge badge-warn hidden md:inline-flex"><i data-lucide="flask-conical" class="lucide"></i>Fase 0 · documentación</span>
     <div class="ml-auto flex items-center gap-3">
@@ -184,9 +184,15 @@
         </div>
         <div class="sub p-4" style="background:var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 30%, transparent)">
           <div class="flex items-center gap-2 font-semibold brand-text mb-1"><i data-lucide="coins" class="lucide"></i>Cripto (sobre Solana)</div>
-          <p class="text-sm" style="color:var(--ink-2)">Referencia y movimiento en <b style="color:var(--ink)">USDC (o SOL)</b>. El grupo elige <b style="color:var(--ink)">wallet de la app</b> (embebida, maneja saldo y transfiere sin extensión, estilo GMGN) o <b style="color:var(--ink)">autocustodia / dirección externa</b> (la app refleja). El bote de grupo seguro usa <b style="color:var(--ink)">multifirma</b>.</p>
+          <p class="text-sm" style="color:var(--ink-2)">Referencia y movimiento en <b style="color:var(--ink)">USDC (o SOL)</b>. Al registrarse con correo, la app crea una <b style="color:var(--ink)">wallet embebida no-custodial</b> (ni la app ni el proveedor tienen la llave completa). El usuario hace <b style="color:var(--ink)">depósitos, retiros y transferencias</b> desde su panel, o usa <b style="color:var(--ink)">autocustodia / wallet externa</b> (Phantom/Solflare) que la app refleja (<b style="color:var(--ink)">modo espejo</b>). El bote de grupo seguro usa <b style="color:var(--ink)">multifirma</b>.</p>
         </div>
       </div>
+      <h3 class="font-semibold flex items-center gap-2 mt-5 mb-2"><i data-lucide="shield-check" class="lucide brand-text"></i>Onboarding de respaldo de la wallet</h3>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="wallet" class="lucide brand-text"></i>1 · Tu dirección</div><p class="text-sm" style="color:var(--ink-2)">Al registrarse, un popup muestra primero la <b style="color:var(--ink)">dirección</b> de la wallet creada automáticamente.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="eye" class="lucide brand-text"></i>2 · Tu llave secreta</div><p class="text-sm" style="color:var(--ink-2)">Luego un popup con la <b style="color:var(--ink)">llave secreta difuminada</b>, con ícono de ojo para revelarla y copiarla. Se guarda <b style="color:var(--ink)">bajo responsabilidad del usuario</b>, con instrucciones claras del respaldo.</p></div>
+      </div>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="flask-conical" class="lucide" style="flex:0 0 auto"></i><span>Toda la capa cripto se prueba <b style="color:var(--ink-2)">primero en devnet</b>; dinero real solo tras validación. Es no-custodial y de <b style="color:var(--ink-2)">alto estándar de seguridad web3</b>.</span></p>
     </section>
 
     <!-- MONEDA -->
@@ -320,12 +326,14 @@
     <section id="cuenta" class="card p-7">
       <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="user-cog" class="lucide-lg brand-text"></i>Registro, perfil y roles</h2>
 
-      <h3 class="font-semibold flex items-center gap-2 mb-2"><i data-lucide="log-in" class="lucide brand-text"></i>Registro y login</h3>
+      <h3 class="font-semibold flex items-center gap-2 mb-2"><i data-lucide="log-in" class="lucide brand-text"></i>Registro y login (métodos combinables)</h3>
       <div class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm mb-4" style="color:var(--ink-2)">
         <div class="flex gap-2"><i data-lucide="key-round" class="lucide chk"></i><b style="color:var(--ink)">Correo + contraseña.</b> Política de contraseña segura: al menos <b style="color:var(--ink)">una mayúscula, un número y un símbolo</b> (además de letras), con <b style="color:var(--ink)">generador de contraseña aleatoria</b> opcional.</div>
-        <div class="flex gap-2"><i data-lucide="mail-check" class="lucide chk"></i><b style="color:var(--ink)">Verificación por correo</b> (email de confirmación). Se usará un <b style="color:var(--ink)">dominio de prueba</b> y un <b style="color:var(--ink)">servidor de correos propio</b>.</div>
+        <div class="flex gap-2"><i data-lucide="mail-check" class="lucide chk"></i><b style="color:var(--ink)">Verificación y 2FA por OTP al correo:</b> <b style="color:var(--ink)">código aleatorio único autogenerado</b> que confirma la cuenta y actúa como segundo factor. Sale por el <b style="color:var(--ink)">servidor SMTP propio</b> (dominio de prueba). TOTP/Google Authenticator queda para más adelante.</div>
+        <div class="flex gap-2"><i data-lucide="wallet" class="lucide chk"></i><b style="color:var(--ink)">Login con wallet</b> (Phantom/Solflare): se entra por la <b style="color:var(--ink)">firma</b> de la wallet, <b style="color:var(--ink)">sin OTP</b> (la propia wallet autentica).</div>
+        <div class="flex gap-2"><i data-lucide="link" class="lucide chk"></i><b style="color:var(--ink)">Combinables:</b> quien entró por wallet puede <b style="color:var(--ink)">vincular</b> luego correo + contraseña + OTP; quien se registró por correo recibe su <b style="color:var(--ink)">wallet embebida no-custodial</b>.</div>
         <div class="flex gap-2"><i data-lucide="user-plus" class="lucide chk"></i>Sin cédula al inicio, para no poner barrera.</div>
-        <div class="flex gap-2"><i data-lucide="chrome" class="lucide chk"></i><b style="color:var(--ink)">A futuro (no MVP):</b> registro / vinculación con <b style="color:var(--ink)">Google</b> (OAuth); un usuario por correo podrá vincular su Google después.</div>
+        <div class="flex gap-2"><i data-lucide="chrome" class="lucide chk"></i><b style="color:var(--ink)">A futuro (no MVP):</b> Google (OAuth) y TOTP/Google Authenticator.</div>
       </div>
 
       <h3 class="font-semibold flex items-center gap-2 mb-2"><i data-lucide="user" class="lucide brand-text"></i>Perfil y configuración (por pestañas)</h3>
@@ -342,14 +350,15 @@
     <!-- SUPER-ADMIN -->
     <section id="admin" class="card p-7">
       <h2 class="text-lg font-bold flex items-center gap-2 mb-3"><i data-lucide="shield" class="lucide-lg brand-text"></i>Panel super-admin</h2>
-      <p class="text-sm mb-3" style="color:var(--ink-2)">Acceso interno separado para los responsables de la plataforma:</p>
+      <p class="text-sm mb-3" style="color:var(--ink-2)">Acceso interno separado para los responsables. Panel <b style="color:var(--ink)">completo</b>:</p>
       <div class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm" style="color:var(--ink-2)">
-        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Administrar usuarios y recolectas.</div>
-        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Ver métodos de pago y documentos subidos (cédula, pasaporte, comprobantes).</div>
-        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Comprobaciones manuales anti-estafa.</div>
-        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i><b style="color:var(--ink)">Enviar notificaciones</b> (a un usuario o globales).</div>
-        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i>Mayor control de seguridad y acceso aparte del de los usuarios.</div>
+        <div class="flex gap-2"><i data-lucide="users-round" class="lucide chk"></i><b style="color:var(--ink)">Gestión de usuarios:</b> ver todos, <b style="color:var(--ink)">editarlos</b> y <b style="color:var(--ink)">crear o invitar</b> nuevos (incluido otro super-admin).</div>
+        <div class="flex gap-2"><i data-lucide="check-circle-2" class="lucide chk"></i><b style="color:var(--ink)">Recolectas:</b> administrar sanes/vacas; ver métodos de pago y documentos subidos (cédula, pasaporte, comprobantes); comprobaciones manuales anti-estafa.</div>
+        <div class="flex gap-2"><i data-lucide="mail-check" class="lucide chk"></i><b style="color:var(--ink)">Configuración de correo (SMTP):</b> cargar los datos del <b style="color:var(--ink)">servidor SMTP</b>; de ahí salen verificación de cuenta, OTP, reseteo de contraseña y avisos.</div>
+        <div class="flex gap-2"><i data-lucide="megaphone" class="lucide chk"></i><b style="color:var(--ink)">Notificaciones:</b> enviar a un usuario o globales.</div>
+        <div class="flex gap-2"><i data-lucide="scroll-text" class="lucide chk"></i><b style="color:var(--ink)">Auditoría</b> y mayor control de seguridad, con acceso aparte del de los usuarios.</div>
       </div>
+      <p class="text-sm mt-3 p-3 rounded-lg flex gap-2" style="background:var(--paper-2); color:var(--ink-2); border:1px solid var(--line)"><i data-lucide="plug" class="lucide brand-text" style="flex:0 0 auto"></i><span><b style="color:var(--ink)">Configuración de integraciones (futuro, no MVP):</b> desde el panel, el super-admin podrá almacenar y gestionar <b style="color:var(--ink)">API keys</b> —de tasas y de <b style="color:var(--ink)">IA</b> (Claude, Gemini, DeepSeek)— en variables de entorno/secretos cifrados, asignar su uso (solo super-admin o global) y elegir el modelo por sección. Es una idea para más adelante; no se construye ahora.</span></p>
     </section>
 
     <!-- SOLANA -->
@@ -399,7 +408,7 @@
       <div class="space-y-3">
         <div class="flex gap-3"><span class="badge badge-ok" style="flex:0 0 auto">Fase 0</span><p class="text-sm" style="color:var(--ink-2)">Documentación (actual).</p></div>
         <div class="flex gap-3"><span class="badge badge-brand" style="flex:0 0 auto">Fase 1</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">MVP gancho (tradicional).</b> Entrega de <b style="color:var(--ink)">primera versión: 1 de junio de 2026, 5:30 p.m.</b> (tarea del bootcamp: tuit con screenshot/video + URL). Incluye: bienvenida, registro/login (correo + clave segura + verificación), preferencias, dashboard con <b style="color:var(--ink)">tasas en vivo</b>, <b style="color:var(--ink)">calculadora</b>, <b style="color:var(--ink)">bottom nav</b>, crear san/bolso y pote/vaca (público/privado), cuenta destino, reporte de pagos, turnos, avisos de mora, <b style="color:var(--ink)">notificaciones (toasts + campanita básica)</b> y <b style="color:var(--ink)">reputación básica</b> (manito +/−, estrellitas). Pruebas en Vercel.</p></div>
-        <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 2</span><p class="text-sm" style="color:var(--ink-2)">Capa cripto: wallet embebida, USDC/SOL, multifirma o modo espejo, multas por mora, <b style="color:var(--ink)">integración wallet Solana ↔ app</b>.</p></div>
+        <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 2</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">Capa cripto (enseguida tras el núcleo, en devnet):</b> wallet embebida <b style="color:var(--ink)">no-custodial</b> + onboarding de respaldo, <b style="color:var(--ink)">login con wallet</b> (Phantom/Solflare), USDC/SOL, depósitos/retiros/transferencias, multifirma o modo espejo, multas por mora. <b style="color:var(--ink)">Alto estándar de seguridad web3</b>; devnet antes de dinero real.</p></div>
         <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 3</span><p class="text-sm" style="color:var(--ink-2)">Confianza y escala: dividir cuentas, KYC con proveedor, panel super-admin completo, <b style="color:var(--ink)">marketplace público</b>, <b style="color:var(--ink)">login con Google</b>, despliegue en VPS.</p></div>
         <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 4</span><p class="text-sm" style="color:var(--ink-2)">App móvil Android/iOS.</p></div>
       </div>
@@ -443,7 +452,7 @@
     </section>
 
     <footer class="pt-2 pb-10 text-center text-xs" style="color:var(--ink-3)">
-      Green Sol · Solana Vibe Bootcamp Venezuela · PRD v0.5 · <span class="mono">2026-05-29</span> · <a href="https://github.com/michumichifu/green-sol" class="brand-text underline">github.com/michumichifu/green-sol</a>
+      Green Sol · Solana Vibe Bootcamp Venezuela · PRD v0.6 · <span class="mono">2026-05-29</span> · <a href="https://github.com/michumichifu/green-sol" class="brand-text underline">github.com/michumichifu/green-sol</a>
     </footer>
 
   </main>

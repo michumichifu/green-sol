@@ -2,7 +2,7 @@
 
 > Proyecto del Solana Vibe Bootcamp (Venezuela). App para **gestionar el ahorro en grupo de forma transparente** (san, bolso, pote, vaca) y dividir cuentas, con **reputación de usuarios**. Método tradicional o cripto sobre Solana, sin que la app custodie dinero a la fuerza. **La finalidad es servir de puente al ahorro en cripto** para la comunidad hispana.
 
-- **Versión:** 0.5 (clase 3: posicionamiento cripto-first, APIs de tasas + caché, calculadora, notificaciones, navegación, registro/perfil a detalle)
+- **Versión:** 0.6 (planificación de desarrollo: auth con OTP por correo y login por wallet, wallet embebida no-custodial + onboarding de respaldo, super-admin con gestión de usuarios y SMTP, capa cripto integrada al plan). Diseño de implementación en [superpowers/specs/2026-05-29-green-sol-mvp-design.md](superpowers/specs/2026-05-29-green-sol-mvp-design.md).
 - **Fecha:** 2026-05-29
 - **Fase:** 0 — Documentación previa al desarrollo (entrega de primera versión: **1 de junio de 2026, 5:30 p.m.**)
 - **Nombre:** Green Sol (sol verde). Descartado: Cochino.
@@ -72,8 +72,10 @@ No es un modo global: cada recolecta elige su método.
 
 **Cripto (sobre Solana):**
 - Referencia y movimiento en USDC (o SOL).
-- El grupo elige **wallet de la app** (embebida, maneja saldo y transfiere sin extensión, estilo GMGN) o **autocustodia / dirección externa** (la app refleja).
+- **Wallet embebida no-custodial:** al registrarse con correo, la app crea automáticamente una wallet de Solana **sin custodiar las llaves** (MPC/TEE o llave cifrada con un secreto del usuario; ni la app ni el proveedor tienen la llave completa). En el **onboarding** se muestra primero la **dirección** de la wallet y luego la **llave secreta** (difuminada, con ícono para revelarla, copiarla y guardarla **bajo responsabilidad del usuario**), con instrucciones claras del respaldo.
+- **Movimientos del usuario:** depósitos, retiros y transferencias desde su panel; o **autocustodia / wallet externa** (Phantom/Solflare) que la app refleja (modo espejo).
 - El **bote de grupo** seguro usa **multifirma**.
+- Toda la capa cripto se prueba **primero en devnet**; dinero real solo tras validación. Es no-custodial y de alto estándar de seguridad web3.
 
 ## 7. Moneda, tasas y equivalencia en bolívares
 
@@ -157,11 +159,13 @@ Dos planos complementarios:
 
 ## 14. Cuenta, registro, verificación, perfil y roles
 
-**Registro y login:**
+**Registro y login (métodos combinables):**
 - **Correo + contraseña.** Política de contraseña segura: al menos **una mayúscula, un número y un símbolo** (además de letras). Con **generador de contraseña aleatoria** opcional.
-- **Verificación por correo** (email de confirmación). Se usará un **dominio de prueba** y un **servidor de correos propio**.
+- **Verificación y 2FA por OTP al correo:** **código aleatorio único autogenerado** enviado al correo asociado, para confirmar la cuenta y como **segundo factor de seguridad básico**. Sale por el **servidor SMTP propio** (dominio de prueba). TOTP/Google Authenticator queda para más adelante.
+- **Login con wallet** (Phantom/Solflare): se entra por la **firma** de la wallet, **sin OTP** (la propia wallet autentica).
+- **Métodos combinables:** quien entró por wallet puede **vincular** luego correo + contraseña + OTP si lo desea; quien se registró por correo recibe su **wallet embebida no-custodial** (sección 6).
 - Sin cédula al inicio, para no poner barrera.
-- **A futuro (no MVP):** registro / vinculación con **Google** (OAuth) para inicios de sesión más rápidos; se configura a nivel super-admin (app de Google). Un usuario registrado por correo podrá **vincular** su cuenta de Google después.
+- **A futuro (no MVP):** Google (OAuth) y TOTP/Google Authenticator.
 
 **Perfil y configuración (por pestañas):**
 - **Cuenta:** cambiar correo principal y contraseña.
@@ -176,7 +180,12 @@ Dos planos complementarios:
 
 ## 15. Panel super-admin
 
-Acceso interno separado para los responsables: administrar usuarios y recolectas, ver métodos de pago y documentos subidos (cédula, pasaporte, comprobantes), hacer comprobaciones manuales anti-estafa, **enviar notificaciones** (a un usuario o globales, sección 13), y mayor control de seguridad.
+Acceso interno separado para los responsables. Panel **completo**:
+- **Gestión de usuarios:** ver todos los usuarios, **editarlos**, y **crear o invitar** nuevos (incluido otro super-admin).
+- **Recolectas:** administrar sanes/vacas; ver métodos de pago y documentos subidos (cédula, pasaporte, comprobantes); comprobaciones manuales anti-estafa.
+- **Configuración de correo (SMTP):** cargar los datos del **servidor SMTP** de la aplicación; de ahí salen las automatizaciones (verificación de cuenta, OTP, reseteo de contraseña, avisos).
+- **Notificaciones:** enviar a un usuario o globales (sección 13).
+- Mayor control de seguridad.
 
 > **Configuración de integraciones (futuro, no MVP):** desde el panel, el super-admin podrá almacenar y gestionar **API keys** —de tasas y de **IA** (Claude, Gemini, DeepSeek)— en variables de entorno/secretos cifrados, asignar su **uso** (solo super-admin o global para usuarios) y **elegir el modelo** por sección, de cara a integraciones de IA futuras. Es una idea concreta para más adelante; no se construye ahora.
 
@@ -207,7 +216,7 @@ Acceso interno separado para los responsables: administrar usuarios y recolectas
 
 - **Fase 0 — Documentación (actual).**
 - **Fase 1 — MVP gancho (tradicional).** Entrega de **primera versión: 1 de junio de 2026, 5:30 p.m.** (tarea del bootcamp: tuit con screenshot/video + URL). Incluye: bienvenida, registro/login (correo + clave segura + verificación), preferencias, dashboard con **tasas en vivo**, **calculadora**, **bottom nav**, crear san/bolso y pote/vaca (público/privado), cuenta destino, reporte de pagos, turnos, avisos de mora, **notificaciones (toasts + campanita básica)** y **reputación básica** (manito +/−, estrellitas). Pruebas en Vercel. *(El alcance exacto del entregable del 1-jun se prioriza por impacto visual; ver nota abajo.)*
-- **Fase 2 — Capa cripto:** wallet embebida, USDC/SOL, multifirma o modo espejo, multas por mora, integración wallet Solana ↔ app.
+- **Fase 2 — Capa cripto (enseguida tras el núcleo, en devnet):** wallet embebida **no-custodial** + onboarding de respaldo, login con wallet (Phantom/Solflare), USDC/SOL, depósitos/retiros/transferencias, multifirma o modo espejo, multas por mora. Alto estándar de seguridad web3; devnet antes de dinero real.
 - **Fase 3 — Confianza y escala:** dividir cuentas, KYC con proveedor, panel super-admin completo, **marketplace público**, login con Google, despliegue en VPS.
 - **Fase 4 — Móvil:** Android/iOS.
 

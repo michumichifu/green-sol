@@ -62,7 +62,8 @@ docker/          compose dev (Postgres), Dockerfile + compose prod (futuro VPS)
 
 **Web2 (desde el inicio):**
 - Secretos solo en variables de entorno / `_privado/`, nunca en el repo (open source).
-- Contraseñas con **Argon2/bcrypt**; verificación de correo; sesiones seguras; validación de inputs (Zod); rate limiting básico en endpoints sensibles.
+- Contraseñas con **Argon2/bcrypt**; **OTP por correo** (código aleatorio único, autogenerado, enviado al correo asociado) para verificación de cuenta y como segundo factor básico; sesiones seguras; validación de inputs (Zod); rate limiting básico en endpoints sensibles.
+- OTP por correo es el 2FA del MVP; **TOTP / Google Authenticator** queda para más adelante. El **login con wallet** (Phantom/Solflare) **no** usa OTP: la firma de la wallet ya autentica.
 - Postgres del VPS: usuario dedicado, SSL, firewall, principio de mínimo privilegio.
 
 **Web3 (bloque cripto, alto estándar):**
@@ -74,7 +75,7 @@ docker/          compose dev (Postgres), Dockerfile + compose prod (futuro VPS)
 
 **Núcleo (producto tradicional):**
 0. **Cimientos:** scaffolding Next.js + Tailwind + shadcn + Prisma; `docker-compose` Postgres local; conexión a la DB; primer deploy en Vercel; esqueleto de seguridad y variables de entorno.
-1. **Auth + layout:** registro/login, contraseña segura + generador, verificación por correo (SMTP), sesión; layout general con **bottom nav**.
+1. **Auth + layout:** registro/login, contraseña segura + generador, **verificación por correo con OTP** (SMTP), sesión; layout general con **bottom nav**.
 2. **Dashboard + tasas + calculadora:** Vercel Cron + caché de tasas; dashboard con tasas sutiles, tus recolectas y reputación; calculadora Bs ↔ USDC ↔ SOL.
 3. **Sanes y vacas:** crear/gestionar recolecta (privado/público, tradicional), participantes, turnos (azar/manual).
 4. **Pagos + mora + notificaciones:** cuenta destino, reporte de pago con comprobante, avisos de mora; **toasts** + **campanita**.
@@ -82,7 +83,7 @@ docker/          compose dev (Postgres), Dockerfile + compose prod (futuro VPS)
 6. **Super-admin completo:** gestión de usuarios (ver/editar/crear/invitar), **configuración de SMTP**, envío de notificaciones, auditoría.
 
 **Bloque cripto (su propio diseño detallado, en devnet):**
-7. **Wallets y movimientos:** wallet embebida **no-custodial** creada al registrarse; **onboarding de respaldo** (popup con la dirección → popup con la llave secreta difuminada, ícono de ojo para revelar/copiar, guardada **bajo responsabilidad del usuario**, con instrucciones claras); depósitos, retiros, transferencias; recolectas en USDC/SOL; bote multifirma; modo espejo de wallet externa (Phantom/Solflare). Decisiones propias en §8.
+7. **Wallets y movimientos:** wallet embebida **no-custodial** creada al registrarse; **onboarding de respaldo** (popup con la dirección → popup con la llave secreta difuminada, ícono de ojo para revelar/copiar, guardada **bajo responsabilidad del usuario**, con instrucciones claras); depósitos, retiros, transferencias; recolectas en USDC/SOL; bote multifirma; modo espejo de wallet externa (Phantom/Solflare). **Login/registro con wallet** (Phantom/Solflare) por firma, sin OTP; un usuario que entró por wallet puede **vincular después correo + contraseña + OTP** si lo desea (métodos de auth combinables). Decisiones propias en §8.
 
 **Hito 1-jun:** desplegado y pulido al menos hasta el bloque 3–4 (auth + dashboard con tasas reales + calculadora + crear san), suficiente para un video que impresione; seguir corrido con el resto.
 
