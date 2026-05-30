@@ -17,6 +17,22 @@ export async function POST(req: Request) {
     create: { correo, correoVerificado: true },
     update: { correoVerificado: true },
   });
+  // Método de pago cripto (SOL) para que el asistente del san pueda elegirlo.
+  const yaTiene = await prisma.metodoPago.findFirst({
+    where: { usuarioId: usuario.id, moneda: "SOL" },
+  });
+  if (!yaTiene) {
+    await prisma.metodoPago.create({
+      data: {
+        usuarioId: usuario.id,
+        categoria: "cripto",
+        moneda: "SOL",
+        metodo: "sol",
+        alias: "Wallet E2E",
+        wallet: "SoLanaWa11etAddr1111111111111111111111111",
+      },
+    });
+  }
   await crearSesion(usuario.id);
   return NextResponse.json({ ok: true, usuarioId: usuario.id });
 }

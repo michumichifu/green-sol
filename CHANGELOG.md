@@ -4,6 +4,16 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.39] — 2026-05-30 — Asistente del san: elegir método de pago del perfil (Fase 2)
+
+### Cambiado
+- El paso "Método de pago" del asistente ya **no pide datos**: el organizador **elige uno de sus métodos** del perfil, **filtrado por la moneda** del san (Bs → fiat VES; USDC/SOL → cripto).
+- Si **no tiene** un método compatible, el paso **se bloquea** con un mensaje y enlace a **Perfil → Pagos**.
+- Al crear, los datos de pago se **copian** del método elegido (endpoint `/api/metodos-pago`).
+
+### Verificado
+- Build limpio; E2E 4/4 (el endpoint de prueba crea un método cripto para el flujo).
+
 ## [0.0.38] — 2026-05-30 — Formulario de método de pago pulido y enfoque VES/USD
 
 ### Cambiado

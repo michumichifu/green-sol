@@ -35,10 +35,8 @@ test("flujo autenticado: dashboard con tasas y crear un san", async ({
   await page.getByLabel(/Meta por turno/).fill("100");
   await page.getByRole("button", { name: "Mensual" }).click();
   await page.getByRole("button", { name: /Siguiente/ }).click();
-  // Paso 6: método de pago (Solana → dirección de wallet)
-  await page
-    .getByLabel(/dirección de wallet/i)
-    .fill("SoLanaWa11etAddr1111111111111111111111111");
+  // Paso 6: elegir el método de pago del perfil (Wallet E2E)
+  await page.getByRole("button", { name: /Wallet E2E/ }).click();
   await page.getByRole("button", { name: /Siguiente/ }).click();
   // Paso 7: crear
   await page.getByRole("button", { name: /Crear ahorro/ }).click();

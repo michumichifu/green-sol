@@ -44,23 +44,28 @@ export async function crearRecolecta(
   const aportePorPersona =
     tipo === "san" && cupoMiembros ? monto / cupoMiembros : null;
 
-  // Datos de pago del organizador (a dónde pagan los participantes).
-  const s = (k: string) => String(formData.get(k) ?? "").trim() || null;
-  const metodoPago = s("metodoPago");
-  const datosPago = metodoPago
-    ? {
+  // Datos de pago: se copian del método de pago elegido en el perfil.
+  const metodoPagoId = String(formData.get("metodoPagoId") ?? "").trim();
+  let datosPago = undefined;
+  if (metodoPagoId) {
+    const mp = await prisma.metodoPago.findFirst({
+      where: { id: metodoPagoId, usuarioId: usuario.id },
+    });
+    if (mp) {
+      datosPago = {
         create: {
-          tipo: metodoPago,
-          banco: s("banco"),
-          tipoCuenta: s("tipoCuenta"),
-          numeroCuenta: s("numeroCuenta"),
-          titular: s("titular"),
-          cedula: s("cedula"),
-          telefono: s("telefono"),
-          wallet: s("wallet"),
+          tipo: mp.categoria === "cripto" ? "wallet" : mp.metodo,
+          banco: mp.banco,
+          tipoCuenta: mp.tipoCuenta,
+          numeroCuenta: mp.numeroCuenta,
+          titular: mp.titular,
+          cedula: mp.cedula,
+          telefono: mp.telefono,
+          wallet: mp.wallet,
         },
-      }
-    : undefined;
+      };
+    }
+  }
 
   const recolecta = await prisma.recolecta.create({
     data: {
