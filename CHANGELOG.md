@@ -4,6 +4,26 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.21] — 2026-05-30 — Nivel en la cabecera, lista negra de palabras y arreglo del Input
+
+### Corregido
+- **Error de consola de Base UI** ("changing the default value of an uncontrolled FieldControl"): el formulario de datos del perfil pasó a **componente controlado**; los inputs con `defaultValue` del panel admin usan `key` estable.
+
+### Cambiado (cabecera)
+- **Logo más grande** y **sin el texto "Green Sol"**; la cabecera **baja** según el área segura (notch).
+- Junto al logo, **etiqueta redondeada con el nivel actual** ("Nivel 1 · Nuevo") que lleva a tu recompensa.
+
+### Cambiado (niveles)
+- Los niveles ahora se muestran como **"Nivel N · Nombre"** (número + rol) en cabecera, perfil, recompensa y dashboard, para que generen identidad.
+
+### Añadido (restricciones)
+- **Lista negra de palabras** para nombre, apellido y nombre de usuario (bloquea intentos de falsa autoridad: admin, organizador, soporte, etc.). Validada en **registro** y en **edición de perfil**.
+- **El super-admin queda exento** (puede usar, p. ej., el usuario "admin").
+- Nueva pestaña **Restricciones** en el panel super-admin para editar las listas por campo.
+
+### Verificado
+- Build limpio; **E2E 4/4**.
+
 ## [0.0.20] — 2026-05-30 — Navegación nueva (Pagos/Perfil), puntos y niveles, sin scroll fantasma
 
 ### Corregido

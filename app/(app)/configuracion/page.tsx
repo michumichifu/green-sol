@@ -2,15 +2,14 @@ import { Shield, Mail } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import {
-  actualizarPerfil,
   agregarMetodoPago,
   eliminarMetodoPago,
 } from "@/app/(app)/perfil/actions";
 import { PanelTabs } from "@/components/panel-tabs";
 import { ToggleAdmin } from "@/components/toggle-admin";
+import { FormDatos } from "@/components/form-datos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 const TIPOS_PAGO = [
   { id: "efectivo", label: "Efectivo (USD)" },
@@ -48,41 +47,12 @@ export default async function ConfiguracionPage({
         inicial={inicial}
       >
         {/* Datos */}
-        <form action={actualizarPerfil} className="space-y-3">
-          <div className="space-y-1">
-            <Label>Correo</Label>
-            <Input defaultValue={usuario!.correo} disabled />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <Label htmlFor="nombre">Nombre</Label>
-              <Input
-                id="nombre"
-                name="nombre"
-                defaultValue={usuario!.nombre ?? ""}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="apellido">Apellido</Label>
-              <Input
-                id="apellido"
-                name="apellido"
-                defaultValue={usuario!.apellido ?? ""}
-              />
-            </div>
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="nombreUsuario">Nombre de usuario</Label>
-            <Input
-              id="nombreUsuario"
-              name="nombreUsuario"
-              defaultValue={usuario!.nombreUsuario ?? ""}
-            />
-          </div>
-          <Button type="submit" variant="outline">
-            Guardar datos
-          </Button>
-        </form>
+        <FormDatos
+          correo={usuario!.correo}
+          nombre={usuario!.nombre ?? ""}
+          apellido={usuario!.apellido ?? ""}
+          nombreUsuario={usuario!.nombreUsuario ?? ""}
+        />
 
         {/* Pagos */}
         <section className="space-y-3">

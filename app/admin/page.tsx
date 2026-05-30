@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { obtenerConfigSmtp, obtenerConfigApp } from "@/lib/config";
-import { cambiarRol, guardarSmtp, guardarAppConfig } from "./actions";
+import { obtenerRestriccionesTexto } from "@/lib/restricciones";
+import {
+  cambiarRol,
+  guardarSmtp,
+  guardarAppConfig,
+  guardarRestricciones,
+} from "./actions";
 import { PanelTabs } from "@/components/panel-tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -134,6 +140,7 @@ export default async function AdminPage() {
     obtenerConfigSmtp(),
     obtenerConfigApp(),
   ]);
+  const restricciones = await obtenerRestriccionesTexto();
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
@@ -144,7 +151,9 @@ export default async function AdminPage() {
         </Link>
       </div>
 
-      <PanelTabs tabs={["Métricas", "Usuarios", "SMTP", "App"]}>
+      <PanelTabs
+        tabs={["Métricas", "Usuarios", "Restricciones", "SMTP", "App"]}
+      >
         {/* Métricas */}
         <div className="space-y-6">
           <section className="space-y-3">
@@ -255,6 +264,50 @@ export default async function AdminPage() {
           </ul>
         </section>
 
+        {/* Restricciones */}
+        <section className="space-y-3">
+          <h2 className="text-sm font-semibold">Restricciones de palabras</h2>
+          <p className="text-xs text-muted-foreground">
+            Palabras separadas por coma. Se bloquean en cuentas de usuario (tú,
+            como super-admin, quedas exento).
+          </p>
+          <form action={guardarRestricciones} className="space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="r_nombre">Nombre</Label>
+              <textarea
+                id="r_nombre"
+                name="nombre"
+                rows={2}
+                defaultValue={restricciones.nombre}
+                className="w-full rounded-md border bg-background p-2 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="r_apellido">Apellido</Label>
+              <textarea
+                id="r_apellido"
+                name="apellido"
+                rows={2}
+                defaultValue={restricciones.apellido}
+                className="w-full rounded-md border bg-background p-2 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="r_usuario">Nombre de usuario</Label>
+              <textarea
+                id="r_usuario"
+                name="nombreUsuario"
+                rows={2}
+                defaultValue={restricciones.nombreUsuario}
+                className="w-full rounded-md border bg-background p-2 text-sm"
+              />
+            </div>
+            <Button type="submit" variant="outline">
+              Guardar restricciones
+            </Button>
+          </form>
+        </section>
+
         {/* SMTP */}
         <section className="space-y-3">
           <h2 className="text-sm font-semibold">Configuración de correo (SMTP)</h2>
@@ -266,6 +319,7 @@ export default async function AdminPage() {
               <div key={clave} className="space-y-1">
                 <Label htmlFor={clave}>{label}</Label>
                 <Input
+                  key={`${clave}-${smtp[clave] ?? ""}`}
                   id={clave}
                   name={clave}
                   defaultValue={smtp[clave] ?? ""}
@@ -291,6 +345,7 @@ export default async function AdminPage() {
             <div className="space-y-1">
               <Label htmlFor="APP_NOMBRE">Nombre de la app</Label>
               <Input
+                key={`nombre-${app.APP_NOMBRE ?? ""}`}
                 id="APP_NOMBRE"
                 name="APP_NOMBRE"
                 defaultValue={app.APP_NOMBRE ?? ""}
@@ -311,6 +366,7 @@ export default async function AdminPage() {
             <div className="space-y-1">
               <Label htmlFor="APP_CORREO_CONTACTO">Correo de contacto</Label>
               <Input
+                key={`correo-${app.APP_CORREO_CONTACTO ?? ""}`}
                 id="APP_CORREO_CONTACTO"
                 name="APP_CORREO_CONTACTO"
                 type="email"
@@ -322,6 +378,7 @@ export default async function AdminPage() {
               <div className="space-y-1">
                 <Label htmlFor="APP_LOGO_URL">URL del logo</Label>
                 <Input
+                  key={`logo-${app.APP_LOGO_URL ?? ""}`}
                   id="APP_LOGO_URL"
                   name="APP_LOGO_URL"
                   defaultValue={app.APP_LOGO_URL ?? ""}
@@ -331,6 +388,7 @@ export default async function AdminPage() {
               <div className="space-y-1">
                 <Label htmlFor="APP_FAVICON_URL">URL del favicon</Label>
                 <Input
+                  key={`favicon-${app.APP_FAVICON_URL ?? ""}`}
                   id="APP_FAVICON_URL"
                   name="APP_FAVICON_URL"
                   defaultValue={app.APP_FAVICON_URL ?? ""}

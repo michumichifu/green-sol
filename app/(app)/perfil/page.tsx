@@ -69,7 +69,9 @@ export default async function PerfilPage() {
 
         <div className="mt-4 flex items-center justify-between rounded-2xl bg-gradient-to-br from-brand to-brand-2 p-3 text-white">
           <div>
-            <p className="text-[11px] text-white/80">Nivel</p>
+            <p className="text-[11px] text-white/80">
+              Nivel {nivel.actual.indice + 1}
+            </p>
             <p className="font-bold">{nivel.actual.nombre}</p>
           </div>
           <div className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5">

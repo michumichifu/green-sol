@@ -5,6 +5,7 @@ import type { Rol } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { guardarConfig, CLAVES_APP } from "@/lib/config";
+import { CLAVES_BLACKLIST } from "@/lib/restricciones";
 
 const ROLES: Rol[] = ["usuario", "admin_grupo", "super_admin"];
 const CLAVES_SMTP = [
@@ -48,5 +49,22 @@ export async function guardarAppConfig(formData: FormData): Promise<void> {
     const valor = String(formData.get(clave) ?? "").trim();
     await guardarConfig(clave, valor);
   }
+  revalidatePath("/admin");
+}
+
+export async function guardarRestricciones(formData: FormData): Promise<void> {
+  if (!(await esAdmin())) return;
+  await guardarConfig(
+    CLAVES_BLACKLIST.nombre,
+    String(formData.get("nombre") ?? "").trim(),
+  );
+  await guardarConfig(
+    CLAVES_BLACKLIST.apellido,
+    String(formData.get("apellido") ?? "").trim(),
+  );
+  await guardarConfig(
+    CLAVES_BLACKLIST.nombreUsuario,
+    String(formData.get("nombreUsuario") ?? "").trim(),
+  );
   revalidatePath("/admin");
 }

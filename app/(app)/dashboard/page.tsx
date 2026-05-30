@@ -52,7 +52,7 @@ export default async function DashboardPage() {
               <Star className="size-3.5 fill-gold text-gold" /> {nivel.puntos}
             </span>
             <span className="text-[10px] text-white/80">
-              Nivel {nivel.actual.nombre}
+              Nivel {nivel.actual.indice + 1} · {nivel.actual.nombre}
             </span>
           </Link>
         </div>

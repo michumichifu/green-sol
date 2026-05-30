@@ -7,6 +7,7 @@ import { hashContrasena, verificarContrasena } from "@/lib/auth/password";
 import { crearYEnviarOtp, validarOtp } from "@/lib/auth/otp";
 import { crearSesion, cerrarSesion, obtenerUsuario } from "@/lib/auth/session";
 import { debeMostrarOnboarding } from "@/lib/onboarding";
+import { validarRestricciones } from "@/lib/restricciones";
 import {
   registroCompletoSchema,
   loginSchema,
@@ -44,6 +45,13 @@ export async function registrarse(
   const { correo, contrasena, nombre, apellido, nombreUsuario, pais } =
     datos.data;
   const correoLower = correo.toLowerCase();
+
+  const errorRest = await validarRestricciones({
+    nombre,
+    apellido,
+    nombreUsuario,
+  });
+  if (errorRest) return { error: errorRest };
 
   const existente = await prisma.usuario.findUnique({
     where: { correo: correoLower },

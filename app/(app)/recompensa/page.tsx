@@ -25,7 +25,8 @@ export default async function RecompensaPage() {
           <span className="text-sm text-white/80">puntos</span>
         </div>
         <p className="mt-1 text-sm font-medium">
-          Nivel <span className="font-bold">{nivel.actual.nombre}</span>
+          Nivel {nivel.actual.indice + 1} ·{" "}
+          <span className="font-bold">{nivel.actual.nombre}</span>
         </p>
 
         {nivel.siguiente ? (

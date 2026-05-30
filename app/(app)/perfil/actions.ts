@@ -4,28 +4,43 @@ import { revalidatePath } from "next/cache";
 import type { TipoMetodoPago } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
+import { validarRestricciones } from "@/lib/restricciones";
 
 function str(v: FormDataEntryValue | null): string | null {
   const s = String(v ?? "").trim();
   return s || null;
 }
 
-export async function actualizarPerfil(formData: FormData): Promise<void> {
+export type EstadoPerfil = { error?: string; ok?: boolean };
+
+export async function actualizarPerfil(
+  _estado: EstadoPerfil,
+  formData: FormData,
+): Promise<EstadoPerfil> {
   const usuario = await obtenerUsuario();
-  if (!usuario) return;
+  if (!usuario) return { error: "Tu sesión expiró." };
+
+  const nombre = str(formData.get("nombre"));
+  const apellido = str(formData.get("apellido"));
+  const nombreUsuario = str(formData.get("nombreUsuario"));
+
+  // El super-admin queda exento de la lista negra de palabras.
+  if (usuario.rol !== "super_admin") {
+    const err = await validarRestricciones({ nombre, apellido, nombreUsuario });
+    if (err) return { error: err };
+  }
+
   try {
     await prisma.usuario.update({
       where: { id: usuario.id },
-      data: {
-        nombre: str(formData.get("nombre")),
-        apellido: str(formData.get("apellido")),
-        nombreUsuario: str(formData.get("nombreUsuario")),
-      },
+      data: { nombre, apellido, nombreUsuario },
     });
   } catch {
-    // nombre de usuario duplicado
+    return { error: "Ese nombre de usuario ya está en uso." };
   }
+  revalidatePath("/configuracion");
   revalidatePath("/perfil");
+  return { ok: true };
 }
 
 const TIPOS: TipoMetodoPago[] = [

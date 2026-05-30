@@ -16,19 +16,30 @@ type Noti = {
 export function AppHeader({
   notis,
   noLeidas,
+  nivelNum,
+  nivelNombre,
 }: {
   notis: Noti[];
   noLeidas: number;
+  nivelNum: number;
+  nivelNombre: string;
 }) {
   const [verNotis, setVerNotis] = useState(false);
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/90 px-4 py-3 backdrop-blur">
-      <Link href="/dashboard" className="flex items-center gap-2">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/green-sol-logo.svg" alt="" className="size-7" />
-        <span className="font-semibold">Green Sol</span>
-      </Link>
+    <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/90 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.85rem)] backdrop-blur">
+      <div className="flex items-center gap-2.5">
+        <Link href="/dashboard" aria-label="Inicio">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/green-sol-logo.svg" alt="Green Sol" className="size-9" />
+        </Link>
+        <Link
+          href="/recompensa"
+          className="rounded-full border border-brand/30 bg-brand/5 px-2.5 py-1 text-xs font-semibold text-brand"
+        >
+          Nivel {nivelNum} · {nivelNombre}
+        </Link>
+      </div>
 
       <button
         type="button"
