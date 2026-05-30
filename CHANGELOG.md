@@ -4,6 +4,15 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.24] — 2026-05-30 — Calculadora rediseñada (clara y sin confusión)
+
+### Cambiado
+- **Calculadora más clara:** primero eliges la **moneda** (Bolívares, **Dólar BCV**, USDT, Solana), luego el **monto** con el **símbolo de la moneda como prefijo** (Bs, $, USDT, SOL) y su **cotización de hoy** debajo; abajo, las **conversiones** a las otras tres monedas con su símbolo.
+- Etiquetas **solo por moneda** y "Dólar BCV" explícito (ya no el ambiguo "BCV"). Se quitó el euro y la redacción confusa.
+
+### Verificado
+- Build limpio; E2E 4/4.
+
 ## [0.0.23] — 2026-05-30 — Logo de la cabecera más grande y ajustado
 
 ### Cambiado

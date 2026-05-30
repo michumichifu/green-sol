@@ -4,96 +4,149 @@ import { useState } from "react";
 import type { Tasas } from "@/lib/rates/cache";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 const MONEDAS = [
-  { id: "usdc", label: "USDC / USD" },
-  { id: "sol", label: "SOL" },
-  { id: "bs_bcv", label: "Bs (BCV)" },
-  { id: "bs_usdt", label: "Bs (USDT)" },
+  { id: "bs", nombre: "Bolívares", simbolo: "Bs" },
+  { id: "bcv", nombre: "Dólar BCV", simbolo: "$" },
+  { id: "usdt", nombre: "USDT", simbolo: "USDT" },
+  { id: "sol", nombre: "Solana", simbolo: "SOL" },
 ] as const;
 type Moneda = (typeof MONEDAS)[number]["id"];
 
 function fmt(n: number) {
-  return n.toLocaleString("es-VE", { maximumFractionDigits: 4 });
-}
-
-function toUsd(
-  n: number,
-  moneda: Moneda,
-  t: { bcv: number; usdt: number; sol: number },
-): number {
-  switch (moneda) {
-    case "usdc":
-      return n;
-    case "sol":
-      return n * t.sol;
-    case "bs_bcv":
-      return t.bcv ? n / t.bcv : 0;
-    case "bs_usdt":
-      return t.usdt ? n / t.usdt : 0;
-  }
-}
-
-function Fila({ label, valor }: { label: string; valor: string }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="font-semibold">{valor}</span>
-    </div>
-  );
+  return n.toLocaleString("es-VE", {
+    maximumFractionDigits: n !== 0 && Math.abs(n) < 1 ? 6 : 2,
+  });
 }
 
 export function Calculadora({ tasas }: { tasas: Tasas }) {
   const [monto, setMonto] = useState("1");
-  const [moneda, setMoneda] = useState<Moneda>("usdc");
+  const [moneda, setMoneda] = useState<Moneda>("bs");
   const n = Number(monto) || 0;
 
-  const bcv = tasas.bcv?.usd ?? 0;
-  const usdt = tasas.usdt?.promedio ?? 0;
-  const sol = tasas.sol?.usd ?? 0;
+  const bcv = tasas.bcv?.usd ?? 0; // Bs por dólar BCV
+  const usdt = tasas.usdt?.promedio ?? 0; // Bs por USDT (paralelo)
+  const sol = tasas.sol?.usd ?? 0; // USD por SOL
+  const usdtBs = usdt || bcv; // referencia en Bs para cripto (cae a BCV si no hay USDT)
 
-  const usd = toUsd(n, moneda, { bcv, usdt, sol });
+  // Valor de 1 unidad de cada moneda en bolívares.
+  const valorBs: Record<Moneda, number> = {
+    bs: 1,
+    bcv,
+    usdt: usdtBs,
+    sol: sol * usdtBs,
+  };
+
+  const convertir = (destino: Moneda): number | null => {
+    const vo = valorBs[moneda];
+    const vd = valorBs[destino];
+    if (!vo || !vd) return null;
+    return (n * vo) / vd;
+  };
+
+  const cotizacion = (): string => {
+    switch (moneda) {
+      case "bs":
+        return `BCV: Bs ${fmt(bcv)} · USDT: Bs ${fmt(usdt)}`;
+      case "bcv":
+        return `1 $ BCV = Bs ${fmt(bcv)}`;
+      case "usdt":
+        return `1 USDT = Bs ${fmt(usdtBs)}`;
+      case "sol":
+        return `1 SOL = $ ${fmt(sol)}`;
+    }
+  };
+
+  const actual = MONEDAS.find((m) => m.id === moneda)!;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {/* 1. Elegir moneda */}
       <div className="space-y-2">
-        <Label htmlFor="monto">Monto</Label>
-        <Input
-          id="monto"
-          type="number"
-          inputMode="decimal"
-          value={monto}
-          onChange={(e) => setMonto(e.target.value)}
-        />
+        <p className="text-sm font-medium">¿Qué moneda quieres convertir?</p>
+        <div className="grid grid-cols-2 gap-2">
+          {MONEDAS.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => setMoneda(m.id)}
+              className={cn(
+                "flex items-center gap-2.5 rounded-xl border p-3 text-left transition-colors",
+                moneda === m.id
+                  ? "border-brand bg-brand/5"
+                  : "hover:border-brand/40",
+              )}
+            >
+              <span
+                className={cn(
+                  "flex size-9 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold",
+                  moneda === m.id
+                    ? "bg-brand text-white"
+                    : "bg-muted text-muted-foreground",
+                )}
+              >
+                {m.simbolo}
+              </span>
+              <span className="text-sm font-medium">{m.nombre}</span>
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="flex flex-wrap gap-2">
-        {MONEDAS.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            onClick={() => setMoneda(m.id)}
+
+      {/* 2. Monto con símbolo + cotización */}
+      <div className="space-y-1.5">
+        <label htmlFor="monto" className="text-sm font-medium">
+          Monto en {actual.nombre}
+        </label>
+        <div className="relative">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-brand">
+            {actual.simbolo}
+          </span>
+          <Input
+            id="monto"
+            type="number"
+            inputMode="decimal"
+            value={monto}
+            onChange={(e) => setMonto(e.target.value)}
             className={cn(
-              "rounded-full border px-3 py-1 text-sm",
-              moneda === m.id
-                ? "border-brand bg-brand/10 text-brand"
-                : "text-muted-foreground",
+              "h-11 text-base",
+              actual.simbolo.length > 2 ? "pl-14" : "pl-10",
             )}
-          >
-            {m.label}
-          </button>
-        ))}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Cotización de hoy · {cotizacion()}
+        </p>
       </div>
-      <div className="space-y-2 rounded-xl border bg-card p-4">
-        <Fila label="USDC / USD" valor={fmt(usd)} />
-        <Fila label="SOL" valor={sol ? fmt(usd / sol) : "—"} />
-        <Fila label="Bs (BCV)" valor={bcv ? fmt(usd * bcv) : "—"} />
-        <Fila label="Bs (USDT)" valor={usdt ? fmt(usd * usdt) : "—"} />
+
+      {/* 3. Resultados */}
+      <div className="space-y-2">
+        <p className="text-sm font-medium">Equivale a</p>
+        {MONEDAS.filter((m) => m.id !== moneda).map((m) => {
+          const v = convertir(m.id);
+          return (
+            <div
+              key={m.id}
+              className="flex items-center justify-between rounded-xl border bg-card p-3.5"
+            >
+              <span className="flex items-center gap-2.5">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-[11px] font-bold text-muted-foreground">
+                  {m.simbolo}
+                </span>
+                <span className="text-sm font-medium">{m.nombre}</span>
+              </span>
+              <span className="font-bold">
+                {v === null ? "—" : `${m.simbolo} ${fmt(v)}`}
+              </span>
+            </div>
+          );
+        })}
       </div>
+
       {!tasas.actualizado && (
         <p className="text-xs text-muted-foreground">
-          Aún no hay tasas cargadas. Se actualizan automáticamente; en desarrollo,
-          ejecuta el cron de tasas.
+          Aún no hay tasas cargadas. Se actualizan automáticamente; en
+          desarrollo, ejecuta el cron de tasas.
         </p>
       )}
     </div>
