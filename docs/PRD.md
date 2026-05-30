@@ -1,6 +1,6 @@
 # PRD — Green Sol
 
-> Proyecto del Solana Vibe Bootcamp (Venezuela). App para **gestionar el ahorro en grupo de forma transparente** (san, bolso, pote, vaca) y dividir cuentas, con **reputación de usuarios**. Método tradicional o cripto sobre Solana, sin que la app custodie dinero a la fuerza. **La finalidad es servir de puente al ahorro en cripto** para la comunidad hispana.
+> Proyecto del Solana Vibe Bootcamp (Venezuela). App para **gestionar el ahorro en grupo de forma transparente** (san/bolso/susi por turnos, o pote/vaca por meta) y dividir cuentas, con **reputación de usuarios**. Método tradicional o cripto sobre Solana, sin que la app custodie dinero a la fuerza. **La finalidad es servir de puente al ahorro en cripto** para la comunidad hispana.
 
 - **Versión:** 0.7 (núcleo del MVP **construido y verificado**: bloques 0–6, app v0.0.9). Estado de desarrollo en [CHANGELOG.md](../CHANGELOG.md); diseño en [superpowers/specs/2026-05-29-green-sol-mvp-design.md](superpowers/specs/2026-05-29-green-sol-mvp-design.md).
 - **Fecha:** 2026-05-30

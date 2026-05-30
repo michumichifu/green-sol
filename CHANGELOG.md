@@ -4,6 +4,11 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.11] — 2026-05-30 — Hidratación: suppressHydrationWarning en el body
+
+### Corregido
+- Warning de hidratación en el `<body>` causado por **extensiones del navegador** (ColorZilla `cz-shortcut-listen`, LanguageTool): añadido `suppressHydrationWarning` al `<body>`. No era un bug de la app (el servidor responde 200 y la DB funciona).
+
 ## [0.0.10] — 2026-05-30 — Logos de marca en la app
 
 ### Añadido
