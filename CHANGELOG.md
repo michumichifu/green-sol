@@ -4,6 +4,15 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.36] — 2026-05-30 — Cimientos y plan del rediseño de métodos de pago
+
+### Añadido
+- `lib/monedas.ts`: monedas fiat (LatAm + USD) con prefijo/nombre/país (buscable) y los métodos por moneda (VES: transferencia/pago móvil; USD: efectivo/Zelle/Zinli/WalyTech/banco) + cripto (USDC/SOL).
+- `docs/PLAN_METODOS_PAGO.md`: diseño completo del nuevo flujo — el organizador **selecciona** un método de pago de su Perfil (no llena datos en el asistente); métodos por categoría fiat/cripto → moneda → método; **wallet cripto principal** (predefinida, no editable, llega con la integración cripto) + **externas con alias**; prohibición de datos de terceros/empresas.
+
+### Pendiente
+- Migrar el modelo `MetodoPago` y la UI del Perfil; luego el asistente del san pasa a seleccionar de ahí (con bloqueo si no hay método compatible).
+
 ## [0.0.35] — 2026-05-30 — Asistente: paso de método de pago del organizador
 
 ### Añadido
