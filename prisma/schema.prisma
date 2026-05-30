@@ -20,6 +20,9 @@ model Usuario {
   apellido         String?
   nombreUsuario    String?        @unique
   fotoUrl          String?
+  pais             String?
+  monedaPreferida  String?
+  onboardingVisto  Boolean        @default(false)
   creadoEn         DateTime       @default(now())
   sesiones         Sesion[]
   codigosOtp       CodigoOtp[]

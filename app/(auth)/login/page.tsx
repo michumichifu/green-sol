@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { iniciarSesion, type EstadoAuth } from "../actions";
+import { CampoContrasena } from "@/components/campo-contrasena";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,21 +13,25 @@ export default function LoginPage() {
     iniciarSesion,
     {},
   );
+  const [contrasena, setContrasena] = useState("");
 
   return (
     <form action={accion} className="space-y-4">
       <h1 className="text-2xl font-bold">Iniciar sesión</h1>
       <div className="space-y-2">
-        <Label htmlFor="correo">Correo</Label>
-        <Input id="correo" name="correo" type="email" required autoComplete="email" />
+        <Label htmlFor="identificador">Correo o usuario</Label>
+        <Input
+          id="identificador"
+          name="identificador"
+          autoComplete="username"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="contrasena">Contraseña</Label>
-        <Input
-          id="contrasena"
+        <CampoContrasena
           name="contrasena"
-          type="password"
-          required
+          value={contrasena}
+          onChange={setContrasena}
           autoComplete="current-password"
         />
       </div>

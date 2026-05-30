@@ -4,6 +4,19 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.12] — 2026-05-30 — Registro por fases, onboarding y animación
+
+### Añadido
+- **Registro en 2 fases:** (1) correo + contraseña + **confirmar contraseña**; (2) nombre, apellido, **nombre de usuario** y **país**.
+- **Campo de contraseña** con ícono de ojito (mostrar/ocultar) y de **generar contraseña**, dentro del mismo campo.
+- **Login por correo O nombre de usuario**.
+- **País → preselecciona la moneda** (Latinoamérica + EE.UU.; Venezuela con tratamiento especial). Modelo: `pais`, `monedaPreferida`, `onboardingVisto`.
+- **Onboarding** tras el registro, con infografía: los 2 tipos de ahorro (san/susi por turnos — destacado; vaca/pote por meta), dividir cuentas y calculadora.
+- **Animación de carga** (logo con oscilación suave) en las pantallas de auth.
+
+### Verificado
+- Build limpio; **E2E 4/4** (incluye el registro por fases); unitarios 6/6.
+
 ## [0.0.11] — 2026-05-30 — Hidratación: suppressHydrationWarning en el body
 
 ### Corregido

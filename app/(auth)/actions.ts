@@ -5,8 +5,13 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { hashContrasena, verificarContrasena } from "@/lib/auth/password";
 import { crearYEnviarOtp, validarOtp } from "@/lib/auth/otp";
-import { crearSesion, cerrarSesion } from "@/lib/auth/session";
-import { registroSchema, loginSchema, otpSchema } from "@/lib/validations/auth";
+import { crearSesion, cerrarSesion, obtenerUsuario } from "@/lib/auth/session";
+import {
+  registroCompletoSchema,
+  loginSchema,
+  otpSchema,
+} from "@/lib/validations/auth";
+import { paisPorCodigo } from "@/lib/paises";
 
 const PENDIENTE = "greensol_pendiente";
 
@@ -25,28 +30,49 @@ export async function registrarse(
   _estado: EstadoAuth,
   formData: FormData,
 ): Promise<EstadoAuth> {
-  const datos = registroSchema.safeParse({
+  const datos = registroCompletoSchema.safeParse({
     correo: formData.get("correo"),
     contrasena: formData.get("contrasena"),
+    confirmar: formData.get("confirmar"),
+    nombre: formData.get("nombre"),
+    apellido: formData.get("apellido"),
+    nombreUsuario: formData.get("nombreUsuario"),
+    pais: formData.get("pais"),
   });
   if (!datos.success) return { error: datos.error.issues[0].message };
-  const { correo, contrasena } = datos.data;
+  const { correo, contrasena, nombre, apellido, nombreUsuario, pais } =
+    datos.data;
+  const correoLower = correo.toLowerCase();
 
-  const existente = await prisma.usuario.findUnique({ where: { correo } });
+  const existente = await prisma.usuario.findUnique({
+    where: { correo: correoLower },
+  });
   if (existente?.correoVerificado) {
     return { error: "Ese correo ya está registrado." };
   }
+  const userExistente = await prisma.usuario.findUnique({
+    where: { nombreUsuario },
+  });
+  if (userExistente && userExistente.correo !== correoLower) {
+    return { error: "Ese nombre de usuario ya está en uso." };
+  }
 
   const hash = await hashContrasena(contrasena);
+  const monedaPreferida = paisPorCodigo(pais)?.moneda ?? "USD";
+  const data = {
+    hashContrasena: hash,
+    nombre,
+    apellido,
+    nombreUsuario,
+    pais,
+    monedaPreferida,
+  };
   const usuario = existente
-    ? await prisma.usuario.update({
-        where: { correo },
-        data: { hashContrasena: hash },
-      })
-    : await prisma.usuario.create({ data: { correo, hashContrasena: hash } });
+    ? await prisma.usuario.update({ where: { correo: correoLower }, data })
+    : await prisma.usuario.create({ data: { correo: correoLower, ...data } });
 
-  await crearYEnviarOtp(usuario.id, correo, "verificacion");
-  await guardarPendiente(correo);
+  await crearYEnviarOtp(usuario.id, correoLower, "verificacion");
+  await guardarPendiente(correoLower);
   redirect("/verificar");
 }
 
@@ -73,7 +99,7 @@ export async function verificar(
   });
   (await cookies()).delete(PENDIENTE);
   await crearSesion(usuario.id);
-  redirect("/dashboard");
+  redirect(usuario.onboardingVisto ? "/dashboard" : "/onboarding");
 }
 
 export async function reenviarCodigo(): Promise<void> {
@@ -88,31 +114,49 @@ export async function iniciarSesion(
   formData: FormData,
 ): Promise<EstadoAuth> {
   const datos = loginSchema.safeParse({
-    correo: formData.get("correo"),
+    identificador: formData.get("identificador"),
     contrasena: formData.get("contrasena"),
   });
   if (!datos.success) return { error: datos.error.issues[0].message };
-  const { correo, contrasena } = datos.data;
+  const { identificador, contrasena } = datos.data;
 
-  const usuario = await prisma.usuario.findUnique({ where: { correo } });
+  const usuario = await prisma.usuario.findFirst({
+    where: {
+      OR: [
+        { correo: identificador.toLowerCase() },
+        { nombreUsuario: identificador },
+      ],
+    },
+  });
   if (
     !usuario?.hashContrasena ||
     !(await verificarContrasena(usuario.hashContrasena, contrasena))
   ) {
-    return { error: "Correo o contraseña incorrectos." };
+    return { error: "Correo/usuario o contraseña incorrectos." };
   }
 
   if (!usuario.correoVerificado) {
-    await crearYEnviarOtp(usuario.id, correo, "verificacion");
-    await guardarPendiente(correo);
+    await crearYEnviarOtp(usuario.id, usuario.correo, "verificacion");
+    await guardarPendiente(usuario.correo);
     redirect("/verificar");
   }
 
   await crearSesion(usuario.id);
-  redirect("/dashboard");
+  redirect(usuario.onboardingVisto ? "/dashboard" : "/onboarding");
 }
 
 export async function cerrarSesionAction() {
   await cerrarSesion();
   redirect("/login");
+}
+
+export async function marcarOnboardingVisto() {
+  const usuario = await obtenerUsuario();
+  if (usuario) {
+    await prisma.usuario.update({
+      where: { id: usuario.id },
+      data: { onboardingVisto: true },
+    });
+  }
+  redirect("/dashboard");
 }

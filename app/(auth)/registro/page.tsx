@@ -3,7 +3,9 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { registrarse, type EstadoAuth } from "../actions";
-import { generarContrasena } from "@/lib/auth/generar-contrasena";
+import { registroPaso1Schema } from "@/lib/validations/auth";
+import { PAISES } from "@/lib/paises";
+import { CampoContrasena } from "@/components/campo-contrasena";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,56 +15,124 @@ export default function RegistroPage() {
     registrarse,
     {},
   );
+  const [paso, setPaso] = useState(1);
+  const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
-  const [mostrar, setMostrar] = useState(false);
+  const [confirmar, setConfirmar] = useState("");
+  const [errorPaso1, setErrorPaso1] = useState<string | null>(null);
+
+  function continuar() {
+    const r = registroPaso1Schema.safeParse({ correo, contrasena, confirmar });
+    if (!r.success) {
+      setErrorPaso1(r.error.issues[0].message);
+      return;
+    }
+    setErrorPaso1(null);
+    setPaso(2);
+  }
 
   return (
     <form action={accion} className="space-y-4">
-      <h1 className="text-2xl font-bold">Crear cuenta</h1>
-      <div className="space-y-2">
-        <Label htmlFor="correo">Correo</Label>
-        <Input id="correo" name="correo" type="email" required autoComplete="email" />
+      <div>
+        <h1 className="text-2xl font-bold">
+          {paso === 1 ? "Crear cuenta" : "Cuéntanos de ti"}
+        </h1>
+        <p className="text-xs text-muted-foreground">Paso {paso} de 2</p>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="contrasena">Contraseña</Label>
-        <Input
-          id="contrasena"
-          name="contrasena"
-          type={mostrar ? "text" : "password"}
-          value={contrasena}
-          onChange={(e) => setContrasena(e.target.value)}
-          required
-          autoComplete="new-password"
-        />
-        <div className="flex items-center justify-between text-xs">
-          <button
-            type="button"
-            className="text-muted-foreground underline"
-            onClick={() => setMostrar((m) => !m)}
-          >
-            {mostrar ? "Ocultar" : "Mostrar"}
-          </button>
-          <button
-            type="button"
-            className="text-brand underline"
-            onClick={() => {
-              setContrasena(generarContrasena());
-              setMostrar(true);
-            }}
-          >
-            Generar contraseña
-          </button>
+
+      <div className={paso === 1 ? "space-y-4" : "hidden"}>
+        <div className="space-y-2">
+          <Label htmlFor="correo">Correo</Label>
+          <Input
+            id="correo"
+            name="correo"
+            type="email"
+            value={correo}
+            onChange={(e) => setCorreo(e.target.value)}
+            autoComplete="email"
+          />
         </div>
-        <p className="text-xs text-muted-foreground">
-          Mínimo 8 caracteres, con una mayúscula, un número y un símbolo.
-        </p>
+        <div className="space-y-2">
+          <Label htmlFor="contrasena">Contraseña</Label>
+          <CampoContrasena
+            name="contrasena"
+            value={contrasena}
+            onChange={setContrasena}
+            autoComplete="new-password"
+            conGenerador
+          />
+          <p className="text-xs text-muted-foreground">
+            Mínimo 8, con una mayúscula, un número y un símbolo.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="confirmar">Confirmar contraseña</Label>
+          <CampoContrasena
+            name="confirmar"
+            value={confirmar}
+            onChange={setConfirmar}
+            autoComplete="new-password"
+          />
+        </div>
+        {errorPaso1 && (
+          <p className="text-sm text-destructive">{errorPaso1}</p>
+        )}
+        <Button type="button" className="w-full" onClick={continuar}>
+          Continuar
+        </Button>
       </div>
-      {estado.error && (
-        <p className="text-sm text-destructive">{estado.error}</p>
-      )}
-      <Button type="submit" className="w-full" disabled={pendiente}>
-        {pendiente ? "Creando..." : "Crear cuenta"}
-      </Button>
+
+      <div className={paso === 2 ? "space-y-4" : "hidden"}>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2">
+            <Label htmlFor="nombre">Nombre</Label>
+            <Input id="nombre" name="nombre" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="apellido">Apellido</Label>
+            <Input id="apellido" name="apellido" />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="nombreUsuario">Nombre de usuario</Label>
+          <Input
+            id="nombreUsuario"
+            name="nombreUsuario"
+            placeholder="con el que te identificarás"
+            autoComplete="username"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="pais">País</Label>
+          <select
+            id="pais"
+            name="pais"
+            defaultValue=""
+            className="w-full rounded-md border bg-background p-2 text-sm"
+          >
+            <option value="" disabled>
+              Elige tu país
+            </option>
+            {PAISES.map((p) => (
+              <option key={p.codigo} value={p.codigo}>
+                {p.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+        {estado.error && (
+          <p className="text-sm text-destructive">{estado.error}</p>
+        )}
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={() => setPaso(1)}>
+            Atrás
+          </Button>
+          <Button type="submit" className="flex-1" disabled={pendiente}>
+            {pendiente ? "Creando..." : "Crear cuenta"}
+          </Button>
+        </div>
+      </div>
+
       <p className="text-center text-sm text-muted-foreground">
         ¿Ya tienes cuenta?{" "}
         <Link href="/login" className="text-brand underline">
