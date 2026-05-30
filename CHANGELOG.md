@@ -4,6 +4,11 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.25] — 2026-05-30 — Calculadora compacta (cabe en una pantalla)
+
+### Cambiado
+- Selección de moneda en **una sola fila** (4 chips), filas de resultados más finas y menos espacios; se quitó el texto descriptivo. Objetivo: que todo entre **sin scroll**.
+
 ## [0.0.24] — 2026-05-30 — Calculadora rediseñada (clara y sin confusión)
 
 ### Cambiado
