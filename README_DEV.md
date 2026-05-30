@@ -34,5 +34,13 @@ App full-stack en Next.js (App Router, TypeScript) + Tailwind v4 + shadcn/ui, da
 - Verde de marca: `#0E9F6E` (light) / `#1DCB8E` (dark). Dorado (reputación): `#C8881A` / `#F5C84B`.
 - Modo light por defecto. Tokens en `app/globals.css` (`--brand`, `--brand-2`, `--gold`, y `--primary` = verde).
 
+## Crear el primer super-admin
+Tras registrarte y verificar tu cuenta, promuévela por SQL:
+```bash
+podman exec greensol-db-dev psql -U greensol -d greensol \
+  -c "UPDATE \"Usuario\" SET rol='super_admin' WHERE correo='TU_CORREO';"
+```
+Luego entra a `/admin` (gestión de usuarios y configuración de SMTP).
+
 ## Seguridad
-- Secretos y credenciales **solo** en `.env.local` / variables de entorno y `_privado/`, nunca en el repo.
+- Secretos y credenciales **solo** en `.env` / variables de entorno y `_privado/`, nunca en el repo.

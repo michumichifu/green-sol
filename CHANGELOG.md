@@ -4,6 +4,16 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.7] — 2026-05-30 — Bloque 6: panel super-admin
+
+### Añadido
+- Panel `/admin` protegido (solo rol `super_admin`).
+- **Gestión de usuarios:** listar y cambiar rol (usuario / admin_grupo / super_admin).
+- **Configuración de SMTP** desde el panel (modelo `ConfiguracionApp`): el mailer usa la config de la base de datos y, si no, las variables de entorno.
+
+### Notas
+- Para crear el primer super-admin, promover la cuenta por SQL (ver `README_DEV.md`).
+
 ## [0.0.6] — 2026-05-30 — Bloque 5: reputación y perfil
 
 ### Añadido

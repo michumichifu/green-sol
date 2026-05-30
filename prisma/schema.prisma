@@ -148,6 +148,11 @@ model Valoracion {
   @@unique([recolectaId, deUsuarioId, aUsuarioId])
 }
 
+model ConfiguracionApp {
+  clave String @id
+  valor String
+}
+
 enum Rol {
   usuario
   admin_grupo
