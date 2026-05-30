@@ -4,6 +4,16 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.8] — 2026-05-30 — Correcciones críticas (botón de inicio, deploy Vercel, hidratación)
+
+### Corregido
+- **Botón de la pantalla de inicio:** ahora lleva a registro/login (estaba como placeholder sin conectar, "no hacía nada").
+- **Deploy en Vercel:** se ejecuta `prisma generate` en `build` y `postinstall`. Los deploys posteriores a v0.0.1 fallaban porque el cliente de Prisma no se generaba en Vercel.
+- **Hidratación:** `suppressHydrationWarning` en `<html>` para silenciar el warning que causan extensiones del navegador (LanguageTool).
+
+### Importante
+- En Vercel, además del build, hay que configurar `DATABASE_URL` apuntando a una base de datos accesible (la del VPS) para que el runtime funcione.
+
 ## [0.0.7] — 2026-05-30 — Bloque 6: panel super-admin
 
 ### Añadido
