@@ -11,14 +11,16 @@ datasource db {
 }
 
 model Usuario {
-  id               String      @id @default(cuid())
-  correo           String      @unique
+  id               String         @id @default(cuid())
+  correo           String         @unique
   hashContrasena   String?
-  correoVerificado Boolean     @default(false)
-  rol              Rol         @default(usuario)
-  creadoEn         DateTime    @default(now())
+  correoVerificado Boolean        @default(false)
+  rol              Rol            @default(usuario)
+  creadoEn         DateTime       @default(now())
   sesiones         Sesion[]
   codigosOtp       CodigoOtp[]
+  organizadas      Recolecta[]    @relation("organizadas")
+  participaciones  Participante[]
 }
 
 model Sesion {
@@ -40,6 +42,52 @@ model CodigoOtp {
   creadoEn   DateTime     @default(now())
 }
 
+model TasaCache {
+  id          String   @id @default(cuid())
+  fuente      String   @unique // "bcv" | "usdt" | "sol"
+  datos       Json
+  actualizado DateTime @default(now())
+}
+
+model Recolecta {
+  id            String          @id @default(cuid())
+  tipo          TipoRecolecta
+  nombre        String
+  visibilidad   Visibilidad     @default(privado)
+  metodo        MetodoRecolecta @default(tradicional)
+  moneda        String          @default("USD")
+  montoAporte   Float? // san: aporte por turno
+  meta          Float? // vaca: meta total
+  estado        EstadoRecolecta @default(abierta)
+  organizadorId String
+  organizador   Usuario         @relation("organizadas", fields: [organizadorId], references: [id])
+  creadaEn      DateTime        @default(now())
+  participantes Participante[]
+  turnos        Turno[]
+}
+
+model Participante {
+  id          String    @id @default(cuid())
+  recolectaId String
+  recolecta   Recolecta @relation(fields: [recolectaId], references: [id], onDelete: Cascade)
+  usuarioId   String
+  usuario     Usuario   @relation(fields: [usuarioId], references: [id])
+  unidoEn     DateTime  @default(now())
+  turno       Turno?
+
+  @@unique([recolectaId, usuarioId])
+}
+
+model Turno {
+  id             String       @id @default(cuid())
+  recolectaId    String
+  recolecta      Recolecta    @relation(fields: [recolectaId], references: [id], onDelete: Cascade)
+  participanteId String       @unique
+  participante   Participante @relation(fields: [participanteId], references: [id], onDelete: Cascade)
+  posicion       Int
+  cobrado        Boolean      @default(false)
+}
+
 enum Rol {
   usuario
   admin_grupo
@@ -51,9 +99,23 @@ enum OtpProposito {
   reset_contrasena
 }
 
-model TasaCache {
-  id          String   @id @default(cuid())
-  fuente      String   @unique // "bcv" | "usdt" | "sol"
-  datos       Json
-  actualizado DateTime @default(now())
+enum TipoRecolecta {
+  san
+  vaca
+}
+
+enum Visibilidad {
+  privado
+  publico
+}
+
+enum MetodoRecolecta {
+  tradicional
+  cripto
+}
+
+enum EstadoRecolecta {
+  abierta
+  activa
+  cerrada
 }

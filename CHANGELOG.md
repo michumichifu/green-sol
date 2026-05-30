@@ -4,6 +4,18 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.4] — 2026-05-30 — Bloque 3: sanes y vacas
+
+### Añadido
+- Modelos `Recolecta`, `Participante`, `Turno` (con enums de tipo, visibilidad, método y estado) y relaciones con `Usuario`.
+- **Crear recolecta:** san (por turnos) o vaca (meta común), pública o privada, método tradicional.
+- **Listado** de las recolectas del usuario y **detalle** con participantes.
+- **Invitar** participantes por correo (organizador).
+- **Sorteo de turnos** al azar para el san (genera el orden e inicia la recolecta).
+
+### Pendiente
+- Reportes de pago, mora y notificaciones (bloque 4); método cripto (bloque cripto).
+
 ## [0.0.3] — 2026-05-30 — Bloque 2: tasas en vivo y calculadora
 
 ### Añadido
