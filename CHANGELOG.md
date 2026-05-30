@@ -4,7 +4,13 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
-## [0.0.25] — 2026-05-30 — Calculadora compacta (cabe en una pantalla)
+## [0.0.26] — 2026-05-30 — Calculadora: compactar sin perder contenido
+
+### Corregido
+- Revierte el exceso de v0.0.25 (que quitaba textos): se **restauran** la descripción, "¿Qué moneda quieres convertir?", "Cotización de hoy ·" y "Equivale a" con resultados legibles. Solo se compactan **espacios y tamaños** (chips de moneda en una fila, filas de resultado un poco más finas).
+
+### Verificado
+- Build limpio.
 
 ### Cambiado
 - Selección de moneda en **una sola fila** (4 chips), filas de resultados más finas y menos espacios; se quitó el texto descriptivo. Objetivo: que todo entre **sin scroll**.

@@ -6,6 +6,10 @@ export default async function CalculadoraPage() {
   return (
     <main className="mx-auto max-w-md space-y-4 px-5 py-5">
       <h1 className="text-xl font-bold">Calculadora</h1>
+      <p className="text-sm text-muted-foreground">
+        Elige la moneda y el monto; abajo verás la conversión con las tasas de
+        hoy.
+      </p>
       <Calculadora tasas={tasas} />
     </main>
   );

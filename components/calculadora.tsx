@@ -60,39 +60,44 @@ export function Calculadora({ tasas }: { tasas: Tasas }) {
   const actual = MONEDAS.find((m) => m.id === moneda)!;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* 1. Elegir moneda */}
-      <div className="grid grid-cols-4 gap-2">
-        {MONEDAS.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            onClick={() => setMoneda(m.id)}
-            className={cn(
-              "flex flex-col items-center gap-1 rounded-xl border px-1 py-2 transition-colors",
-              moneda === m.id ? "border-brand bg-brand/5" : "hover:border-brand/40",
-            )}
-          >
-            <span
+      <div className="space-y-2">
+        <p className="text-sm font-medium">¿Qué moneda quieres convertir?</p>
+        <div className="grid grid-cols-4 gap-2">
+          {MONEDAS.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => setMoneda(m.id)}
               className={cn(
-                "flex size-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold",
+                "flex flex-col items-center gap-1 rounded-xl border px-1 py-2 transition-colors",
                 moneda === m.id
-                  ? "bg-brand text-white"
-                  : "bg-muted text-muted-foreground",
+                  ? "border-brand bg-brand/5"
+                  : "hover:border-brand/40",
               )}
             >
-              {m.simbolo}
-            </span>
-            <span className="text-center text-[10px] font-medium leading-tight">
-              {m.nombre}
-            </span>
-          </button>
-        ))}
+              <span
+                className={cn(
+                  "flex size-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold",
+                  moneda === m.id
+                    ? "bg-brand text-white"
+                    : "bg-muted text-muted-foreground",
+                )}
+              >
+                {m.simbolo}
+              </span>
+              <span className="text-center text-[11px] font-medium leading-tight">
+                {m.nombre}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* 2. Monto con símbolo + cotización */}
-      <div className="space-y-1">
-        <label htmlFor="monto" className="text-xs font-medium text-muted-foreground">
+      <div className="space-y-1.5">
+        <label htmlFor="monto" className="text-sm font-medium">
           Monto en {actual.nombre}
         </label>
         <div className="relative">
@@ -111,26 +116,28 @@ export function Calculadora({ tasas }: { tasas: Tasas }) {
             )}
           />
         </div>
-        <p className="text-[11px] text-muted-foreground">{cotizacion()}</p>
+        <p className="text-xs text-muted-foreground">
+          Cotización de hoy · {cotizacion()}
+        </p>
       </div>
 
       {/* 3. Resultados */}
-      <div className="space-y-1.5">
-        <p className="text-xs font-medium text-muted-foreground">Equivale a</p>
+      <div className="space-y-2">
+        <p className="text-sm font-medium">Equivale a</p>
         {MONEDAS.filter((m) => m.id !== moneda).map((m) => {
           const v = convertir(m.id);
           return (
             <div
               key={m.id}
-              className="flex items-center justify-between rounded-xl border bg-card px-3 py-2.5"
+              className="flex items-center justify-between rounded-xl border bg-card p-3"
             >
-              <span className="flex items-center gap-2">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-[10px] font-bold text-muted-foreground">
+              <span className="flex items-center gap-2.5">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-[10px] font-bold text-muted-foreground">
                   {m.simbolo}
                 </span>
                 <span className="text-sm font-medium">{m.nombre}</span>
               </span>
-              <span className="text-sm font-bold">
+              <span className="font-bold">
                 {v === null ? "—" : `${m.simbolo} ${fmt(v)}`}
               </span>
             </div>
@@ -139,8 +146,9 @@ export function Calculadora({ tasas }: { tasas: Tasas }) {
       </div>
 
       {!tasas.actualizado && (
-        <p className="text-[11px] text-muted-foreground">
-          Aún no hay tasas cargadas. En desarrollo, ejecuta el cron de tasas.
+        <p className="text-xs text-muted-foreground">
+          Aún no hay tasas cargadas. Se actualizan automáticamente; en
+          desarrollo, ejecuta el cron de tasas.
         </p>
       )}
     </div>
