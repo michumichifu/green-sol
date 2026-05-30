@@ -13,24 +13,24 @@ type Metodo = {
 
 const METODOS: Metodo[] = [
   {
-    img: "/onboarding-2-san.svg",
+    img: "/metodo-san.svg",
     icon: RefreshCw,
     tag: "Por turnos",
     tagColor: "bg-brand/10 text-brand",
-    titulo: "San · Susi · Bolso",
+    titulo: "San · Susi",
     resumen:
-      "Todos aportan cada ronda y, por turno, a cada quien le toca recibir el bote completo.",
+      "Todos aportan cada ronda (semanal, quincenal o mensual) y, por turno, a cada quien le toca recibir el bote completo.",
     provecho:
       "Ideal para ahorrar con disciplina y recibir un monto grande de golpe, sin intereses.",
   },
   {
-    img: "/onboarding-3-vaca.svg",
+    img: "/metodo-bolso.svg",
     icon: Target,
     tag: "Meta común",
     tagColor: "bg-gold/15 text-gold",
-    titulo: "Vaca · Pote",
+    titulo: "Bolso · Vaca · Pote",
     resumen:
-      "Varias personas juntan dinero hacia una meta; al llegar, se reparte o se gasta. Sin turnos.",
+      "Todos juntan dinero en un mismo lugar hacia una meta o fin concreto; al llegar, se usa o se reparte. Sin turnos.",
     provecho:
       "Perfecto para un regalo, un viaje o una compra grande entre amigos o familia.",
   },

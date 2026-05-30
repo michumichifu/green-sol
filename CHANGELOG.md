@@ -4,6 +4,12 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.28] — 2026-05-30 — Guía: imágenes y reclasificación (bolso = meta común)
+
+### Cambiado
+- En la guía, el **bolso** pasa al grupo de **meta común**: "Bolso · Vaca · Pote" (todos juntan en un lugar con una finalidad). El método **por turnos** queda como "San · Susi".
+- Imágenes nuevas: `metodo-san.svg` (San/Susi) y `metodo-bolso.svg` (Bolso/Vaca/Pote).
+
 ## [0.0.27] — 2026-05-30 — Sección Ahorros reestructurada: unirse, compartir y guía
 
 ### Cambiado
