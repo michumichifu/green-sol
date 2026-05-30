@@ -1,48 +1,39 @@
 "use client";
 
 import { useRef, useState } from "react";
-import {
-  X,
-  Repeat,
-  Target,
-  Split,
-  Calculator,
-  ChevronLeft,
-  ChevronRight,
-  type LucideIcon,
-} from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { cerrarOnboarding } from "@/app/(auth)/actions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-type Tarjeta = { icon?: LucideIcon; logo?: boolean; titulo: string; texto: string };
+type Tarjeta = { img: string; titulo: string; texto: string };
 
 const TARJETAS: Tarjeta[] = [
   {
-    logo: true,
+    img: "/onboarding-1-intro.svg",
     titulo: "¿Cómo funciona Green Sol?",
     texto:
       "Una plataforma para llevar tus métodos de ahorro —solo o en grupo— de forma fácil, rápida y transparente.",
   },
   {
-    icon: Repeat,
+    img: "/onboarding-2-san.svg",
     titulo: "San, susi o bolso — por turnos",
     texto:
       "Todos aportan por turno y, por turno, a cada quien le toca recibir el bote completo. Ahorro disciplinado: es el corazón de la app.",
   },
   {
-    icon: Target,
+    img: "/onboarding-3-vaca.svg",
     titulo: "Vaca o pote — meta común",
     texto:
       "Juntan dinero hacia una meta y luego se gasta o reparte. Sin turnos.",
   },
   {
-    icon: Split,
+    img: "/onboarding-4-dividir.svg",
     titulo: "Dividir una cuenta",
     texto: "Reparten un gasto entre varios; cada quien ve cuánto le toca.",
   },
   {
-    icon: Calculator,
+    img: "/onboarding-5-calculadora.svg",
     titulo: "Calculadora",
     texto: "Convierte entre Bs, USDC y SOL con las tasas del día.",
   },
@@ -87,23 +78,19 @@ export function CarruselOnboarding() {
         {TARJETAS.map((t, i) => (
           <section
             key={i}
-            className="flex w-full shrink-0 snap-center flex-col items-center justify-center gap-6 px-8 text-center"
+            className="flex w-full shrink-0 snap-center flex-col items-center justify-center gap-5 px-8 text-center"
           >
-            {t.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src="/green-sol-logo.svg"
-                alt="Green Sol"
-                className="size-28 drop-shadow-xl"
-                style={{ animation: "greensol-entrada 1.3s ease-out both" }}
-              />
-            ) : (
-              t.icon && (
-                <div className="flex size-24 items-center justify-center rounded-3xl bg-white/15 shadow-lg">
-                  <t.icon className="size-12" strokeWidth={1.8} />
-                </div>
-              )
-            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={t.img}
+              alt=""
+              className="h-52 w-52 object-contain drop-shadow-xl sm:h-60 sm:w-60"
+              style={
+                i === 0
+                  ? { animation: "greensol-drop 0.7s ease-out both" }
+                  : undefined
+              }
+            />
             <h2 className="text-2xl font-bold sm:text-3xl">{t.titulo}</h2>
             <p className="max-w-sm text-base leading-relaxed text-white/90">
               {t.texto}

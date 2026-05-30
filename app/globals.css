@@ -173,3 +173,15 @@
     transform: translateY(0) rotate(360deg);
   }
 }
+
+/* Caída suave (rápido→lento) para la infografía de la intro, sin giro. */
+@keyframes greensol-drop {
+  0% {
+    transform: translateY(-90px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

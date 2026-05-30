@@ -4,6 +4,15 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.16] — 2026-05-30 — Infografías del onboarding
+
+### Añadido
+- Las **5 infografías** (intro, san/susi/bolso, vaca/pote, dividir cuenta, calculadora) reemplazan los íconos en el carrusel.
+- La infografía de la intro entra con una **caída suave** (el giro tipo ruleta estaba pensado para el logo solo; en una infografía completa se quitó).
+
+### Pendiente (optimización)
+- Los SVG traen el arte embebido (~2 MB c/u). Para producción conviene convertirlos a WebP/PNG optimizado.
+
 ## [0.0.15] — 2026-05-30 — Animación de entrada del logo en el onboarding
 
 ### Añadido
