@@ -55,45 +55,57 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto max-w-md space-y-5 px-5 py-6">
       {/* Hero de bienvenida */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand to-brand-2 p-6 text-white shadow-lg shadow-brand/20">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand to-brand-2 p-5 text-white shadow-lg shadow-brand/20">
         <Sparkles className="absolute -right-4 -top-4 size-28 text-white/10" />
-        <p className="text-sm font-medium text-white/80">
-          ¡Hola{nombre ? `, ${nombre}` : ""}! 👋
-        </p>
-        <h1 className="mt-1 text-2xl font-bold leading-tight">
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-base font-semibold">
+            ¡Hola{nombre ? `, ${nombre}` : ""}! 👋
+          </p>
+          <div className="flex flex-col items-end gap-0.5">
+            <Estrellas valor={reputacion.estrellas} />
+            <span className="text-[10px] text-white/80">
+              {reputacion.total > 0
+                ? `${reputacion.estrellas} · ${reputacion.total} valoración(es)`
+                : "Sin valoraciones aún"}
+            </span>
+          </div>
+        </div>
+        <h1 className="mt-2 text-xl font-bold leading-tight">
           Tu ahorro, claro y en orden.
         </h1>
-        <div className="mt-4 flex items-center gap-2">
-          <Estrellas valor={reputacion.estrellas} />
-          <span className="text-xs text-white/80">
-            {reputacion.total > 0
-              ? `${reputacion.estrellas} · ${reputacion.total} valoración(es)`
-              : "Aún sin valoraciones"}
-          </span>
-        </div>
       </section>
 
       {/* Accesos rápidos */}
       <section className="grid grid-cols-2 gap-3">
         <Link
           href="/sanes/crear"
-          className="flex flex-col gap-2 rounded-2xl bg-brand p-4 text-white shadow-sm transition-transform active:scale-[0.98]"
+          className="flex items-center gap-3 rounded-2xl bg-brand p-3.5 text-white shadow-sm transition-transform active:scale-[0.98]"
         >
-          <span className="flex size-9 items-center justify-center rounded-full bg-white/20">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/20">
             <Plus className="size-5" />
           </span>
-          <span className="text-sm font-semibold">Nuevo ahorro</span>
-          <span className="text-xs text-white/80">San o vaca</span>
+          <span className="flex min-w-0 flex-col">
+            <span className="text-sm font-semibold leading-tight">
+              Nuevo ahorro
+            </span>
+            <span className="text-[11px] text-white/80">San o vaca</span>
+          </span>
         </Link>
         <Link
           href="/calculadora"
-          className="flex flex-col gap-2 rounded-2xl border bg-card p-4 shadow-sm transition-transform active:scale-[0.98]"
+          className="flex items-center gap-3 rounded-2xl border bg-card p-3.5 shadow-sm transition-transform active:scale-[0.98]"
         >
-          <span className="flex size-9 items-center justify-center rounded-full bg-brand/10 text-brand">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
             <Calculator className="size-5" />
           </span>
-          <span className="text-sm font-semibold">Calculadora</span>
-          <span className="text-xs text-muted-foreground">Bs · USDC · SOL</span>
+          <span className="flex min-w-0 flex-col">
+            <span className="text-sm font-semibold leading-tight">
+              Calculadora
+            </span>
+            <span className="truncate text-[11px] text-muted-foreground">
+              Bs · USDC · SOL
+            </span>
+          </span>
         </Link>
       </section>
 

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { Rol } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
-import { guardarConfig } from "@/lib/config";
+import { guardarConfig, CLAVES_APP } from "@/lib/config";
 
 const ROLES: Rol[] = ["usuario", "admin_grupo", "super_admin"];
 const CLAVES_SMTP = [
@@ -37,6 +37,16 @@ export async function guardarSmtp(formData: FormData): Promise<void> {
   for (const clave of CLAVES_SMTP) {
     const valor = String(formData.get(clave) ?? "").trim();
     if (valor) await guardarConfig(clave, valor);
+  }
+  revalidatePath("/admin");
+}
+
+export async function guardarAppConfig(formData: FormData): Promise<void> {
+  if (!(await esAdmin())) return;
+  for (const clave of CLAVES_APP) {
+    // Se guarda siempre (permite vaciar un campo).
+    const valor = String(formData.get(clave) ?? "").trim();
+    await guardarConfig(clave, valor);
   }
   revalidatePath("/admin");
 }

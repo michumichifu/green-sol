@@ -9,6 +9,14 @@ const CLAVES_SMTP = [
   "SMTP_SECURE",
 ] as const;
 
+export const CLAVES_APP = [
+  "APP_NOMBRE",
+  "APP_DESCRIPCION",
+  "APP_CORREO_CONTACTO",
+  "APP_LOGO_URL",
+  "APP_FAVICON_URL",
+] as const;
+
 export async function guardarConfig(clave: string, valor: string): Promise<void> {
   await prisma.configuracionApp.upsert({
     where: { clave },
@@ -20,6 +28,13 @@ export async function guardarConfig(clave: string, valor: string): Promise<void>
 export async function obtenerConfigSmtp(): Promise<Record<string, string>> {
   const filas = await prisma.configuracionApp.findMany({
     where: { clave: { in: [...CLAVES_SMTP] } },
+  });
+  return Object.fromEntries(filas.map((f) => [f.clave, f.valor]));
+}
+
+export async function obtenerConfigApp(): Promise<Record<string, string>> {
+  const filas = await prisma.configuracionApp.findMany({
+    where: { clave: { in: [...CLAVES_APP] } },
   });
   return Object.fromEntries(filas.map((f) => [f.clave, f.valor]));
 }

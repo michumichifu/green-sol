@@ -4,6 +4,28 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.19] — 2026-05-30 — Dashboard compacto, drawer pulido y panel super-admin con métricas
+
+### Cambiado (dashboard)
+- **Hero compacto:** "¡Hola, {nombre}!" con las **estrellitas y valoraciones a la derecha** en la misma línea (ahorra una línea).
+- **Accesos rápidos en horizontal:** ícono a la izquierda y título + subtítulo al lado (Nuevo ahorro / Calculadora), para subir la sección "Tus ahorros".
+
+### Cambiado (drawer de configuración)
+- **Deslizado suave** al abrir (derecha→izquierda) y fundido del fondo.
+- El contenido **baja** según el área segura del dispositivo (notch/cámara).
+- En "Tu cuenta" se muestra el **nombre de usuario** (`@usuario`) encima del correo.
+
+### Añadido (registro)
+- **Tooltip** en "Nombre de usuario" + ayuda: es tu apodo público (nombre o seudónimo).
+
+### Mejorado (panel super-admin)
+- **Responsive en móvil** y organizado en **pestañas**: Métricas · Usuarios · SMTP · App.
+- **Métricas reales:** usuarios (total, verificados, nuevos hoy/ayer/7d/30d), ahorros (recolectas, sanes/vacas activos, abiertas/cerradas), aportes confirmados (cantidad y monto), y rankings de **monedas**, **método de recolecta** y **métodos de pago** más usados.
+- **Configuración general de la app:** nombre, descripción, correo de contacto, URL de logo y favicon (claves `APP_*`).
+
+### Verificado
+- Build limpio; **E2E 4/4**.
+
 ## [0.0.18] — 2026-05-30 — Onboarding: "no volver a mostrar" y pantalla de carga
 
 ### Añadido

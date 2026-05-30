@@ -28,6 +28,7 @@ export default async function AppLayout({
     <div className="flex min-h-dvh flex-1 flex-col bg-muted/30">
       <AppHeader
         nombre={usuario.nombre ?? ""}
+        nombreUsuario={usuario.nombreUsuario ?? ""}
         correo={usuario.correo}
         esAdmin={usuario.rol === "super_admin"}
         notis={notisRaw}

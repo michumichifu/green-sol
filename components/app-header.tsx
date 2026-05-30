@@ -26,12 +26,14 @@ type Noti = {
 
 export function AppHeader({
   nombre,
+  nombreUsuario,
   correo,
   esAdmin,
   notis,
   noLeidas,
 }: {
   nombre: string;
+  nombreUsuario: string;
   correo: string;
   esAdmin: boolean;
   notis: Noti[];
@@ -81,7 +83,7 @@ export function AppHeader({
             className="fixed inset-0 z-40"
             onClick={() => setVerNotis(false)}
           />
-          <div className="absolute right-3 top-14 z-50 w-80 max-w-[calc(100vw-1.5rem)] rounded-xl border bg-card p-3 shadow-xl">
+          <div className="absolute right-3 top-14 z-50 w-80 max-w-[calc(100vw-1.5rem)] animate-in fade-in slide-in-from-top-2 rounded-xl border bg-card p-3 shadow-xl duration-200">
             <div className="mb-2 flex items-center justify-between">
               <span className="font-semibold">Avisos</span>
               {noLeidas > 0 && (
@@ -128,10 +130,10 @@ export function AppHeader({
       {verConfig && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/40"
+            className="fixed inset-0 z-40 bg-black/40 animate-in fade-in duration-300"
             onClick={() => setVerConfig(false)}
           />
-          <div className="fixed right-0 top-0 z-50 flex h-dvh w-80 max-w-[85vw] flex-col bg-background p-5 shadow-2xl">
+          <div className="fixed right-0 top-0 z-50 flex h-dvh w-80 max-w-[85vw] flex-col bg-background px-5 pb-5 shadow-2xl animate-in slide-in-from-right duration-300 ease-out pt-[calc(env(safe-area-inset-top)+2rem)]">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-lg font-semibold">Configuración</span>
               <button
@@ -144,6 +146,11 @@ export function AppHeader({
             </div>
             <div className="mb-4 rounded-xl border bg-muted/40 p-3">
               <p className="font-medium">{nombre || "Tu cuenta"}</p>
+              {nombreUsuario && (
+                <p className="text-xs font-medium text-brand">
+                  @{nombreUsuario}
+                </p>
+              )}
               <p className="text-xs text-muted-foreground">{correo}</p>
             </div>
             <nav className="flex flex-1 flex-col gap-1 text-sm">

@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
+import { Info } from "lucide-react";
 import { registrarse, type EstadoAuth } from "../actions";
 import { registroPaso1Schema } from "@/lib/validations/auth";
 import { PAISES } from "@/lib/paises";
@@ -94,13 +95,24 @@ export default function RegistroPage() {
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="nombreUsuario">Nombre de usuario</Label>
+          <Label htmlFor="nombreUsuario" className="flex items-center gap-1.5">
+            Nombre de usuario
+            <span
+              title="Tu nombre de usuario o seudónimo: así te verán las demás personas en la app."
+              className="inline-flex cursor-help"
+            >
+              <Info className="size-3.5 text-muted-foreground" />
+            </span>
+          </Label>
           <Input
             id="nombreUsuario"
             name="nombreUsuario"
-            placeholder="con el que te identificarás"
+            placeholder="seudónimo con el que te verán"
             autoComplete="username"
           />
+          <p className="text-xs text-muted-foreground">
+            Es tu apodo público; puede ser tu nombre o un seudónimo.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="pais">País</Label>
