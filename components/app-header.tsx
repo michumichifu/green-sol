@@ -29,9 +29,9 @@ export function AppHeader({
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/90 px-4 pb-3 pt-[max(2.75rem,calc(env(safe-area-inset-top)+0.6rem))] backdrop-blur">
       <div className="flex items-center gap-2.5">
-        <Link href="/dashboard" aria-label="Inicio">
+        <Link href="/dashboard" aria-label="Inicio" className="ml-0.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/green-sol-logo.svg" alt="Green Sol" className="size-9" />
+          <img src="/green-sol-logo.svg" alt="Green Sol" className="size-12" />
         </Link>
         <Link
           href="/recompensa"

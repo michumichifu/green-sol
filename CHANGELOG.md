@@ -4,6 +4,11 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.23] — 2026-05-30 — Logo de la cabecera más grande y ajustado
+
+### Cambiado
+- Logo superior **~30% más grande** (de 36 a 48 px), **2 px hacia la derecha** y centrado en vertical con la etiqueta de nivel.
+
 ## [0.0.22] — 2026-05-30 — Notch despejado y nombre de usuario con disponibilidad en vivo
 
 ### Corregido
