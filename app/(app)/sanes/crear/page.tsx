@@ -139,8 +139,8 @@ export default function CrearPage() {
                     </span>
                   </span>
                   <span className="block text-xs text-muted-foreground">
-                    Todos aportan cada ronda y, por turno, a cada quien le toca
-                    el bote completo.
+                    Cada ronda todos aportan a la vez; lo que rota es el cobro:
+                    por turno, a una persona le toca el bote completo.
                   </span>
                 </span>
               </button>
@@ -163,7 +163,8 @@ export default function CrearPage() {
                     </span>
                   </span>
                   <span className="block text-xs text-muted-foreground">
-                    Juntan dinero hacia una meta; al llegar, se usa o se reparte.
+                    Aportan para reunir entre todas y lograr un objetivo o meta
+                    común.
                   </span>
                 </span>
               </button>

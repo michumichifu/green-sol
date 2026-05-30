@@ -2,9 +2,9 @@
 
 > Proyecto del Solana Vibe Bootcamp (Venezuela). App para **gestionar el ahorro en grupo de forma transparente** (san/bolso/susi por turnos, o pote/vaca por meta) y dividir cuentas, con **reputación de usuarios**. Método tradicional o cripto sobre Solana, sin que la app custodie dinero a la fuerza. **La finalidad es servir de puente al ahorro en cripto** para la comunidad hispana.
 
-- **Versión:** 0.7 (núcleo del MVP **construido y verificado**: bloques 0–6, app v0.0.9). Estado de desarrollo en [CHANGELOG.md](../CHANGELOG.md); diseño en [superpowers/specs/2026-05-29-green-sol-mvp-design.md](superpowers/specs/2026-05-29-green-sol-mvp-design.md).
+- **Versión:** 0.9 (núcleo del MVP **construido y verificado**, app v0.0.30). Estado de desarrollo en [CHANGELOG.md](../CHANGELOG.md); diseño en [superpowers/specs/2026-05-29-green-sol-mvp-design.md](superpowers/specs/2026-05-29-green-sol-mvp-design.md).
 - **Fecha:** 2026-05-30
-- **Fase:** 1 — MVP en construcción. **Núcleo tradicional construido** (auth con OTP, sanes/vacas, tasas en vivo, calculadora, notificaciones, pagos, reputación, perfil, super-admin), verificado con build + tests unitarios + E2E (Playwright). Pendiente: capa cripto (bloque 7) y despliegue. Entrega de primera versión: **1 de junio de 2026, 5:30 p.m.**
+- **Fase:** 1 — MVP en construcción. **Núcleo tradicional construido** (auth con OTP, ahorros san/vaca con **asistente de creación por pasos**, **unirse por enlace/código**, tasas en vivo, calculadora, navegación de 5 pestañas con header de nivel y avisos, dashboard, pagos, **reputación por puntos y niveles**, perfil/configuración, **panel super-admin con métricas y restricciones**, onboarding), verificado con build + tests unitarios + E2E (Playwright). Pendiente: capa cripto (bloque 7), referidos, despliegue. Entrega de primera versión: **1 de junio de 2026, 5:30 p.m.**
 - **Nombre:** Green Sol (sol verde). Descartado: Cochino.
 
 Versión visual: [PRD.html](PRD.html). Técnica: [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md), [INTEGRACIONES_API.md](INTEGRACIONES_API.md) y [SEGURIDAD_Y_WALLETS.md](SEGURIDAD_Y_WALLETS.md).
@@ -47,9 +47,11 @@ Técnicamente, Green Sol es una **app híbrida con componente dApp**, no una dAp
 
 ## 4. Los tres tipos de recolecta
 
-- **San / bolso (rotativo) — gancho principal.** Aporte periódico y reparto por turnos. Ej.: 5 personas, cada una recibe $100; dura 5 semanas; cada semana todos aportan $20 y a uno le toca cobrar los $100. Quien cobra primero sigue aportando. Ahorro disciplinado y muy popular.
-- **Pote / vaca (meta común).** Todos aportan (igual o distinto) hasta llegar a una meta, sin fechas fijas, y luego se gasta o reparte.
-- **Dividir una cuenta (fase posterior).** Repartir un gasto entre varios; cada quien ve cuánto le toca.
+- **Susi · San · Bolso (por turnos) — gancho principal.** Los tres nombres son **lo mismo**: aporte periódico y reparto rotativo por turnos. Ej.: 5 personas, cada una recibe $100; dura 5 semanas; cada semana todos aportan $20 y a uno le toca cobrar los $100. Quien cobra primero sigue aportando. Ahorro disciplinado y muy popular. (En el modelo de datos es `tipo = san`.)
+- **Vaca · Pote (meta común).** Todos aportan (igual o distinto) hasta llegar a una meta, sin fechas fijas, y luego se gasta o reparte. (En el modelo de datos es `tipo = vaca`.)
+- **Dividir una cuenta (fase posterior).** Repartir un **gasto a pagar** entre varios; cada quien ve cuánto le toca. **No es ahorro**; aparece en la guía como método aparte y aún no está implementado como recolecta.
+
+> **Terminología (importante, ya aplicada en la app):** **San · Susi · Bolso = por turnos** (los tres son lo mismo); **Vaca · Pote = meta común**; **Dividir una cuenta = repartir un gasto** (no es ahorro).
 
 ## 5. Público o privado, y marketplace
 
@@ -99,13 +101,15 @@ Implementado con un **cron / scheduled job** (Vercel Cron). El WebSocket de USDT
 
 ## 8. Calculadora de cotizaciones
 
-Herramienta clave accesible desde la **barra de navegación** (sección 12). Convierte en ambos sentidos entre:
+Herramienta clave accesible desde la **barra de navegación** (sección 12). **Implementada** (`components/calculadora.tsx`): primero **eliges la moneda de origen** entre cuatro —**Bolívares**, **Dólar BCV**, **USDT** y **Solana** (la etiqueta "Dólar BCV" es explícita; **no hay euro**)— y escribes el monto con el **símbolo de la moneda como prefijo** (Bs, $, USDT, SOL). Debajo se muestra la **cotización del día** de esa moneda y, en tarjetas, las **conversiones a las otras tres**.
 
-- **Bolívares** a tasa **BCV**, **USDT** o **personalizada**.
-- **USDC** (≈ dólar digital).
-- **SOL** (a su precio del día vía DexScreener).
+Convierte en ambos sentidos:
 
-Es más completa que las calculadoras de tasas venezolanas habituales (que solo hacen Bs↔USD): aquí se suma USDC y SOL, leyendo del **caché global** (sección 7) para no consultar las APIs en cada cálculo. Ejemplos: "¿cuántos Bs son 20 USDT a tasa BCV?", "¿cuántos Bs equivale 1 SOL?", "¿cuánto SOL son 50 USDC?".
+- **Bolívares** ↔ dólar a tasa **BCV** y **USDT** (paralelo).
+- **Dólar BCV** (≈ dólar oficial / digital).
+- **SOL** (a su precio del día vía DexScreener; valorado en Bs vía USDT, con caída a BCV si no hay USDT).
+
+Es más completa que las calculadoras de tasas venezolanas habituales (que solo hacen Bs↔USD): aquí se suma SOL, leyendo del **caché global** (sección 7) para no consultar las APIs en cada cálculo. Ejemplos: "¿cuántos Bs son 20 USDT?", "¿cuántos Bs equivale 1 SOL?", "¿cuánto SOL son 50 dólares BCV?".
 
 ## 9. Turnos del san y mora
 
@@ -117,8 +121,20 @@ Es más completa que las calculadoras de tasas venezolanas habituales (que solo 
 Con dinero no se juega; saber con quién te metes es esencial.
 
 - Al **cerrar un bolso**, cada participante puede **valorar a los demás**: **manito arriba (+1)** o **manito abajo (−1)** y un **comentario** sobre la experiencia. Todo se almacena.
-- El perfil muestra la **puntuación** (positivos vs negativos) y su equivalente visual en **estrellitas** (atractivo y rápido de leer).
+- El perfil muestra la **puntuación** (positivos vs negativos) y su equivalente visual en **estrellitas**.
 - La reputación **baja por retrasos y mora**.
+
+**Puntos y niveles (estilo Cashea) — implementado.** Los **puntos = estrellitas** son un **acumulado** (las valoraciones positivas recibidas), **ya no un ratio de 5 estrellas**. Según los puntos, el usuario sube de **nivel** (lógica en `lib/reputacion.ts`, función `nivelPorReputacion`):
+
+| Nivel | Nombre | Puntos mínimos |
+| --- | --- | --- |
+| 1 | Nuevo | 0 |
+| 2 | Confiable | 5 |
+| 3 | Destacado | 15 |
+| 4 | Estrella | 30 |
+| 5 | Leyenda | 60 |
+
+El nivel se muestra como **"Nivel N · Nombre"** en el **header** (etiqueta enlazada a `/recompensa`), en el **hero del dashboard** y en la **tarjeta de identidad del perfil** (puntos + positivos/negativos). La página **`/recompensa`** detalla el progreso al siguiente nivel.
 - **Al unirse a un san**, se ve a el/los **organizador(es)** (pueden ser varios) y su historial: cuántos sanes han hecho, montos, cuántos **completados** vs **no concretados**, y de qué tipo (público/privado, tradicional/cripto, Bs/USDC/SOL). También se ve quién más se unió, su nombre/usuario y su reputación.
 - Aplica **incluso en planes privados**: ver quién entró y su puntuación.
 - Responsabilidad: la plataforma presta la herramienta y la transparencia; **organizar y cumplir es responsabilidad de los usuarios**.
@@ -127,16 +143,49 @@ Con dinero no se juega; saber con quién te metes es esencial.
 
 ## 11. Dashboard del usuario
 
-Pantalla principal con lo esencial de un vistazo:
+Pantalla principal (`app/(app)/dashboard/page.tsx`, ruta `/dashboard`), con lo esencial de un vistazo. **Implementada así:**
 
-- **Tasas del día** mostradas de forma **sutil** arriba de las tarjetas: BCV, USDT promedio y SOL/USDC, con su variación (del caché global, sección 7).
-- Si tiene **saldo** en su wallet (y cuánto), con equivalente en Bs.
-- En qué **bolsos / vacas / cuentas** está participando ahora, su estado y próximos vencimientos.
-- Su **reputación** (estrellitas) y accesos rápidos a crear o unirse.
+- **Hero de bienvenida:** saludo por nombre ("¡Hola, …!") y, a la derecha, **puntos y nivel** (estrellita + número de puntos + "Nivel N · Nombre", enlazado al perfil).
+- **Accesos rápidos:** dos tarjetas — **Nuevo ahorro** (`/sanes/crear`) y **Calculadora** (`/calculadora`).
+- **Tarjeta de tasas de hoy:** BCV, USDT y SOL/USDC del caché global (sección 7), con enlace a la calculadora.
+- **"Tus ahorros":** lista de las recolectas en las que participa (san por turnos / vaca meta común), con su estado; estado vacío que invita a crear el primero.
+- **Saldo de wallet:** pendiente de la capa cripto (fase 2); aún no se muestra.
+
+> El bloque de saldo en wallet con equivalente en Bs queda para la fase cripto.
 
 ## 12. Navegación (barra inferior)
 
-La app usa un **menú de navegación inferior** (bottom nav, estilo app móvil) con los botones clave. Set previsto (a afinar con referencias visuales): **Dashboard / Inicio**, **Sanes & Vacas**, **Calculadora**, **Notificaciones** (campanita) y **Perfil**. Diseño responsive: la barra inferior en móvil; en escritorio puede pasar a lateral o superior.
+La app usa un **menú de navegación inferior** (bottom nav, estilo app móvil). **Implementado** (`components/bottom-nav.tsx`) con **5 ítems**, "Inicio" al centro:
+
+| Orden | Ítem | Ruta | Ícono (Lucide) |
+| --- | --- | --- | --- |
+| 1 | Ahorro | `/sanes` | `Wallet` |
+| 2 | Pagos | `/pagos` | `CalendarClock` |
+| 3 | **Inicio** (centro) | `/dashboard` | `Home` |
+| 4 | Calculadora | `/calculadora` | `Calculator` |
+| 5 | Perfil | `/perfil` | `User` |
+
+**Header superior** (`components/app-header.tsx`, sticky): logo de Green Sol (a `/dashboard`), **etiqueta de nivel** ("Nivel N · Nombre", enlazada a `/recompensa`) y **campana de avisos** con contador de no leídos que abre un **panel desplegable** de notificaciones (últimas 8, "Marcar leídas", enlace a `/notificaciones`). Entre pestañas hay una **transición de fade** (`app/(app)/template.tsx`). Diseño responsive: la barra inferior en móvil; en escritorio puede pasar a lateral o superior.
+
+## 12b. Sección Ahorro: crear, unirse, compartir y guía (implementado)
+
+La pestaña **Ahorro** (`app/(app)/sanes/`, ruta `/sanes`) es el corazón funcional ya construido:
+
+- **Landing "Ahorros"** (`sanes/page.tsx`): título "Ahorros" (ya **no** se titula "Sanes & Vacas") con tres acciones — **Crear ahorro** (`/sanes/crear`), **Unirme** (`/sanes/unirse`) y **¿Cómo funciona el ahorro?** (`/sanes/guia`) — y la lista de "Tus ahorros" con estado vacío que invita a crear o unirse.
+
+- **Asistente de creación por pasos** (`sanes/crear/page.tsx`, con **barra de progreso**, 6 pasos):
+  1. **Tipo:** Susi·San·Bolso (por turnos) o Vaca·Pote (meta común).
+  2. **Nombre.**
+  3. **Visibilidad:** privado (solo invitación) o público (cualquiera puede unirse).
+  4. **Moneda:** Bs (tasa BCV), Bs (paralelo/USDT), USDT, USDC (Solana) o Solana — claves `bs_bcv`, `bs_usdt`, `usdt`, `usdc`, `sol` (`lib/validations/recolecta.ts`). El monto se escribe con el **símbolo de la moneda como prefijo**.
+  5. **Detalles según tipo:** el **san** pide **aporte por turno**, **frecuencia** (semanal/quincenal/mensual) y **nº de manos (personas)**, 2–50; la **vaca** pide la **meta**.
+  6. **Resumen y crear.**
+
+- **Unirse a un ahorro** (`sanes/unirse/page.tsx` + componente `unirse-ahorro.tsx`; acciones `buscarRecolecta` / `unirseARecolecta` en `sanes/actions.ts`): por **enlace o código**. El **código es el id de la recolecta** (cuid); la página acepta `?codigo=` para precargarlo. Al unirse se **notifica al organizador**.
+
+- **Compartir** (`components/compartir-ahorro.tsx`): en el detalle de la recolecta, muestra el **código**, botón de **copiar enlace** y **compartir nativo**.
+
+- **Guía visual** (`sanes/guia/page.tsx`): tarjetas con infografía por método —**San · Susi · Bolso** (por turnos), **Vaca · Pote** (meta común) y **Dividir una cuenta** (repartir un gasto)— cada una con "cómo aprovecharlo".
 
 ## 13. Notificaciones y avisos
 
@@ -167,12 +216,24 @@ Dos planos complementarios:
 - Sin cédula al inicio, para no poner barrera.
 - **A futuro (no MVP):** Google (OAuth) y TOTP/Google Authenticator.
 
-**Perfil y configuración (por pestañas):**
-- **Cuenta:** cambiar correo principal y contraseña.
-- **Perfil:** foto de perfil, nombre y apellido, **nombre de usuario** (campo adicional); nacionalidad y, si es venezolano, documento (cédula/pasaporte) y número.
-- **Datos de pago** (para cobrar/pagar en los sanes):
-  - **Tradicional:** efectivo (dólar físico), transferencia bancaria (Bs), pago móvil (Bs).
-  - **Cripto:** dirección de wallet **USDT** (ej. Binance) y/o wallet **Solana** (USDC/SOL) — se incentiva Solana para que haya consulta entre la wallet y la app (saldos, interacción en los sanes).
+**Onboarding** (`app/onboarding/`): tras el registro, un **carrusel a pantalla completa** con infografías explica los métodos de ahorro (incluye "San, susi o bolso — por turnos", correcto con la terminología actual), con **checkbox "no volver a mostrar más"** (persistido en `Usuario.onboardingCerrado`) y una **pantalla de carga con el logo**.
+
+**Perfil — hub** (`app/(app)/perfil/page.tsx`, ruta `/perfil`). Implementado como **centro de cuenta**:
+- **Tarjeta de identidad:** inicial/avatar, nombre, **@usuario**, **nivel** (Nivel N · Nombre) y **puntos**, con desglose de positivos/negativos.
+- **Menú:** **Tu recompensa** (`/recompensa`), **Tus datos** (`/configuracion?tab=datos`), **Métodos de pago** (`/configuracion?tab=pagos`), **Centro de ayuda** (`/ayuda`), **Configuración** (`/configuracion`), **Panel super-admin** (`/admin`, solo si el rol es `super_admin`) y **Cerrar sesión**.
+
+**Configuración — sección propia** (`app/(app)/configuracion/page.tsx`, ruta `/configuracion`). Dejó de ser un drawer; ahora es una página con **pestañas**:
+- **Datos:** correo, nombre, apellido y **nombre de usuario** (3–15 caracteres), con **validación de disponibilidad del nombre de usuario en vivo** (endpoint `app/api/usuario-disponible/route.ts`).
+- **Pagos (métodos):** efectivo (USD), transferencia (Bs), pago móvil, wallet USDT y wallet Solana — agregar/quitar.
+- **Seguridad:** cambio de contraseña y 2FA (próximamente).
+- **Avisos:** preferencias de correos/marketing (próximamente).
+- Para el super-admin, un **toggle a super-admin** (`components/toggle-admin.tsx`) lleva al panel.
+
+A futuro (fase cripto): direcciones de wallet **USDT** y **Solana** (USDC/SOL) como datos de pago, para consulta entre la wallet y la app.
+
+**Restricciones / lista negra de palabras** (`lib/restricciones.ts`): bloquea palabras de **falsa autoridad** (admin, organizador, soporte, moderador, root, oficial, "green sol", etc.) en **nombre, apellido y nombre de usuario**, tanto en el **registro** como al **editar el perfil**. El **super-admin queda exento** y puede **editar las listas** desde su panel (claves `BLACKLIST_NOMBRE`, `BLACKLIST_APELLIDO`, `BLACKLIST_USUARIO`).
+
+**Centro de ayuda** (`/ayuda`) y **Recompensa** (`/recompensa`) son páginas nuevas ya creadas.
 
 **KYC:** no para registrarse, pero **sí para funciones de dinero**, vía proveedor tercero (documento + selfie/video), no manual.
 
@@ -180,12 +241,15 @@ Dos planos complementarios:
 
 ## 15. Panel super-admin
 
-Acceso interno separado para los responsables. Panel **completo**:
-- **Gestión de usuarios:** ver todos los usuarios, **editarlos**, y **crear o invitar** nuevos (incluido otro super-admin).
-- **Recolectas:** administrar sanes/vacas; ver métodos de pago y documentos subidos (cédula, pasaporte, comprobantes); comprobaciones manuales anti-estafa.
-- **Configuración de correo (SMTP):** cargar los datos del **servidor SMTP** de la aplicación; de ahí salen las automatizaciones (verificación de cuenta, OTP, reseteo de contraseña, avisos).
-- **Notificaciones:** enviar a un usuario o globales (sección 13).
-- Mayor control de seguridad.
+Acceso interno separado (`app/admin/page.tsx`, ruta `/admin`), **responsive**, organizado en **5 pestañas** (`components/panel-tabs.tsx`):
+
+- **Métricas (reales, desde la base de datos):** usuarios **totales**, **verificados** y **nuevos** (hoy, ayer, 7 días, 30 días); recolectas totales, **sanes y vacas activos**, abiertas y cerradas; **aportes confirmados** y monto sumado; y **rankings** por **moneda**, por **método de recolecta** (tradicional/cripto) y por **método de pago**.
+- **Usuarios:** listado (hasta 100, más recientes primero) para ver y gestionar; base para editar/invitar (incluido otro super-admin).
+- **Restricciones:** editar la **lista negra de palabras** de nombre, apellido y nombre de usuario (sección 14).
+- **SMTP:** cargar los datos del **servidor SMTP** (host, puerto, usuario, contraseña, remitente, seguro), de donde salen verificación de cuenta, OTP, reseteo de contraseña y avisos. Claves `SMTP_*`.
+- **App:** configuración general de la aplicación — **nombre, descripción, correo de contacto, URL de logo y URL de favicon**. Claves `APP_*`.
+
+Toda la configuración se persiste en la tabla `ConfiguracionApp` (`clave`/`valor`; ver [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md)). **Notificaciones** (enviar a un usuario o globales) y comprobaciones anti-estafa de documentos quedan dentro del alcance del panel (sección 13), parcial/pendiente.
 
 > **Configuración de integraciones (futuro, no MVP):** desde el panel, el super-admin podrá almacenar y gestionar **API keys** —de tasas y de **IA** (Claude, Gemini, DeepSeek)— en variables de entorno/secretos cifrados, asignar su **uso** (solo super-admin o global para usuarios) y **elegir el modelo** por sección, de cara a integraciones de IA futuras. Es una idea concreta para más adelante; no se construye ahora.
 
@@ -215,7 +279,7 @@ Acceso interno separado para los responsables. Panel **completo**:
 ## 19. Roadmap por fases
 
 - **Fase 0 — Documentación. Completada.**
-- **Fase 1 — MVP gancho (tradicional). Núcleo construido y verificado (app v0.0.9).** Bloques 0–6 hechos (build + tests unitarios + E2E con Playwright): bienvenida, registro/login (correo + clave segura + **OTP por correo**), dashboard con **tasas en vivo**, **calculadora**, **bottom nav**, crear san/bolso y pote/vaca (público/privado), reporte de pagos, turnos, **notificaciones (toasts + campanita)**, **reputación** (manito +/−, estrellitas) y **super-admin** (usuarios + SMTP). Entrega de primera versión: **1 de junio de 2026, 5:30 p.m.** Pendiente de esta fase: **despliegue** (Vercel + base de datos en el VPS).
+- **Fase 1 — MVP gancho (tradicional). Núcleo construido y verificado (app v0.0.30).** Hecho (build + tests unitarios + E2E con Playwright): bienvenida y **onboarding** con carrusel, registro/login (correo + clave segura + **OTP por correo**), **navegación de 5 pestañas** con header de nivel y avisos, **dashboard** con **tasas en vivo**, **calculadora** rediseñada (Bs · Dólar BCV · USDT · Solana), sección **Ahorro** con **asistente de creación por pasos** y **unirse por enlace/código** + compartir + guía, **pagos** (por confirmar/rechazados/activos), turnos, **notificaciones (toasts + campanita)**, **reputación por puntos y niveles** (Nuevo → Leyenda), **perfil/configuración** (con validación de usuario en vivo y restricciones de palabras) y **panel super-admin** con **métricas, usuarios, restricciones, SMTP y configuración de app**. Entrega de primera versión: **1 de junio de 2026, 5:30 p.m.** Pendiente de esta fase: **sistema de referidos** (ver [IDEAS_FUTURAS.md](IDEAS_FUTURAS.md)), **calendario de pagos con fechas**, y **despliegue** (Vercel + base de datos en el VPS).
 - **Fase 2 — Capa cripto (enseguida tras el núcleo, en devnet):** wallet embebida **no-custodial** + onboarding de respaldo, login con wallet (Phantom/Solflare), USDC/SOL, depósitos/retiros/transferencias, multifirma o modo espejo, multas por mora. Alto estándar de seguridad web3; devnet antes de dinero real.
 - **Fase 3 — Confianza y escala:** dividir cuentas, KYC con proveedor, panel super-admin completo, **marketplace público**, login con Google, despliegue en VPS.
 - **Fase 4 — Móvil:** Android/iOS.
@@ -236,6 +300,7 @@ Acceso interno separado para los responsables. Panel **completo**:
 
 ## 22. Fuera de alcance / decisiones abiertas
 
+- **Sistema de referidos (pendiente, no implementado — roadmap).** Código de referido por usuario (copiar/compartir), **+40 puntos a ambos** (quien invita y referido) cuando el referido **se registra con el código y hace su primer aporte**, **máximo 5 referidos** premiados, **solo cuentas nuevas**, acreditación única. Más adelante, **club de canje de puntos**. Toca el esquema (campos `codigoReferido`/`referidoPorId` en `Usuario`) y la lógica del evento "primer aporte". Detalle en [IDEAS_FUTURAS.md](IDEAS_FUTURAS.md).
 - Proveedor de wallet embebida y de KYC.
 - Set final y orden de íconos del bottom nav (pendiente revisar referencias visuales).
 - Detalle del algoritmo de reputación (estudiar Cashea).

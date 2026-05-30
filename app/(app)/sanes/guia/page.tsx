@@ -19,7 +19,7 @@ const METODOS: Metodo[] = [
     tagColor: "bg-brand/10 text-brand",
     titulo: "San · Susi · Bolso",
     resumen:
-      "Todos aportan cada ronda (semanal, quincenal o mensual) y, por turno, a cada quien le toca recibir el bote completo.",
+      "Cada ronda (semanal, quincenal o mensual) todos aportan al mismo tiempo. Lo que rota es el cobro: por turno, a una persona le toca llevarse el bote completo, y la siguiente ronda le toca a otra, hasta que todos cobran.",
     provecho:
       "Ideal para ahorrar con disciplina y recibir un monto grande de golpe, sin intereses.",
   },
@@ -30,7 +30,7 @@ const METODOS: Metodo[] = [
     tagColor: "bg-gold/15 text-gold",
     titulo: "Vaca · Pote",
     resumen:
-      "Varias personas juntan dinero hacia una meta; al llegar, se usa o se reparte. Sin turnos.",
+      "Varias personas aportan dinero para reunir entre todas y alcanzar un objetivo o meta común. Al llegar a la meta, se usa o se reparte. No hay turnos.",
     provecho:
       "Perfecto para un regalo, un viaje o una compra grande entre amigos o familia.",
   },

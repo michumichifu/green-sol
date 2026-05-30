@@ -4,6 +4,15 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.31] — 2026-05-30 — Documentación al día (PRD 0.9) y descripciones del ahorro
+
+### Cambiado
+- **Documentación actualizada al estado real (app v0.0.30):** `PRD.md` → 0.9 y `PRD.html` (navegación de 5 ítems, puntos/niveles, calculadora, sección Ahorro con asistente/unirse/guía, perfil+configuración, super-admin con métricas y restricciones, referidos en roadmap); `ARQUITECTURA_TECNICA.md` → 0.3 (modelo de datos y mapa de rutas).
+- **Descripciones del ahorro corregidas:** en el san/susi el aporte es **simultáneo** y lo que rota es el **cobro** por turno; en la vaca/pote se aclara que aportan para **reunir y lograr una meta común**.
+
+### Verificado
+- Build limpio; E2E 4/4.
+
 ## [0.0.30] — 2026-05-30 — Asistente de creación de ahorro por pasos
 
 ### Añadido

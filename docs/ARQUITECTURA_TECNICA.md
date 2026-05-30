@@ -1,7 +1,7 @@
 # Arquitectura técnica — Green Sol
 
-- **Versión:** 0.2 (enfocada en Green Sol)
-- **Fecha:** 2026-05-29
+- **Versión:** 0.3 (enfocada en Green Sol; modelo de datos y mapa de rutas al día con app v0.0.30)
+- **Fecha:** 2026-05-30
 - **Audiencia:** equipo con experiencia en web tradicional, principiante en web3.
 
 > Explica, primero en lenguaje llano y luego con detalle, en qué se diferencia una app web3 de una web tradicional, y propone un stack concreto para Green Sol alineado con lo que el equipo ya domina.
@@ -145,7 +145,7 @@ Para recolectas en modo tradicional, el backend (Postgres) guarda, sin nada on-c
 
 ## 11. Reputación, analítica y marketplace
 
-- **Reputación:** tabla de valoraciones (`de_usuario`, `a_usuario`, `recolecta_id`, voto +1/−1, comentario, fecha) que se habilita al **cerrar** una recolecta. El perfil agrega positivos/negativos → puntuación → **estrellitas** (cálculo en backend). La **mora** genera ajustes negativos. El historial del organizador (sanes creados / completados / no concretados, montos, tipos público-privado y tradicional-cripto) se deriva de las recolectas. Todo off-chain.
+- **Reputación (implementada en `lib/reputacion.ts`):** tabla `Valoracion` (`deUsuarioId`, `aUsuarioId`, `recolectaId`, `voto` +1/−1, `comentario`, `creadaEn`; única por `[recolectaId, deUsuarioId, aUsuarioId]`) que se habilita al **cerrar** una recolecta. `obtenerReputacion` agrega positivos/negativos. **Puntos = estrellitas** es un **acumulado** (las valoraciones positivas recibidas), no un ratio de 5 estrellas. `nivelPorReputacion` deriva el **nivel** por umbrales de puntos: **Nuevo (0) → Confiable (5) → Destacado (15) → Estrella (30) → Leyenda (60)**, con progreso al siguiente. La **mora** generará ajustes negativos. El historial del organizador (sanes creados / completados / no concretados, montos, tipos) se deriva de las recolectas. Todo off-chain.
 - **Notificaciones:** tabla `notificaciones` (`usuario_destino`, `tipo`, `titulo`, `cuerpo`, `recurso_id`/enlace, `leida`, `fecha`) para la **campanita** (persistentes). Se crean por **eventos** (entró al san, pagó/al día, moroso, completado) y por **broadcast** del super-admin (a un usuario o a todos). Los **toasts** (éxito/error/advertencia/info) son solo de UI (frontend), no se persisten. Push/correo: fase posterior.
 - **Tasas y calculadora:** un **scheduled job** (Vercel Cron) refresca el caché de tasas (BCV 2×/día; USDT y SOL cada 1–2 h) desde las APIs externas; toda la app y la calculadora leen del caché, nunca de la API en cada vista. Detalle en [INTEGRACIONES_API.md](INTEGRACIONES_API.md).
 - **Analítica / UTM:** capturar parámetros **UTM** (source/medium/campaign) en registro e ingreso, guardados por usuario/sesión para medir adquisición y marketing. Datos sensibles aparte y cifrados; respetar privacidad.
@@ -158,3 +158,51 @@ Para recolectas en modo tradicional, el backend (Postgres) guarda, sin nada on-c
 - Sin programa propio: USDC (SPL existente) + multifirma vía Squads.
 - Wallet embebida no-custodial (Web3Auth/Privy) + Wallet Adapter para externas.
 - Audio en Opus; archivos off-chain. Empezar en devnet.
+
+## 13. Modelo de datos (Prisma) — estado real
+
+Esquema en `prisma/schema.prisma` (Postgres). Modelos y enums implementados a v0.0.30:
+
+| Modelo | Campos clave | Notas |
+| --- | --- | --- |
+| `Usuario` | `correo` (único), `hashContrasena?`, `correoVerificado`, `rol`, `nombre?`, `apellido?`, `nombreUsuario?` (único), `fotoUrl?`, `pais?`, `monedaPreferida?`, **`onboardingCerrado` (Int)**, **`ingresos` (Int)**, `creadoEn` | `onboardingCerrado` controla el carrusel de bienvenida; `ingresos` para perfil. Relaciones: sesiones, OTP, recolectas organizadas, participaciones, notificaciones, métodos de pago, valoraciones dadas/recibidas. |
+| `Sesion` | `usuarioId`, `expiraEn`, `creadaEn` | Sesión por cookie. |
+| `CodigoOtp` | `usuarioId`, `hashCodigo`, `proposito`, `expiraEn`, `usado` | OTP de verificación y reseteo. |
+| `TasaCache` | `fuente` (único), `datos` (Json), `actualizado` | Caché global de tasas (BCV, USDT, SOL). |
+| `Recolecta` | `tipo`, `nombre`, `visibilidad`, `metodo`, **`moneda` (String, def. "USD")**, `montoAporte?`, `meta?`, **`frecuencia?` (String)**, **`cupoMiembros?` (Int)**, `estado`, `organizadorId`, `creadaEn` | `moneda` guarda `bs_bcv`/`bs_usdt`/`usdt`/`usdc`/`sol` (string, no enum). `frecuencia` = semanal/quincenal/mensual; `cupoMiembros` = nº de manos (san). El **código** para unirse es el `id` (cuid). |
+| `Participante` | `recolectaId`, `usuarioId`, `unidoEn` | Único por `[recolectaId, usuarioId]`. Tiene `turno?` y `aportes`. |
+| `Turno` | `recolectaId`, `participanteId` (único), `posicion`, `cobrado` | Solo posición y cobrado; **sin fechas aún** (calendario pendiente). |
+| `Aporte` | `recolectaId`, `participanteId`, `monto`, `referencia?`, `comprobanteUrl?`, `estado`, `creadoEn` | Estado `reportado`/`confirmado`/`rechazado` (alimenta la pestaña Pagos). |
+| `Notificacion` | `usuarioId`, `tipo`, `titulo`, `cuerpo?`, `enlace?`, `leida`, `creadaEn` | Campanita persistente. |
+| `MetodoPago` | `usuarioId`, `tipo`, `detalle`, `creadoEn` | Métodos del perfil. |
+| `Valoracion` | `recolectaId`, `deUsuarioId`, `aUsuarioId`, `voto`, `comentario?`, `creadaEn` | Reputación; única por trío. |
+| `ConfiguracionApp` | `clave` (id), `valor` | **Almacén clave/valor** de la app: `SMTP_*`, `APP_*` y `BLACKLIST_NOMBRE`/`BLACKLIST_APELLIDO`/`BLACKLIST_USUARIO`. |
+
+Enums: `Rol` (`usuario`, `admin_grupo`, `super_admin`), `OtpProposito` (`verificacion`, `reset_contrasena`), `TipoRecolecta` (`san`, `vaca`), `Visibilidad` (`privado`, `publico`), `MetodoRecolecta` (`tradicional`, `cripto`), `EstadoRecolecta` (`abierta`, `activa`, `cerrada`), `EstadoAporte` (`reportado`, `confirmado`, `rechazado`), `TipoMetodoPago` (`efectivo`, `transferencia_bs`, `pago_movil`, `wallet_usdt`, `wallet_solana`).
+
+> Pendiente en el esquema (ver `docs/IDEAS_FUTURAS.md`): campos de **referidos** (`codigoReferido`, `referidoPorId`) en `Usuario`; **fechas por turno** (`fechaInicio` + frecuencia) en `Recolecta`/`Turno` para el calendario de Pagos; y un **código corto** propio para unirse (hoy se usa el `id`).
+
+## 14. Mapa de rutas y componentes (Next.js App Router)
+
+Estructura real bajo `app/`, `components/` y `lib/`:
+
+**Grupos de rutas**
+
+- **`app/(auth)/`** — fuera de la app autenticada: `login`, `registro`, `verificar` (OTP), con `actions.ts` (registro/login/cierre de sesión).
+- **`app/(app)/`** — app autenticada. `layout.tsx` exige sesión, carga reputación/nivel y notificaciones, y monta `AppHeader` + `BottomNav`; `template.tsx` añade la **transición de fade** entre pestañas. Rutas:
+  - `dashboard/` — hero + accesos rápidos + tasas + "Tus ahorros".
+  - `sanes/` — landing "Ahorros"; subrutas `crear/` (asistente por pasos), `unirse/` (por enlace/código, acepta `?codigo=`), `guia/` (guía visual), `[id]/` (detalle de la recolecta); `actions.ts` con `crearRecolecta`, `buscarRecolecta`, `unirseARecolecta`, `invitarPorCorreo`, `generarTurnos`, `reportarPago`, `resolverAporte`, `cerrarRecolecta`, `valorar`.
+  - `pagos/` — aportes por confirmar / rechazados y ahorros activos con turno/posición.
+  - `calculadora/` — usa `components/calculadora.tsx`.
+  - `perfil/` — hub de cuenta (`actions.ts`: datos, métodos de pago); `configuracion/` — pestañas Datos/Pagos/Seguridad/Avisos; `recompensa/` — progreso de nivel; `ayuda/` — centro de ayuda; `notificaciones/` — bandeja completa (`actions.ts`: marcar leídas).
+  - `onboarding/` — carrusel a pantalla completa (`onboardingCerrado`).
+- **`app/admin/`** — panel super-admin (`page.tsx`, `actions.ts`, `layout.tsx`): pestañas Métricas · Usuarios · Restricciones · SMTP · App.
+- **`app/api/`** — `cron/tasas` (refresco de tasas), `health`, `usuario-disponible` (validación de nombre de usuario en vivo), `test/sesion`.
+
+**Componentes (`components/`)**
+
+`app-header.tsx` (logo + nivel + campana/panel de avisos), `bottom-nav.tsx` (5 ítems), `calculadora.tsx`, `tasas-resumen.tsx`, `compartir-ahorro.tsx`, `unirse-ahorro.tsx`, `carrusel-onboarding.tsx`, `panel-tabs.tsx` (pestañas reusadas en configuración y admin), `toggle-admin.tsx`, `form-datos.tsx`, `campo-contrasena.tsx`, `campo-usuario.tsx`, y primitivas en `components/ui/`.
+
+**Librería (`lib/`)**
+
+`auth/` (sesión), `db.ts` (Prisma), `config.ts` (claves `SMTP_*`/`APP_*` en `ConfiguracionApp`), `reputacion.ts` (puntos/niveles), `restricciones.ts` (lista negra `BLACKLIST_*`), `notificaciones.ts`, `onboarding.ts`, `mailer.ts` (SMTP), `rates/` (caché de tasas), `validations/` (esquemas Zod, incl. `recolecta.ts` con monedas y frecuencias), `paises.ts`, `utils.ts`.
