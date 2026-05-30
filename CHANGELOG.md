@@ -4,6 +4,24 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.32] — 2026-05-30 — Asistente de creación: claridad, anclaje al dólar y cálculo
+
+### Cambiado (crear ahorro)
+- **Paso tipo:** etiqueta colorida ("Por turnos" / "Meta en común") como placa, además del título y la descripción.
+- **Paso título:** pregunta concreta ("¿Qué título le quieres poner a tu san/vaca?") + campo **descripción** con ejemplo.
+- **Paso visibilidad:** al elegir privado, nota de que luego se invita por correo, usuario o enlace.
+- **Paso moneda:** "¿En qué moneda deseas ahorrar?" + **tooltip** explicativo; opciones: Bolívares (dólar BCV), Bolívares (paralelo/USDT), USDC, Solana (se quitó USDT suelto).
+- **Paso detalles (san) reordenado:** nº de participantes → **meta por turno anclada en dólares** (se paga en Bs a la tasa del día) → **aporte por persona calculado** → frecuencia (semanal/quincenal/mensual o **días a medida**) → **duración estimada**.
+
+### Añadido
+- Campos `descripcion` y `frecuenciaDias` en `Recolecta` (migración). El detalle muestra descripción, participantes, frecuencia y la nota de tasa del día.
+
+### Pendiente (documentado)
+- Sistema de solicitudes de unión (enlace → solicitar → aprobar/rechazar).
+
+### Verificado
+- Build limpio; E2E 4/4.
+
 ## [0.0.31] — 2026-05-30 — Documentación al día (PRD 0.9) y descripciones del ahorro
 
 ### Cambiado

@@ -13,10 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CompartirAhorro } from "@/components/compartir-ahorro";
-import {
-  MONEDA_RECOLECTA,
-  FRECUENCIA_LABEL,
-} from "@/lib/validations/recolecta";
+import { MONEDA_RECOLECTA } from "@/lib/validations/recolecta";
 
 export default async function DetalleRecolecta({
   params,
@@ -46,7 +43,8 @@ export default async function DetalleRecolecta({
   const esParticipante = r.participantes.some((p) => p.usuarioId === usuario.id);
   if (!esParticipante && r.visibilidad === "privado") notFound();
   const esOrganizador = r.organizadorId === usuario.id;
-  const sim = MONEDA_RECOLECTA[r.moneda]?.simbolo ?? "$";
+  const info = MONEDA_RECOLECTA[r.moneda];
+  const ancla = info?.ancla ?? "$";
   const invitar = invitarPorCorreo.bind(null, r.id);
   const generar = generarTurnos.bind(null, r.id);
   const reportar = reportarPago.bind(null, r.id);
@@ -61,17 +59,19 @@ export default async function DetalleRecolecta({
         </div>
         <p className="text-sm text-muted-foreground">
           {r.tipo === "san"
-            ? `Aporte: ${sim} ${r.montoAporte}`
-            : `Meta: ${sim} ${r.meta}`}{" "}
+            ? `Aporte por turno: ${ancla} ${r.montoAporte ?? "?"}`
+            : `Meta: ${ancla} ${r.meta ?? "?"}`}{" "}
           · {r.estado} · {r.visibilidad}
         </p>
-        {r.tipo === "san" && (r.frecuencia || r.cupoMiembros) && (
+        {r.tipo === "san" && (r.cupoMiembros || r.frecuencia) && (
           <p className="text-xs text-muted-foreground">
-            {r.frecuencia ? FRECUENCIA_LABEL[r.frecuencia] : ""}
-            {r.frecuencia && r.cupoMiembros ? " · " : ""}
-            {r.cupoMiembros ? `${r.cupoMiembros} manos` : ""}
+            {r.cupoMiembros ? `${r.cupoMiembros} personas` : ""}
+            {r.cupoMiembros && r.frecuencia ? " · " : ""}
+            {r.frecuencia ?? ""}
+            {info?.enBolivares ? " · se paga en Bs a la tasa del día" : ""}
           </p>
         )}
+        {r.descripcion && <p className="mt-2 text-sm">{r.descripcion}</p>}
       </div>
 
       <section className="space-y-2">

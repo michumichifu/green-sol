@@ -9,19 +9,27 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  Info,
+  CalendarClock,
 } from "lucide-react";
 import { crearRecolecta, type EstadoRecolecta } from "../actions";
 import {
   MONEDAS_RECOLECTA,
   MONEDA_RECOLECTA,
-  FRECUENCIAS,
-  FRECUENCIA_LABEL,
+  FRECUENCIAS_PRESET,
 } from "@/lib/validations/recolecta";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const TOTAL = 6;
+
+function fmt(n: number) {
+  if (!isFinite(n)) return "0";
+  return n.toLocaleString("es-VE", {
+    maximumFractionDigits: n !== 0 && Math.abs(n) < 1 ? 4 : 2,
+  });
+}
 
 export default function CrearPage() {
   const [estado, accion, pendiente] = useActionState<EstadoRecolecta, FormData>(
@@ -32,16 +40,33 @@ export default function CrearPage() {
   const [paso, setPaso] = useState(0);
   const [tipo, setTipo] = useState<"" | "san" | "vaca">("");
   const [nombre, setNombre] = useState("");
+  const [descripcion, setDescripcion] = useState("");
   const [visibilidad, setVisibilidad] = useState<"privado" | "publico">(
     "privado",
   );
   const [moneda, setMoneda] = useState("");
-  const [monto, setMonto] = useState("");
-  const [frecuencia, setFrecuencia] = useState("");
+  const [monto, setMonto] = useState(""); // san: meta por turno · vaca: meta a juntar
   const [cupo, setCupo] = useState("");
+  const [frecId, setFrecId] = useState(""); // preset id o "personalizado"
+  const [dias, setDias] = useState("");
+  const [verTip, setVerTip] = useState(false);
 
   const esSan = tipo === "san";
-  const simbolo = moneda ? MONEDA_RECOLECTA[moneda]?.simbolo : "";
+  const info = moneda ? MONEDA_RECOLECTA[moneda] : null;
+  const ancla = info?.ancla ?? "";
+
+  const preset = FRECUENCIAS_PRESET.find((f) => f.id === frecId);
+  const frecuenciaDias =
+    frecId === "personalizado" ? Number(dias) || 0 : (preset?.dias ?? 0);
+  const frecuenciaLabel =
+    frecId === "personalizado"
+      ? `Cada ${dias || "?"} días`
+      : (preset?.label ?? "");
+
+  const nParticipantes = Number(cupo) || 0;
+  const aportePersona =
+    nParticipantes > 0 ? Number(monto) / nParticipantes : 0;
+  const duracionDias = nParticipantes * frecuenciaDias;
 
   const puedeSeguir = (() => {
     switch (paso) {
@@ -54,35 +79,13 @@ export default function CrearPage() {
       case 3:
         return moneda !== "";
       case 4:
-        return (
-          Number(monto) > 0 &&
-          (!esSan || (frecuencia !== "" && Number(cupo) >= 2))
-        );
+        if (!(Number(monto) > 0)) return false;
+        if (!esSan) return true;
+        return nParticipantes >= 2 && frecuenciaDias >= 1;
       default:
         return true;
     }
   })();
-
-  const Chip = ({
-    activo,
-    onClick,
-    children,
-  }: {
-    activo: boolean;
-    onClick: () => void;
-    children: React.ReactNode;
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "rounded-xl border p-3 text-sm transition-colors",
-        activo ? "border-brand bg-brand/5 text-brand" : "hover:border-brand/40",
-      )}
-    >
-      {children}
-    </button>
-  );
 
   return (
     <main className="mx-auto flex min-h-full max-w-md flex-col px-5 py-5">
@@ -132,13 +135,11 @@ export default function CrearPage() {
               >
                 <RefreshCw className="mt-0.5 size-5 shrink-0 text-brand" />
                 <span>
-                  <span className="block font-semibold">
-                    Susi · San · Bolso{" "}
-                    <span className="text-xs font-normal text-muted-foreground">
-                      (por turnos)
-                    </span>
+                  <span className="block font-semibold">Susi · San · Bolso</span>
+                  <span className="mt-1 inline-block rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">
+                    Por turnos
                   </span>
-                  <span className="block text-xs text-muted-foreground">
+                  <span className="mt-1.5 block text-xs text-muted-foreground">
                     Cada ronda todos aportan a la vez; lo que rota es el cobro:
                     por turno, a una persona le toca el bote completo.
                   </span>
@@ -156,13 +157,11 @@ export default function CrearPage() {
               >
                 <Target className="mt-0.5 size-5 shrink-0 text-gold" />
                 <span>
-                  <span className="block font-semibold">
-                    Vaca · Pote{" "}
-                    <span className="text-xs font-normal text-muted-foreground">
-                      (meta común)
-                    </span>
+                  <span className="block font-semibold">Vaca · Pote</span>
+                  <span className="mt-1 inline-block rounded-full bg-gold/15 px-2 py-0.5 text-[11px] font-semibold text-gold">
+                    Meta en común
                   </span>
-                  <span className="block text-xs text-muted-foreground">
+                  <span className="mt-1.5 block text-xs text-muted-foreground">
                     Aportan para reunir entre todas y lograr un objetivo o meta
                     común.
                   </span>
@@ -171,22 +170,42 @@ export default function CrearPage() {
             </div>
           )}
 
-          {/* Paso 1: nombre */}
+          {/* Paso 1: título + descripción */}
           {paso === 1 && (
-            <div className="space-y-2">
-              <label htmlFor="nombre-v" className="text-sm font-medium">
-                ¿Cómo se llama?
-              </label>
-              <Input
-                id="nombre-v"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                placeholder={esSan ? "Ej: San de la oficina" : "Ej: Viaje a la playa"}
-                autoFocus
-              />
-              <p className="text-xs text-muted-foreground">
-                Un nombre claro para que todos lo reconozcan.
-              </p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="nombre-v" className="text-sm font-medium">
+                  {esSan
+                    ? "¿Qué título le quieres poner a tu san?"
+                    : "¿Qué título le quieres poner a tu vaca?"}
+                </label>
+                <Input
+                  id="nombre-v"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  placeholder={
+                    esSan ? "Ej: San de la oficina" : "Ej: Viaje a la playa"
+                  }
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="desc-v" className="text-sm font-medium">
+                  Descripción{" "}
+                  <span className="font-normal text-muted-foreground">
+                    (opcional)
+                  </span>
+                </label>
+                <textarea
+                  id="desc-v"
+                  value={descripcion}
+                  onChange={(e) => setDescripcion(e.target.value)}
+                  rows={3}
+                  maxLength={300}
+                  className="w-full rounded-lg border bg-transparent p-2.5 text-sm"
+                  placeholder="Describe para qué lo van a usar, con qué finalidad, reglas que acordaron, etc."
+                />
+              </div>
             </div>
           )}
 
@@ -195,34 +214,73 @@ export default function CrearPage() {
             <div className="space-y-3">
               <p className="text-sm font-medium">¿Quién puede verlo?</p>
               <div className="grid grid-cols-2 gap-2">
-                <Chip
-                  activo={visibilidad === "privado"}
+                <button
+                  type="button"
                   onClick={() => setVisibilidad("privado")}
+                  className={cn(
+                    "rounded-xl border p-3 text-sm transition-colors",
+                    visibilidad === "privado"
+                      ? "border-brand bg-brand/5 text-brand"
+                      : "hover:border-brand/40",
+                  )}
                 >
                   <Lock className="mx-auto mb-1 size-5" />
                   Privado
                   <span className="mt-1 block text-[11px] text-muted-foreground">
                     Solo con invitación
                   </span>
-                </Chip>
-                <Chip
-                  activo={visibilidad === "publico"}
+                </button>
+                <button
+                  type="button"
                   onClick={() => setVisibilidad("publico")}
+                  className={cn(
+                    "rounded-xl border p-3 text-sm transition-colors",
+                    visibilidad === "publico"
+                      ? "border-brand bg-brand/5 text-brand"
+                      : "hover:border-brand/40",
+                  )}
                 >
                   <Globe className="mx-auto mb-1 size-5" />
                   Público
                   <span className="mt-1 block text-[11px] text-muted-foreground">
                     Cualquiera puede unirse
                   </span>
-                </Chip>
+                </button>
               </div>
+              {visibilidad === "privado" && (
+                <p className="rounded-xl bg-muted/50 p-3 text-xs text-muted-foreground">
+                  Al terminar podrás invitar por <b>correo</b>, por{" "}
+                  <b>nombre de usuario</b> o compartiendo un <b>enlace/código</b>.
+                </p>
+              )}
             </div>
           )}
 
           {/* Paso 3: moneda */}
           {paso === 3 && (
             <div className="space-y-3">
-              <p className="text-sm font-medium">¿En qué moneda?</p>
+              <div className="relative flex items-center gap-1.5">
+                <p className="text-sm font-medium">
+                  ¿En qué moneda deseas ahorrar?
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setVerTip((v) => !v)}
+                  aria-label="Más información"
+                  className="text-muted-foreground"
+                >
+                  <Info className="size-4" />
+                </button>
+                {verTip && (
+                  <div className="absolute left-0 top-7 z-10 w-72 rounded-xl border bg-card p-3 text-xs text-muted-foreground shadow-xl">
+                    Es la moneda del plan de ahorro en la que todos aportan
+                    juntos. Si eliges <b>Bolívares</b>, el monto se{" "}
+                    <b>fija en dólares</b> (BCV o paralelo) y al pagar se calcula
+                    en Bs a la <b>tasa del día</b>, para que el ahorro no pierda
+                    valor.
+                  </div>
+                )}
+              </div>
               <div className="space-y-2">
                 {MONEDAS_RECOLECTA.map((m) => (
                   <button
@@ -251,46 +309,11 @@ export default function CrearPage() {
           {/* Paso 4: detalles según tipo */}
           {paso === 4 && (
             <div className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="monto-v" className="text-sm font-medium">
-                  {esSan ? "Aporte por turno" : "Meta a juntar"}
-                </label>
-                <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-brand">
-                    {simbolo}
-                  </span>
-                  <Input
-                    id="monto-v"
-                    type="number"
-                    inputMode="decimal"
-                    min="0"
-                    step="0.01"
-                    value={monto}
-                    onChange={(e) => setMonto(e.target.value)}
-                    className={simbolo.length > 2 ? "pl-14" : "pl-10"}
-                  />
-                </div>
-              </div>
-
-              {esSan && (
+              {esSan ? (
                 <>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">¿Cada cuánto se aporta?</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {FRECUENCIAS.map((f) => (
-                        <Chip
-                          key={f}
-                          activo={frecuencia === f}
-                          onClick={() => setFrecuencia(f)}
-                        >
-                          {FRECUENCIA_LABEL[f]}
-                        </Chip>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
                     <label htmlFor="cupo-v" className="text-sm font-medium">
-                      ¿Cuántas manos (personas)?
+                      ¿Cuántas personas participan?
                     </label>
                     <Input
                       id="cupo-v"
@@ -300,13 +323,129 @@ export default function CrearPage() {
                       max="50"
                       value={cupo}
                       onChange={(e) => setCupo(e.target.value)}
-                      placeholder="Ej: 10"
+                      placeholder="Ej: 5"
                     />
                     <p className="text-xs text-muted-foreground">
-                      Determina cuántos turnos habrá.
+                      Habrá un turno de cobro por persona.
                     </p>
                   </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="monto-v" className="text-sm font-medium">
+                      Meta por turno (el bote que recibe quien cobra)
+                    </label>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-brand">
+                        {ancla}
+                      </span>
+                      <Input
+                        id="monto-v"
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="0.01"
+                        value={monto}
+                        onChange={(e) => setMonto(e.target.value)}
+                        className={ancla.length > 2 ? "pl-14" : "pl-10"}
+                      />
+                    </div>
+                    {info?.enBolivares && (
+                      <p className="text-xs text-muted-foreground">
+                        Se fija en dólares ({moneda === "bs_bcv" ? "BCV" : "paralelo"});
+                        al pagar se calcula en Bs a la tasa del día.
+                      </p>
+                    )}
+                  </div>
+
+                  {nParticipantes >= 2 && Number(monto) > 0 && (
+                    <div className="rounded-xl bg-brand/5 p-3 text-sm">
+                      Cada persona aporta{" "}
+                      <b>
+                        {ancla} {fmt(aportePersona)}
+                      </b>{" "}
+                      por turno.
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">¿Cada cuánto se aporta?</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {FRECUENCIAS_PRESET.map((f) => (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => setFrecId(f.id)}
+                          className={cn(
+                            "rounded-xl border p-2 text-xs transition-colors",
+                            frecId === f.id
+                              ? "border-brand bg-brand/5 text-brand"
+                              : "hover:border-brand/40",
+                          )}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setFrecId("personalizado")}
+                        className={cn(
+                          "rounded-xl border p-2 text-xs transition-colors",
+                          frecId === "personalizado"
+                            ? "border-brand bg-brand/5 text-brand"
+                            : "hover:border-brand/40",
+                        )}
+                      >
+                        A medida
+                      </button>
+                    </div>
+                    {frecId === "personalizado" && (
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        min="1"
+                        max="365"
+                        value={dias}
+                        onChange={(e) => setDias(e.target.value)}
+                        placeholder="Cada cuántos días"
+                      />
+                    )}
+                  </div>
+
+                  {duracionDias > 0 && (
+                    <div className="flex items-center gap-2 rounded-xl border p-3 text-sm">
+                      <CalendarClock className="size-4 text-brand" />
+                      Duración estimada: <b>~{duracionDias} días</b> (
+                      {nParticipantes} turnos).
+                    </div>
+                  )}
                 </>
+              ) : (
+                <div className="space-y-2">
+                  <label htmlFor="monto-v" className="text-sm font-medium">
+                    ¿Cuánto quieren juntar? (meta)
+                  </label>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-brand">
+                      {ancla}
+                    </span>
+                    <Input
+                      id="monto-v"
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      step="0.01"
+                      value={monto}
+                      onChange={(e) => setMonto(e.target.value)}
+                      className={ancla.length > 2 ? "pl-14" : "pl-10"}
+                    />
+                  </div>
+                  {info?.enBolivares && (
+                    <p className="text-xs text-muted-foreground">
+                      Se fija en dólares ({moneda === "bs_bcv" ? "BCV" : "paralelo"});
+                      al aportar se calcula en Bs a la tasa del día.
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           )}
@@ -320,27 +459,34 @@ export default function CrearPage() {
                   k="Tipo"
                   v={esSan ? "Susi · San · Bolso (turnos)" : "Vaca · Pote (meta)"}
                 />
-                <Resumen k="Nombre" v={nombre} />
+                <Resumen k="Título" v={nombre} />
+                {descripcion.trim() && (
+                  <Resumen k="Descripción" v={descripcion.trim()} />
+                )}
                 <Resumen
                   k="Visibilidad"
                   v={visibilidad === "privado" ? "Privado" : "Público"}
                 />
-                <Resumen
-                  k="Moneda"
-                  v={moneda ? MONEDA_RECOLECTA[moneda].label : ""}
-                />
-                <Resumen
-                  k={esSan ? "Aporte por turno" : "Meta"}
-                  v={`${simbolo} ${monto}`}
-                />
-                {esSan && (
+                <Resumen k="Moneda" v={info?.label ?? ""} />
+                {esSan ? (
                   <>
+                    <Resumen k="Participantes" v={`${cupo} personas`} />
                     <Resumen
-                      k="Frecuencia"
-                      v={frecuencia ? FRECUENCIA_LABEL[frecuencia] : ""}
+                      k="Meta por turno"
+                      v={`${ancla} ${fmt(Number(monto))}`}
                     />
-                    <Resumen k="Manos" v={`${cupo} personas`} />
+                    <Resumen
+                      k="Aporte por persona"
+                      v={`${ancla} ${fmt(aportePersona)}`}
+                    />
+                    <Resumen k="Frecuencia" v={frecuenciaLabel} />
+                    <Resumen
+                      k="Duración estimada"
+                      v={`~${duracionDias} días`}
+                    />
                   </>
+                ) : (
+                  <Resumen k="Meta" v={`${ancla} ${fmt(Number(monto))}`} />
                 )}
               </dl>
               {estado.error && (
@@ -365,13 +511,19 @@ export default function CrearPage() {
             <form action={accion}>
               <input type="hidden" name="tipo" value={tipo} />
               <input type="hidden" name="nombre" value={nombre} />
+              <input type="hidden" name="descripcion" value={descripcion} />
               <input type="hidden" name="visibilidad" value={visibilidad} />
               <input type="hidden" name="moneda" value={moneda} />
               <input type="hidden" name="monto" value={monto} />
               <input
                 type="hidden"
                 name="frecuencia"
-                value={esSan ? frecuencia : ""}
+                value={esSan ? frecuenciaLabel : ""}
+              />
+              <input
+                type="hidden"
+                name="frecuenciaDias"
+                value={esSan ? frecuenciaDias : ""}
               />
               <input
                 type="hidden"
@@ -392,8 +544,8 @@ export default function CrearPage() {
 
 function Resumen({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <dt className="text-muted-foreground">{k}</dt>
+    <div className="flex items-start justify-between gap-3">
+      <dt className="shrink-0 text-muted-foreground">{k}</dt>
       <dd className="text-right font-medium">{v}</dd>
     </div>
   );

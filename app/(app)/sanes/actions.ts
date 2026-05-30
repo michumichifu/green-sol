@@ -19,26 +19,43 @@ export async function crearRecolecta(
   const datos = crearRecolectaSchema.safeParse({
     tipo: formData.get("tipo"),
     nombre: formData.get("nombre"),
+    descripcion: formData.get("descripcion") || undefined,
     visibilidad: formData.get("visibilidad"),
     moneda: formData.get("moneda"),
     monto: formData.get("monto"),
     frecuencia: formData.get("frecuencia") || undefined,
+    frecuenciaDias: formData.get("frecuenciaDias") || undefined,
     cupoMiembros: formData.get("cupoMiembros") || undefined,
   });
   if (!datos.success) return { error: datos.error.issues[0].message };
-  const { tipo, nombre, visibilidad, moneda, monto, frecuencia, cupoMiembros } =
-    datos.data;
+  const {
+    tipo,
+    nombre,
+    descripcion,
+    visibilidad,
+    moneda,
+    monto,
+    frecuencia,
+    frecuenciaDias,
+    cupoMiembros,
+  } = datos.data;
+
+  // En un san, `monto` es la meta por turno; el aporte por persona se reparte.
+  const aportePorPersona =
+    tipo === "san" && cupoMiembros ? monto / cupoMiembros : null;
 
   const recolecta = await prisma.recolecta.create({
     data: {
       tipo,
       nombre,
+      descripcion: descripcion ?? null,
       visibilidad,
       moneda,
       organizadorId: usuario.id,
-      montoAporte: tipo === "san" ? monto : null,
-      meta: tipo === "vaca" ? monto : null,
-      frecuencia: tipo === "san" ? frecuencia : null,
+      montoAporte: aportePorPersona,
+      meta: monto, // meta por turno (san) o meta a juntar (vaca)
+      frecuencia: tipo === "san" ? (frecuencia ?? null) : null,
+      frecuenciaDias: tipo === "san" ? (frecuenciaDias ?? null) : null,
       cupoMiembros: tipo === "san" ? cupoMiembros : null,
       participantes: { create: { usuarioId: usuario.id } },
     },

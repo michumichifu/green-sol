@@ -65,12 +65,14 @@ model Recolecta {
   id            String          @id @default(cuid())
   tipo          TipoRecolecta
   nombre        String
+  descripcion   String?
   visibilidad   Visibilidad     @default(privado)
   metodo        MetodoRecolecta @default(tradicional)
   moneda        String          @default("USD")
   montoAporte   Float?
   meta          Float?
   frecuencia    String?
+  frecuenciaDias Int?
   cupoMiembros  Int?
   estado        EstadoRecolecta @default(abierta)
   organizadorId String
