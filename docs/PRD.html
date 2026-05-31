@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Green Sol — PRD v0.9 · Ahorro en grupo transparente y puente al ahorro en cripto sobre Solana</title>
+<title>Green Sol — PRD v0.10 · Ahorro en grupo transparente y puente al ahorro en cripto sobre Solana</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <link rel="preconnect" href="https://rsms.me/">
@@ -54,7 +54,7 @@
       <div class="font-semibold text-[15px]">Green Sol</div>
       <div class="text-xs" style="color:var(--ink-3)">PRD · ahorro en grupo · puente al ahorro en cripto</div>
     </div>
-    <span class="ml-3 badge badge-brand"><i data-lucide="tag" class="lucide"></i>PRD v0.9 · app v0.0.30</span>
+    <span class="ml-3 badge badge-brand"><i data-lucide="tag" class="lucide"></i>PRD v0.10 · app v0.0.41</span>
     <span class="badge badge-muted hidden sm:inline-flex"><i data-lucide="calendar" class="lucide"></i>2026-05-30</span>
     <span class="badge badge-ok hidden md:inline-flex"><i data-lucide="hammer" class="lucide"></i>Fase 1 · núcleo construido</span>
     <div class="ml-auto flex items-center gap-3">
@@ -69,6 +69,7 @@
     <div class="sticky top-24">
       <div class="text-xs font-semibold uppercase tracking-wide mb-3" style="color:var(--ink-3)">Contenido</div>
       <nav class="toc text-sm space-y-1">
+        <a href="#estado" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="list-checks" class="lucide"></i>Estado del proyecto</a>
         <a href="#resumen" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="sparkles" class="lucide"></i>Resumen</a>
         <a href="#problema" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="alert-triangle" class="lucide"></i>Problema</a>
         <a href="#tipos" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="layers" class="lucide"></i>Los tres tipos</a>
@@ -95,6 +96,60 @@
   </aside>
 
   <main class="flex-1 min-w-0 space-y-10">
+
+    <!-- ESTADO DEL PROYECTO -->
+    <section id="estado" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-2"><i data-lucide="list-checks" class="lucide-lg brand-text"></i>Estado del proyecto</h2>
+      <p class="text-sm mb-4" style="color:var(--ink-3)">Foto rápida a <b style="color:var(--ink-2)">app v0.0.41</b>: qué funciona, qué falta y qué se decidió en la última conversación.</p>
+      <div class="grid lg:grid-cols-3 gap-3">
+
+        <!-- Implementado -->
+        <div class="sub p-4">
+          <div class="flex items-center gap-2 font-semibold mb-3"><span class="badge badge-ok"><i data-lucide="check-circle-2" class="lucide"></i>Implementado</span></div>
+          <ul class="text-sm space-y-1.5" style="color:var(--ink-2)">
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i>Auth: correo + clave segura, <b style="color:var(--ink)">OTP por correo</b>, sesión.</li>
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Onboarding</b> con carrusel (no volver a mostrar).</li>
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i>Navegación de <b style="color:var(--ink)">5 ítems</b> + header (nivel + campana) + fade.</li>
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Dashboard</b> con tasas de hoy y "Tus ahorros".</li>
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Calculadora</b> (Bs · Dólar BCV · USDT · Solana).</li>
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i>Ahorro: <b style="color:var(--ink)">asistente por pasos</b> (incl. método de pago del perfil), unirse por enlace/código, compartir, guía.</li>
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Pagos</b> (por confirmar/rechazados/activos).</li>
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Métodos de pago</b> rediseñados (fiat/cripto): crear, editar, eliminar.</li>
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Seguridad</b> por clave + <b style="color:var(--ink)">avisos app + correo</b> en acciones sensibles.</li>
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Reputación</b> (puntos/estrellitas + niveles).</li>
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i>Restricciones de palabras + <b style="color:var(--ink)">super-admin</b> (5 pestañas, métricas reales).</li>
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i>Datasets: 25 bancos VE, monedas; páginas Recompensa y Ayuda.</li>
+          </ul>
+        </div>
+
+        <!-- Pendiente -->
+        <div class="sub p-4">
+          <div class="flex items-center gap-2 font-semibold mb-3"><span class="badge badge-warn"><i data-lucide="clock" class="lucide"></i>Pendiente</span></div>
+          <ul class="text-sm space-y-1.5" style="color:var(--ink-2)">
+            <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Integración cripto:</b> wallet embebida en el registro, billetera en el dashboard, retiros; primero en <b style="color:var(--ink)">DevNet</b>.</li>
+            <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Referidos:</b> +40 pts a ambos, máx 5, solo cuentas nuevas, club de canje.</li>
+            <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Calendario de turnos con fechas</b> (hoy <span class="mono">Turno</span> solo tiene posición/cobrado).</li>
+            <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Despliegue:</b> Vercel + DB en VPS.</li>
+            <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Comprobantes:</b> subir captura, vía MinIO/S3 en el VPS.</li>
+            <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i>Monedas/bancos de otros países.</li>
+            <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i>Código de invitación corto propio.</li>
+            <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i>Marketplace público, dividir cuentas, KYC, login con Google/wallet.</li>
+          </ul>
+        </div>
+
+        <!-- Nuevos de esta conversación -->
+        <div class="sub p-4" style="background:var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 30%, transparent)">
+          <div class="flex items-center gap-2 font-semibold mb-3"><span class="badge badge-brand"><i data-lucide="sparkles" class="lucide"></i>Nuevos de esta conversación</span></div>
+          <ul class="text-sm space-y-1.5" style="color:var(--ink-2)">
+            <li class="flex gap-2"><i data-lucide="shield-check" class="lucide brand-text" style="flex:0 0 auto"></i><b style="color:var(--ink)">Pestaña de Verificaciones</b> en Configuración → Seguridad: <b style="color:var(--ink)">verificación de correo</b> (la más fácil), <b style="color:var(--ink)">identidad nivel 1 y nivel 2</b> (cada nivel habilita límites/montos distintos para san/pote), y <b style="color:var(--ink)">teléfono</b> (futuro; alternativa al SMS: código por <b style="color:var(--ink)">WhatsApp mediante Evolution API</b> en instancia propia). Cada acción sensible podrá exigir el factor adecuado.</li>
+            <li class="flex gap-2"><i data-lucide="key-round" class="lucide brand-text" style="flex:0 0 auto"></i>Aplicar <b style="color:var(--ink)">verificación por clave/2FA</b> a más acciones: retiros, cambio de clave, cierre de san.</li>
+            <li class="flex gap-2"><i data-lucide="bell-ring" class="lucide brand-text" style="flex:0 0 auto"></i><b style="color:var(--ink)">Avisos por correo + app</b> en todos los eventos del san: invitación, turnos, pagos, cierre.</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="text-sm mt-4 p-3 rounded-lg flex gap-2" style="background:color-mix(in srgb, var(--warn) 12%, transparent); color:var(--ink-2); border:1px solid color-mix(in srgb, var(--warn) 30%, transparent)"><i data-lucide="clipboard-check" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><span><b style="color:var(--ink)">Pendiente de prueba / QA manual por el usuario:</b> el <b style="color:var(--ink)">flujo completo de crear y finalizar un san</b>; el <b style="color:var(--ink)">registro + verificación OTP</b>; y el <b style="color:var(--ink)">panel super-admin</b> con <b style="color:var(--ink)">carga de SMTP y prueba de envío de correos</b>.</span></p>
+    </section>
 
     <!-- RESUMEN -->
     <section id="resumen" class="card p-7 relative overflow-hidden">
@@ -157,7 +212,7 @@
       <p class="text-sm p-3 rounded-lg flex gap-2 mb-4" style="background:var(--brand-soft); color:var(--ink-2); border:1px solid color-mix(in srgb, var(--brand) 30%, transparent)"><i data-lucide="info" class="lucide brand-text" style="flex:0 0 auto"></i><span><b style="color:var(--ink)">Terminología (ya aplicada):</b> <b style="color:var(--ink)">San · Susi · Bolso = por turnos</b> (los tres son lo mismo); <b style="color:var(--ink)">Vaca · Pote = meta común</b>; <b style="color:var(--ink)">Dividir una cuenta = repartir un gasto</b> (no es ahorro).</span></p>
       <div class="grid sm:grid-cols-2 gap-3">
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="layout-grid" class="lucide brand-text"></i>Landing "Ahorros"</div><p class="text-sm" style="color:var(--ink-2)">Título "Ahorros" (ya no "Sanes &amp; Vacas") con 3 acciones — <b style="color:var(--ink)">Crear</b>, <b style="color:var(--ink)">Unirme</b> y <b style="color:var(--ink)">Guía</b> — y la lista de "Tus ahorros".</p></div>
-        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="list-checks" class="lucide brand-text"></i>Asistente de creación por pasos</div><p class="text-sm" style="color:var(--ink-2)">Con <b style="color:var(--ink)">barra de progreso</b>: tipo → nombre → visibilidad → <b style="color:var(--ink)">moneda</b> (Bs BCV, Bs paralelo, USDT, USDC, Solana) → detalles (san: <b style="color:var(--ink)">aporte por turno + frecuencia + nº de manos</b>; vaca: <b style="color:var(--ink)">meta</b>) → resumen.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="list-checks" class="lucide brand-text"></i>Asistente de creación por pasos</div><p class="text-sm" style="color:var(--ink-2)">Con <b style="color:var(--ink)">barra de progreso</b>: tipo → <b style="color:var(--ink)">título + descripción</b> → visibilidad → <b style="color:var(--ink)">moneda</b> (Bs BCV, Bs paralelo, USDC, Solana) → detalles (san: <b style="color:var(--ink)">nº de manos → meta por turno anclada en dólares → aporte por persona calculado → frecuencia (con días personalizables) → duración estimada</b>; vaca: <b style="color:var(--ink)">meta</b>) → <b style="color:var(--ink)">método de pago elegido del perfil</b> → resumen. Al crear, aviso en app y correo.</p></div>
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="log-in" class="lucide brand-text"></i>Unirse</div><p class="text-sm" style="color:var(--ink-2)">Por <b style="color:var(--ink)">enlace o código</b> (el código es el id de la recolecta; acepta <span class="mono">?codigo=</span>). Notifica al organizador.</p></div>
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="share-2" class="lucide brand-text"></i>Compartir</div><p class="text-sm" style="color:var(--ink-2)">En el detalle: código, copiar enlace y compartir nativo.</p></div>
         <div class="sub p-4 sm:col-span-2"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="book-open" class="lucide brand-text"></i>Guía visual</div><p class="text-sm" style="color:var(--ink-2)">Tarjetas con infografía por método (San·Susi·Bolso por turnos; Vaca·Pote meta común; Dividir una cuenta) con "cómo aprovecharlo".</p></div>
@@ -352,7 +407,7 @@
           </div>
         </div>
       </div>
-      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Para el MVP, notificaciones <b style="color:var(--ink-2)">in-app</b> son suficientes; correo/push pueden venir después.</span></p>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Para el MVP bastan las notificaciones <b style="color:var(--ink-2)">in-app</b>. <b style="color:var(--ink-2)">Ya implementado</b> el helper <span class="mono">notificarYCorreo</span> (campanita + correo), hoy usado en acciones de <b style="color:var(--ink-2)">métodos de pago</b> y al <b style="color:var(--ink-2)">crear un ahorro</b>. Pendiente: extenderlo a todos los eventos del san y push.</span></p>
     </section>
 
     <!-- CUENTA / REGISTRO / PERFIL / ROLES -->
@@ -376,8 +431,8 @@
       <p class="text-sm mb-3" style="color:var(--ink-2)">El <b style="color:var(--ink)">perfil</b> (<span class="mono">/perfil</span>) es el centro de cuenta: <b style="color:var(--ink)">tarjeta de identidad</b> (nombre, @usuario, nivel y puntos) y menú — Tu recompensa, Tus datos, Métodos de pago, Centro de ayuda (<span class="mono">/ayuda</span>), Configuración, Panel super-admin (si aplica) y Cerrar sesión. La <b style="color:var(--ink)">configuración</b> dejó de ser un drawer: ahora es <b style="color:var(--ink)">sección propia</b> (<span class="mono">/configuracion</span>) con pestañas:</p>
       <div class="grid sm:grid-cols-2 gap-3 mb-4">
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="id-card" class="lucide brand-text"></i>Datos</div><p class="text-sm" style="color:var(--ink-2)">Correo, nombre, apellido y <b style="color:var(--ink)">nombre de usuario</b> (3–15), con <b style="color:var(--ink)">validación de disponibilidad en vivo</b> (<span class="mono">/api/usuario-disponible</span>).</p></div>
-        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="wallet" class="lucide brand-text"></i>Pagos (métodos)</div><p class="text-sm" style="color:var(--ink-2)">Efectivo (USD), transferencia (Bs), pago móvil, wallet <b style="color:var(--ink)">USDT</b> y wallet <b style="color:var(--ink)">Solana</b> — agregar/quitar.</p></div>
-        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="shield" class="lucide brand-text"></i>Seguridad</div><p class="text-sm" style="color:var(--ink-2)">Cambio de contraseña y 2FA. <b style="color:var(--ink)">Próximamente.</b></p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="wallet" class="lucide brand-text"></i>Pagos (métodos) — rediseñado</div><p class="text-sm" style="color:var(--ink-2)">Crear/<b style="color:var(--ink)">editar</b>/eliminar métodos (modelo <span class="mono">MetodoPago</span>): <b style="color:var(--ink)">categoría Fiat/Cripto</b> → <b style="color:var(--ink)">moneda</b> (MVP: VES y USD; demás <b style="color:var(--ink)">"Pronto"</b>) → método → datos. Fiat VES (transferencia/pago móvil con banco buscable) · USD (efectivo, Zelle, Zinli, WalyTech, banco) · Cripto (USDC/SOL → wallet externa + alias). Datos del <b style="color:var(--ink)">titular, persona natural</b>. Agregar/editar/eliminar <b style="color:var(--ink)">piden la clave</b> y avisan en app + correo.</p></div>
+        <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="shield" class="lucide brand-text"></i>Seguridad</div><p class="text-sm" style="color:var(--ink-2)">Cambio de contraseña, 2FA y <b style="color:var(--ink)">verificaciones</b> (correo, identidad nivel 1/2, teléfono). <b style="color:var(--ink)">Próximamente</b> (ver Estado del proyecto).</p></div>
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="mail" class="lucide brand-text"></i>Avisos</div><p class="text-sm" style="color:var(--ink-2)">Preferencias de correos y marketing. <b style="color:var(--ink)">Próximamente.</b></p></div>
       </div>
 
@@ -447,7 +502,7 @@
       <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="route" class="lucide-lg brand-text"></i>Roadmap por fases</h2>
       <div class="space-y-3">
         <div class="flex gap-3"><span class="badge badge-ok" style="flex:0 0 auto">Fase 0</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">Documentación. Completada.</b></p></div>
-        <div class="flex gap-3"><span class="badge badge-brand" style="flex:0 0 auto">Fase 1</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">MVP gancho (tradicional). Núcleo construido y verificado (app v0.0.30).</b> Hecho con build + tests unitarios + E2E (Playwright): bienvenida y <b style="color:var(--ink)">onboarding</b>, registro/login (correo + clave segura + <b style="color:var(--ink)">OTP por correo</b>), <b style="color:var(--ink)">navegación de 5 pestañas</b> con header de nivel y avisos, <b style="color:var(--ink)">dashboard</b> con <b style="color:var(--ink)">tasas en vivo</b>, <b style="color:var(--ink)">calculadora</b> rediseñada (Bs · Dólar BCV · USDT · Solana), sección <b style="color:var(--ink)">Ahorro</b> con <b style="color:var(--ink)">asistente por pasos</b> y <b style="color:var(--ink)">unirse por enlace/código</b> + compartir + guía, <b style="color:var(--ink)">pagos</b>, turnos, <b style="color:var(--ink)">notificaciones (toasts + campanita)</b>, <b style="color:var(--ink)">reputación por puntos y niveles</b> (Nuevo → Leyenda), <b style="color:var(--ink)">perfil/configuración</b> (validación de usuario en vivo + restricciones) y <b style="color:var(--ink)">super-admin</b> (métricas, usuarios, restricciones, SMTP, app). Entrega de <b style="color:var(--ink)">primera versión: 1 de junio de 2026, 5:30 p.m.</b> Pendiente de esta fase: <b style="color:var(--ink)">sistema de referidos</b>, <b style="color:var(--ink)">calendario de pagos con fechas</b> y <b style="color:var(--ink)">despliegue</b> (Vercel + base de datos en el VPS).</p></div>
+        <div class="flex gap-3"><span class="badge badge-brand" style="flex:0 0 auto">Fase 1</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">MVP gancho (tradicional). Núcleo construido y verificado (app v0.0.41).</b> Hecho con build + tests unitarios + E2E (Playwright): bienvenida y <b style="color:var(--ink)">onboarding</b>, registro/login (correo + clave segura + <b style="color:var(--ink)">OTP por correo</b>), <b style="color:var(--ink)">navegación de 5 pestañas</b> con header de nivel y avisos, <b style="color:var(--ink)">dashboard</b> con <b style="color:var(--ink)">tasas en vivo</b>, <b style="color:var(--ink)">calculadora</b> rediseñada (Bs · Dólar BCV · USDT · Solana), sección <b style="color:var(--ink)">Ahorro</b> con <b style="color:var(--ink)">asistente por pasos</b> (incl. <b style="color:var(--ink)">método de pago del perfil</b>) y <b style="color:var(--ink)">unirse por enlace/código</b> + compartir + guía, <b style="color:var(--ink)">pagos</b>, turnos, <b style="color:var(--ink)">notificaciones (toasts + campanita) y avisos en app + correo</b>, <b style="color:var(--ink)">métodos de pago rediseñados</b> (fiat/cripto, con confirmación por clave), <b style="color:var(--ink)">reputación por puntos y niveles</b> (Nuevo → Leyenda), <b style="color:var(--ink)">perfil/configuración</b> (validación de usuario en vivo + restricciones) y <b style="color:var(--ink)">super-admin</b> (métricas, usuarios, restricciones, SMTP, app). Entrega de <b style="color:var(--ink)">primera versión: 1 de junio de 2026, 5:30 p.m.</b> Pendiente de esta fase: <b style="color:var(--ink)">sistema de referidos</b>, <b style="color:var(--ink)">calendario de pagos con fechas</b>, <b style="color:var(--ink)">comprobantes (MinIO/S3 en VPS)</b> y <b style="color:var(--ink)">despliegue</b> (Vercel + base de datos en el VPS).</p></div>
         <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 2</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">Capa cripto (enseguida tras el núcleo, en devnet):</b> wallet embebida <b style="color:var(--ink)">no-custodial</b> + onboarding de respaldo, <b style="color:var(--ink)">login con wallet</b> (Phantom/Solflare), USDC/SOL, depósitos/retiros/transferencias, multifirma o modo espejo, multas por mora. <b style="color:var(--ink)">Alto estándar de seguridad web3</b>; devnet antes de dinero real.</p></div>
         <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 3</span><p class="text-sm" style="color:var(--ink-2)">Confianza y escala: dividir cuentas, KYC con proveedor, panel super-admin completo, <b style="color:var(--ink)">marketplace público</b>, <b style="color:var(--ink)">login con Google</b>, despliegue en VPS.</p></div>
         <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 4</span><p class="text-sm" style="color:var(--ink-2)">App móvil Android/iOS.</p></div>
@@ -492,7 +547,7 @@
     </section>
 
     <footer class="pt-2 pb-10 text-center text-xs" style="color:var(--ink-3)">
-      Green Sol · Solana Vibe Bootcamp Venezuela · PRD v0.9 · app v0.0.30 · <span class="mono">2026-05-30</span> · <a href="https://github.com/michumichifu/green-sol" class="brand-text underline">github.com/michumichifu/green-sol</a>
+      Green Sol · Solana Vibe Bootcamp Venezuela · PRD v0.10 · app v0.0.41 · <span class="mono">2026-05-30</span> · <a href="https://github.com/michumichifu/green-sol" class="brand-text underline">github.com/michumichifu/green-sol</a>
     </footer>
 
   </main>

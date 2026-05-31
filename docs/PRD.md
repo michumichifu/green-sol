@@ -2,12 +2,59 @@
 
 > Proyecto del Solana Vibe Bootcamp (Venezuela). App para **gestionar el ahorro en grupo de forma transparente** (san/bolso/susi por turnos, o pote/vaca por meta) y dividir cuentas, con **reputación de usuarios**. Método tradicional o cripto sobre Solana, sin que la app custodie dinero a la fuerza. **La finalidad es servir de puente al ahorro en cripto** para la comunidad hispana.
 
-- **Versión:** 0.9 (núcleo del MVP **construido y verificado**, app v0.0.30). Estado de desarrollo en [CHANGELOG.md](../CHANGELOG.md); diseño en [superpowers/specs/2026-05-29-green-sol-mvp-design.md](superpowers/specs/2026-05-29-green-sol-mvp-design.md).
+- **Versión:** 0.10 (núcleo del MVP **construido y verificado**, app v0.0.41). Estado de desarrollo en [CHANGELOG.md](../CHANGELOG.md); diseño en [superpowers/specs/2026-05-29-green-sol-mvp-design.md](superpowers/specs/2026-05-29-green-sol-mvp-design.md).
 - **Fecha:** 2026-05-30
-- **Fase:** 1 — MVP en construcción. **Núcleo tradicional construido** (auth con OTP, ahorros san/vaca con **asistente de creación por pasos**, **unirse por enlace/código**, tasas en vivo, calculadora, navegación de 5 pestañas con header de nivel y avisos, dashboard, pagos, **reputación por puntos y niveles**, perfil/configuración, **panel super-admin con métricas y restricciones**, onboarding), verificado con build + tests unitarios + E2E (Playwright). Pendiente: capa cripto (bloque 7), referidos, despliegue. Entrega de primera versión: **1 de junio de 2026, 5:30 p.m.**
+- **Fase:** 1 — MVP en construcción. **Núcleo tradicional construido** (auth con OTP, ahorros san/vaca con **asistente de creación por pasos** —incluido el paso de **método de pago elegido del perfil**—, **unirse por enlace/código**, tasas en vivo, calculadora, navegación de 5 pestañas con header de nivel y avisos, dashboard, pagos, **reputación por puntos y niveles**, **métodos de pago rediseñados** (modelo `MetodoPago` fiat/cripto con agregar/editar/eliminar), **verificación por clave** y **avisos en app + correo** en acciones sensibles, perfil/configuración, **panel super-admin con métricas y restricciones**, onboarding), verificado con build + tests unitarios + E2E (Playwright). Pendiente: capa cripto (bloque 7), referidos, calendario de turnos con fechas, despliegue. Entrega de primera versión: **1 de junio de 2026, 5:30 p.m.**
 - **Nombre:** Green Sol (sol verde). Descartado: Cochino.
 
 Versión visual: [PRD.html](PRD.html). Técnica: [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md), [INTEGRACIONES_API.md](INTEGRACIONES_API.md) y [SEGURIDAD_Y_WALLETS.md](SEGURIDAD_Y_WALLETS.md).
+
+---
+
+## 0. Estado del proyecto (app v0.0.41)
+
+Foto rápida de qué funciona, qué falta y qué se decidió en la última conversación.
+
+### ✅ Implementado (ya funciona)
+
+- **Autenticación:** registro/login con **correo + contraseña** (política de clave segura con generador aleatorio), **verificación y 2FA por OTP al correo** vía SMTP propio, sesión por cookie.
+- **Onboarding:** carrusel a pantalla completa con infografías y checkbox "no volver a mostrar" (`onboardingCerrado`), pantalla de carga con logo.
+- **Navegación:** **5 ítems** (Ahorro · Pagos · **Inicio** · Calculadora · Perfil) + **header** sticky con **etiqueta de nivel** y **campana de avisos** (panel desplegable); **transición de fade** entre pestañas.
+- **Dashboard:** hero con saludo + puntos/nivel, accesos rápidos, **tasas de hoy** (BCV/USDT/SOL del caché global) y "Tus ahorros".
+- **Calculadora** rediseñada (`components/calculadora.tsx`): origen entre **Bolívares · Dólar BCV · USDT · Solana**, símbolo como prefijo, cotización del día y conversiones a las otras tres (lee del caché global).
+- **Sección Ahorro:** landing "Ahorros" (Crear/Unirme/Guía), **asistente de creación por pasos** (tipo → título+descripción → visibilidad → moneda → detalles del san con **meta por turno anclada en dólares**, aporte por persona calculado, **frecuencia con días personalizables** y duración estimada → **método de pago elegido del perfil** → resumen), **unirse por enlace/código** (acepta `?codigo=`), **compartir** (código, copiar enlace, compartir nativo) y **guía visual**.
+- **Pagos:** aportes por confirmar / rechazados y ahorros activos con turno/posición.
+- **Perfil (hub) y Configuración** por pestañas (Datos · Pagos · Seguridad · Avisos), con **validación de nombre de usuario en vivo**.
+- **Métodos de pago rediseñados** (modelo `MetodoPago` fiat/cripto): crear (flujo categoría → moneda → método → datos, con monedas futuras deshabilitadas "Pronto"), **editar** y **eliminar**; enfoque MVP = VES + USD (+ cripto USDC/SOL).
+- **Seguridad y avisos:** `lib/seguridad.ts` (`verificarFactores`, hoy con la clave) — agregar/editar/eliminar método de pago **pide confirmar con la clave** y **avisa en app + correo** (`notificarYCorreo`), igual que al **crear un ahorro**.
+- **Reputación:** puntos = estrellitas + niveles (Nuevo → Confiable → Destacado → Estrella → Leyenda) en `lib/reputacion.ts`; valoraciones (manito +/−) al cerrar.
+- **Restricciones** (lista negra de palabras) en nombre/apellido/usuario; **panel super-admin** con 5 pestañas (Métricas reales · Usuarios · Restricciones · SMTP · App).
+- **Datasets:** `lib/bancos-venezuela.ts` (25 bancos), `lib/monedas.ts` (monedas fiat + futuras + métodos por moneda + cripto).
+- **Páginas** Recompensa (`/recompensa`) y Centro de ayuda (`/ayuda`).
+- **Tasas:** caché global refrescado por cron (`/api/cron/tasas`); toda la app lee del caché.
+
+### ⏳ Pendiente (roadmap, de IDEAS_FUTURAS / PLAN_METODOS_PAGO / PLAN_SEGURIDAD)
+
+- **Integración cripto:** wallet embebida no-custodial entregada en el **registro** (mostrar dirección + llave difuminada con ícono de ojo, bajo responsabilidad del usuario), **billetera en el dashboard**, **depósitos/retiros/transferencias**, multifirma/modo espejo; todo primero en **DevNet**. La wallet **principal** como método de pago predefinido sale de aquí.
+- **Sistema de referidos:** código por usuario (copiar/compartir), **+40 puntos a ambos** cuando el referido se registra con el código y hace su **primer aporte**, **máximo 5** premiados, **solo cuentas nuevas**, acreditación única; luego **club de canje** de puntos. Toca el esquema (`codigoReferido`, `referidoPorId` en `Usuario`).
+- **Calendario de turnos con fechas:** hoy `Turno` solo tiene `posicion` y `cobrado`; añadir `fechaInicio` + frecuencia → fechas por turno para la pestaña Pagos.
+- **Código de invitación corto** propio (hoy se usa el `id`/cuid).
+- **Despliegue:** Vercel (auto-redeploy con GitHub) + **base de datos en el VPS**.
+- **Almacenamiento de comprobantes:** subir captura del pago, vía **MinIO/S3 en el VPS**.
+- **Monedas y bancos de otros países** (reactivar `MONEDAS_FIAT_FUTURAS` país por país).
+- **Marketplace público**, dividir cuentas, KYC con proveedor, login con Google y con wallet.
+
+### 🆕 Pendientes nuevos de esta conversación
+
+- **Pestaña de Verificaciones** en Configuración → Seguridad:
+  - **Verificación de correo** (la más fácil, primera en implementarse).
+  - **Verificación de identidad nivel 1** y **nivel 2** — cada nivel habilita **límites/montos distintos** para san/pote.
+  - **Verificación de teléfono** (futuro): como alternativa al SMS, enviar el código por **WhatsApp mediante Evolution API** desde una instancia propia.
+  - Cada acción sensible podrá **exigir el factor adecuado** según el nivel del usuario.
+- **Aplicar verificación por clave/2FA a más acciones:** retiros (cripto), cambio de clave, cierre de san, además de los métodos de pago (ya cubiertos).
+- **Avisos por correo + app en todos los eventos del san:** invitación, sorteo de turnos, pago reportado/confirmado/rechazado, cierre (hoy varios solo in-app).
+
+> **Pendiente de prueba / QA manual por el usuario:** probar el **flujo completo de crear y finalizar un san**; el **registro + verificación OTP**; y el **panel super-admin** con **carga de SMTP** y **prueba de envío de correos**.
 
 ---
 
@@ -173,13 +220,14 @@ La pestaña **Ahorro** (`app/(app)/sanes/`, ruta `/sanes`) es el corazón funcio
 
 - **Landing "Ahorros"** (`sanes/page.tsx`): título "Ahorros" (ya **no** se titula "Sanes & Vacas") con tres acciones — **Crear ahorro** (`/sanes/crear`), **Unirme** (`/sanes/unirse`) y **¿Cómo funciona el ahorro?** (`/sanes/guia`) — y la lista de "Tus ahorros" con estado vacío que invita a crear o unirse.
 
-- **Asistente de creación por pasos** (`sanes/crear/page.tsx`, con **barra de progreso**, 6 pasos):
-  1. **Tipo:** Susi·San·Bolso (por turnos) o Vaca·Pote (meta común).
-  2. **Nombre.**
-  3. **Visibilidad:** privado (solo invitación) o público (cualquiera puede unirse).
-  4. **Moneda:** Bs (tasa BCV), Bs (paralelo/USDT), USDT, USDC (Solana) o Solana — claves `bs_bcv`, `bs_usdt`, `usdt`, `usdc`, `sol` (`lib/validations/recolecta.ts`). El monto se escribe con el **símbolo de la moneda como prefijo**.
-  5. **Detalles según tipo:** el **san** pide **aporte por turno**, **frecuencia** (semanal/quincenal/mensual) y **nº de manos (personas)**, 2–50; la **vaca** pide la **meta**.
-  6. **Resumen y crear.**
+- **Asistente de creación por pasos** (`sanes/crear/page.tsx`, con **barra de progreso**):
+  1. **Tipo:** Susi·San·Bolso (por turnos) o Vaca·Pote (meta común), con etiqueta colorida ("Por turnos" / "Meta en común").
+  2. **Título y descripción:** "¿Qué título le quieres poner a tu san/vaca?" + un campo de **descripción** con ejemplo (campos `nombre` y `descripcion`).
+  3. **Visibilidad:** privado (solo invitación; nota de que luego se invita por correo, usuario o enlace) o público (cualquiera puede unirse).
+  4. **Moneda:** Bs (tasa BCV), Bs (paralelo/USDT), USDC (Solana) o Solana — claves `bs_bcv`, `bs_usdt`, `usdc`, `sol` (`lib/validations/recolecta.ts`); con **tooltip** explicativo. El monto se escribe con el **símbolo de la moneda como prefijo**.
+  5. **Detalles según tipo:** el **san** pide, en orden, **nº de participantes (manos, 2–50)** → **meta por turno anclada en dólares** (se paga en Bs a la tasa del día) → **aporte por persona calculado** (= meta ÷ participantes) → **frecuencia** (semanal/quincenal/mensual o **"Personalizar"** con días a medida, campo `frecuenciaDias`) → **duración estimada** (en días y su equivalente en semanas, p. ej. "~75 días (≈11 semanas) · 5 turnos"); la **vaca** pide la **meta**.
+  6. **Método de pago:** el organizador **elige uno de sus métodos de pago del perfil**, **filtrado por la moneda** del san (Bs → fiat VES; USDC/SOL → cripto). Si **no tiene** un método compatible, el paso se **bloquea** con un mensaje y enlace a **Perfil → Pagos**. Los datos de pago se **copian** del método elegido (vía endpoint `/api/metodos-pago`) hacia `DatosPagoRecolecta`.
+  7. **Resumen y crear.** Al crear, el usuario recibe un **aviso en app y por correo** ("¡Creaste tu ahorro!").
 
 - **Unirse a un ahorro** (`sanes/unirse/page.tsx` + componente `unirse-ahorro.tsx`; acciones `buscarRecolecta` / `unirseARecolecta` en `sanes/actions.ts`): por **enlace o código**. El **código es el id de la recolecta** (cuid); la página acepta `?codigo=` para precargarlo. Al unirse se **notifica al organizador**.
 
@@ -204,7 +252,7 @@ Dos planos complementarios:
 | Naranja | Advertencia / probable error |
 | Azul | Información neutra |
 
-> Para el MVP, notificaciones **in-app** son suficientes; correo/push pueden venir después.
+> Para el MVP, notificaciones **in-app** son suficientes. **Ya implementado** un helper `notificarYCorreo` (`lib/notificaciones.ts`) que avisa **en la app (campanita) y por correo** a la vez; hoy se usa en acciones sensibles de **métodos de pago** (agregar/editar/eliminar) y al **crear un ahorro**. Pendiente: extender el mismo patrón a todos los eventos del san (invitación, sorteo de turnos, pago reportado/confirmado/rechazado, cierre) y push.
 
 ## 14. Cuenta, registro, verificación, perfil y roles
 
@@ -224,12 +272,17 @@ Dos planos complementarios:
 
 **Configuración — sección propia** (`app/(app)/configuracion/page.tsx`, ruta `/configuracion`). Dejó de ser un drawer; ahora es una página con **pestañas**:
 - **Datos:** correo, nombre, apellido y **nombre de usuario** (3–15 caracteres), con **validación de disponibilidad del nombre de usuario en vivo** (endpoint `app/api/usuario-disponible/route.ts`).
-- **Pagos (métodos):** efectivo (USD), transferencia (Bs), pago móvil, wallet USDT y wallet Solana — agregar/quitar.
-- **Seguridad:** cambio de contraseña y 2FA (próximamente).
-- **Avisos:** preferencias de correos/marketing (próximamente).
+- **Pagos (métodos) — rediseñado** (modelo `MetodoPago`, `components/form-metodo-pago.tsx` + `components/metodo-pago-item.tsx`): el usuario **crea, edita y elimina** sus métodos para **recibir** en los ahorros que organice. Flujo de creación: **categoría Fiat o Cripto** → **moneda** (selector buscable; el MVP habilita **VES** y **USD**, y las demás monedas de LatAm aparecen **deshabilitadas con la etiqueta "Pronto"** desde `MONEDAS_FIAT_FUTURAS`) → **método** → **datos**:
+  - **Fiat VES:** Transferencia (banco buscable de `lib/bancos-venezuela.ts`, tipo de cuenta, número, titular, cédula) o Pago móvil (banco, teléfono, titular, cédula).
+  - **Fiat USD:** Efectivo, Zelle, Zinli, WalyTech o Banco (USD).
+  - **Cripto (red Solana):** USDC o SOL → dirección de **wallet externa** + alias. (La wallet **principal** la entregará la integración cripto, predefinida y no editable; campo `principal`.)
+  - **Prohibición** clara: los datos deben ser del **titular, persona natural** (no terceros ni empresas).
+  - **Seguridad:** agregar, editar y eliminar un método **piden confirmar con la clave** (`lib/seguridad.ts`) y **avisan en app y por correo** (`notificarYCorreo`).
+- **Seguridad:** cambio de contraseña y verificación en dos pasos (**próximamente** — hoy es un placeholder en la UI; ver la sección de Estado).
+- **Avisos:** preferencias de correos/marketing (**próximamente** — placeholder).
 - Para el super-admin, un **toggle a super-admin** (`components/toggle-admin.tsx`) lleva al panel.
 
-A futuro (fase cripto): direcciones de wallet **USDT** y **Solana** (USDC/SOL) como datos de pago, para consulta entre la wallet y la app.
+A futuro (fase cripto): la **wallet embebida principal** (USDC/SOL) que la app entrega al registrarse aparecerá como método de pago predefinido y no editable.
 
 **Restricciones / lista negra de palabras** (`lib/restricciones.ts`): bloquea palabras de **falsa autoridad** (admin, organizador, soporte, moderador, root, oficial, "green sol", etc.) en **nombre, apellido y nombre de usuario**, tanto en el **registro** como al **editar el perfil**. El **super-admin queda exento** y puede **editar las listas** desde su panel (claves `BLACKLIST_NOMBRE`, `BLACKLIST_APELLIDO`, `BLACKLIST_USUARIO`).
 
@@ -279,7 +332,7 @@ Toda la configuración se persiste en la tabla `ConfiguracionApp` (`clave`/`valo
 ## 19. Roadmap por fases
 
 - **Fase 0 — Documentación. Completada.**
-- **Fase 1 — MVP gancho (tradicional). Núcleo construido y verificado (app v0.0.30).** Hecho (build + tests unitarios + E2E con Playwright): bienvenida y **onboarding** con carrusel, registro/login (correo + clave segura + **OTP por correo**), **navegación de 5 pestañas** con header de nivel y avisos, **dashboard** con **tasas en vivo**, **calculadora** rediseñada (Bs · Dólar BCV · USDT · Solana), sección **Ahorro** con **asistente de creación por pasos** y **unirse por enlace/código** + compartir + guía, **pagos** (por confirmar/rechazados/activos), turnos, **notificaciones (toasts + campanita)**, **reputación por puntos y niveles** (Nuevo → Leyenda), **perfil/configuración** (con validación de usuario en vivo y restricciones de palabras) y **panel super-admin** con **métricas, usuarios, restricciones, SMTP y configuración de app**. Entrega de primera versión: **1 de junio de 2026, 5:30 p.m.** Pendiente de esta fase: **sistema de referidos** (ver [IDEAS_FUTURAS.md](IDEAS_FUTURAS.md)), **calendario de pagos con fechas**, y **despliegue** (Vercel + base de datos en el VPS).
+- **Fase 1 — MVP gancho (tradicional). Núcleo construido y verificado (app v0.0.41).** Hecho (build + tests unitarios + E2E con Playwright): bienvenida y **onboarding** con carrusel, registro/login (correo + clave segura + **OTP por correo**), **navegación de 5 pestañas** con header de nivel y avisos, **dashboard** con **tasas en vivo**, **calculadora** rediseñada (Bs · Dólar BCV · USDT · Solana), sección **Ahorro** con **asistente de creación por pasos** —incluido el paso de **método de pago elegido del perfil**— y **unirse por enlace/código** + compartir + guía, **pagos** (por confirmar/rechazados/activos), turnos, **notificaciones (toasts + campanita)** más **avisos en app + correo** en acciones sensibles, **métodos de pago rediseñados** (modelo `MetodoPago` fiat/cripto con agregar/editar/eliminar y **confirmación por clave**), **reputación por puntos y niveles** (Nuevo → Leyenda), **perfil/configuración** (con validación de usuario en vivo y restricciones de palabras) y **panel super-admin** con **métricas, usuarios, restricciones, SMTP y configuración de app**. Entrega de primera versión: **1 de junio de 2026, 5:30 p.m.** Pendiente de esta fase: **sistema de referidos** (ver [IDEAS_FUTURAS.md](IDEAS_FUTURAS.md)), **calendario de pagos con fechas**, **almacenamiento de comprobantes** (MinIO/S3 en VPS), y **despliegue** (Vercel + base de datos en el VPS).
 - **Fase 2 — Capa cripto (enseguida tras el núcleo, en devnet):** wallet embebida **no-custodial** + onboarding de respaldo, login con wallet (Phantom/Solflare), USDC/SOL, depósitos/retiros/transferencias, multifirma o modo espejo, multas por mora. Alto estándar de seguridad web3; devnet antes de dinero real.
 - **Fase 3 — Confianza y escala:** dividir cuentas, KYC con proveedor, panel super-admin completo, **marketplace público**, login con Google, despliegue en VPS.
 - **Fase 4 — Móvil:** Android/iOS.

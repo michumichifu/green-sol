@@ -4,6 +4,16 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.42] — 2026-05-30 — Documentación al día (PRD 0.10) + auditoría y estado del proyecto
+
+### Cambiado
+- **Auditoría código vs PRD** y actualización completa (sin resumir): `PRD.md` → **0.10**, `PRD.html` y `ARQUITECTURA_TECNICA.md` → **0.4**, alineados al estado real v0.0.41.
+- **Nueva sección "Estado del proyecto"** en PRD (md y html) con tres listas: ✅ **Implementado**, ⏳ **Pendiente**, 🆕 **Pendientes nuevos** de la conversación; más una nota de **QA manual pendiente** (probar: crear/finalizar san, registro+OTP, super-admin+SMTP).
+- Correcciones del PRD donde afirmaba de más (USDT suelto como moneda del san; métodos de pago viejos) y se documentó lo implementado que faltaba (asistente con método de pago del perfil, modelo `MetodoPago` rediseñado, `lib/seguridad.ts`, `notificarYCorreo`).
+
+### Pendiente nuevo registrado
+- **Pestaña de Verificaciones** (Configuración → Seguridad): verificación de **correo**, **identidad nivel 1 y 2** (habilitan límites/montos distintos en san/pote), y **teléfono** (futuro; código por **WhatsApp vía Evolution API** como alternativa a SMS).
+
 ## [0.0.41] — 2026-05-30 — Verificación por clave y avisos (app + correo)
 
 ### Añadido
