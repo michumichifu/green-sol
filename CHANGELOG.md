@@ -4,6 +4,17 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.41] — 2026-05-30 — Verificación por clave y avisos (app + correo)
+
+### Añadido
+- **Verificación de seguridad** reutilizable (`lib/seguridad.ts → verificarFactores`): hoy con la **clave de la cuenta**; diseñado para sumar OTP por correo, TOTP (Google Authenticator), PIN o biometría sin tocar las acciones.
+- **Agregar / editar / eliminar** un método de pago ahora **piden confirmar con la clave** (eliminar incluido, por ser destructivo).
+- **Avisos en la app y por correo** (`notificarYCorreo`) en cada cambio: se agregó/editó/eliminó un método de pago, y al **crear un ahorro** ("¡Creaste tu ahorro!").
+- `docs/PLAN_SEGURIDAD.md`: diseño extensible y dónde aplicar el patrón (retiros, 2FA, eventos del san, etc.).
+
+### Verificado
+- Build limpio; E2E 4/4.
+
 ## [0.0.40] — 2026-05-30 — Editar métodos de pago
 
 ### Añadido

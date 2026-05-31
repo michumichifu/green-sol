@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { enviarCorreo } from "@/lib/mailer";
 
 type BaseNoti = {
   tipo: string;
@@ -6,6 +7,23 @@ type BaseNoti = {
   cuerpo?: string;
   enlace?: string;
 };
+
+/**
+ * Notifica al usuario en la app (campanita) **y** por correo. Para eventos
+ * importantes: seguridad (métodos de pago), creación de un ahorro, etc.
+ */
+export async function notificarYCorreo(
+  usuario: { id: string; correo: string },
+  base: BaseNoti,
+): Promise<void> {
+  await crearNotificacion(usuario.id, base);
+  const cuerpo = base.cuerpo ? `${base.titulo}\n\n${base.cuerpo}` : base.titulo;
+  try {
+    await enviarCorreo(usuario.correo, base.titulo, `${cuerpo}\n\n— Green Sol`);
+  } catch {
+    // si el SMTP falla, la notificación in-app ya quedó registrada
+  }
+}
 
 /** Crea una notificación para un usuario (campanita). */
 export async function crearNotificacion(

@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { validarRestricciones } from "@/lib/restricciones";
+import { verificarFactores } from "@/lib/seguridad";
+import { notificarYCorreo } from "@/lib/notificaciones";
 
 function str(v: FormDataEntryValue | null): string | null {
   const s = String(v ?? "").trim();
@@ -80,9 +82,24 @@ export async function agregarMetodoPago(
   if (!categoria || !moneda || !metodo)
     return { error: "Faltan datos del método." };
 
+  const ver = await verificarFactores(usuario.id, {
+    clave: str(formData.get("clave")) ?? undefined,
+  });
+  if (!ver.ok) return { error: ver.error };
+
   await prisma.metodoPago.create({
     data: { usuarioId: usuario.id, categoria, moneda, metodo, ...datosMetodo(formData) },
   });
+  await notificarYCorreo(
+    { id: usuario.id, correo: usuario.correo },
+    {
+      tipo: "seguridad",
+      titulo: "Agregaste un método de pago",
+      cuerpo:
+        "Se agregó un método de pago a tu cuenta. Si no fuiste tú, cámbialo y revisa tu seguridad.",
+      enlace: "/configuracion?tab=pagos",
+    },
+  );
   revalidatePath("/configuracion");
   return { ok: true };
 }
@@ -95,20 +112,55 @@ export async function editarMetodoPago(
   if (!usuario) return { error: "Tu sesión expiró." };
   const id = str(formData.get("id"));
   if (!id) return { error: "Método no encontrado." };
+  const ver = await verificarFactores(usuario.id, {
+    clave: str(formData.get("clave")) ?? undefined,
+  });
+  if (!ver.ok) return { error: ver.error };
   const res = await prisma.metodoPago.updateMany({
     where: { id, usuarioId: usuario.id },
     data: datosMetodo(formData),
   });
   if (res.count === 0) return { error: "Método no encontrado." };
+  await notificarYCorreo(
+    { id: usuario.id, correo: usuario.correo },
+    {
+      tipo: "seguridad",
+      titulo: "Editaste un método de pago",
+      cuerpo:
+        "Se modificó un método de pago de tu cuenta. Si no fuiste tú, revisa tu seguridad.",
+      enlace: "/configuracion?tab=pagos",
+    },
+  );
   revalidatePath("/configuracion");
   return { ok: true };
 }
 
-export async function eliminarMetodoPago(id: string): Promise<void> {
+export async function eliminarMetodoPago(
+  _estado: EstadoMetodo,
+  formData: FormData,
+): Promise<EstadoMetodo> {
   const usuario = await obtenerUsuario();
-  if (!usuario) return;
-  await prisma.metodoPago.deleteMany({
+  if (!usuario) return { error: "Tu sesión expiró." };
+  const id = str(formData.get("id"));
+  if (!id) return { error: "Método no encontrado." };
+  const ver = await verificarFactores(usuario.id, {
+    clave: str(formData.get("clave")) ?? undefined,
+  });
+  if (!ver.ok) return { error: ver.error };
+  const res = await prisma.metodoPago.deleteMany({
     where: { id, usuarioId: usuario.id },
   });
-  revalidatePath("/perfil");
+  if (res.count === 0) return { error: "Método no encontrado." };
+  await notificarYCorreo(
+    { id: usuario.id, correo: usuario.correo },
+    {
+      tipo: "seguridad",
+      titulo: "Eliminaste un método de pago",
+      cuerpo:
+        "Se eliminó un método de pago de tu cuenta. Si no fuiste tú, revisa tu seguridad.",
+      enlace: "/configuracion?tab=pagos",
+    },
+  );
+  revalidatePath("/configuracion");
+  return { ok: true };
 }

@@ -58,6 +58,7 @@ export function FormMetodoPago() {
   const [email, setEmail] = useState("");
   const [wallet, setWallet] = useState("");
   const [detalle, setDetalle] = useState("");
+  const [clave, setClave] = useState("");
 
   function limpiar() {
     setCategoria("");
@@ -76,6 +77,7 @@ export function FormMetodoPago() {
     setEmail("");
     setWallet("");
     setDetalle("");
+    setClave("");
   }
 
   useEffect(() => {
@@ -107,9 +109,10 @@ export function FormMetodoPago() {
   const titular = `${nombre} ${apellido}`.trim();
   const cedula = cedulaNum.trim() ? `${cedulaPref}-${cedulaNum.trim()}` : "";
 
-  const puedeAgregar = esCripto
+  const datosListos = esCripto
     ? !!metodo && wallet.trim().length > 0
     : !!moneda && !!metodo && nombre.trim().length > 0;
+  const puedeAgregar = datosListos && clave.trim().length > 0;
 
   const camposTitular = (
     <>
@@ -448,6 +451,20 @@ export function FormMetodoPago() {
             </>
           )}
 
+          <div className="space-y-1 rounded-lg bg-muted/40 p-2.5">
+            <label className="text-xs font-medium">Confirma con tu clave</label>
+            <Input
+              type="password"
+              name="clave"
+              value={clave}
+              onChange={(e) => setClave(e.target.value)}
+              placeholder="Tu clave de la cuenta"
+              autoComplete="current-password"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Por seguridad, confirma que eres el titular.
+            </p>
+          </div>
           <Button
             type="submit"
             variant="secondary"

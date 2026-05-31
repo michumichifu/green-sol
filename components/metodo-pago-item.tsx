@@ -50,10 +50,17 @@ function Campo({
 
 export function MetodoPagoItem({ m }: { m: MetodoCompleto }) {
   const [editando, setEditando] = useState(false);
+  const [eliminando, setEliminando] = useState(false);
+  const [claveEdit, setClaveEdit] = useState("");
+  const [claveDel, setClaveDel] = useState("");
   const [estado, accion, pendiente] = useActionState<EstadoMetodo, FormData>(
     editarMetodoPago,
     {},
   );
+  const [estadoDel, accionDel, pendienteDel] = useActionState<
+    EstadoMetodo,
+    FormData
+  >(eliminarMetodoPago, {});
 
   const [alias, setAlias] = useState(m.alias ?? "");
   const [titular, setTitular] = useState(m.titular ?? "");
@@ -69,10 +76,16 @@ export function MetodoPagoItem({ m }: { m: MetodoCompleto }) {
     if (estado.ok) {
       toast.success("Método actualizado");
       setEditando(false);
+      setClaveEdit("");
     } else if (estado.error) {
       toast.error(estado.error);
     }
   }, [estado]);
+
+  useEffect(() => {
+    if (estadoDel.ok) toast.success("Método eliminado");
+    else if (estadoDel.error) toast.error(estadoDel.error);
+  }, [estadoDel]);
 
   const esVE = m.moneda === "VES";
   const esCripto = m.categoria === "cripto";
@@ -93,8 +106,6 @@ export function MetodoPagoItem({ m }: { m: MetodoCompleto }) {
     .filter(Boolean)
     .join(" · ");
 
-  const eliminar = eliminarMetodoPago.bind(null, m.id);
-
   return (
     <li className="rounded-lg border bg-card px-3 py-2">
       <div className="flex items-center justify-between gap-2">
@@ -111,18 +122,62 @@ export function MetodoPagoItem({ m }: { m: MetodoCompleto }) {
             type="button"
             size="sm"
             variant="ghost"
-            onClick={() => setEditando((v) => !v)}
+            onClick={() => {
+              setEditando((v) => !v);
+              setEliminando(false);
+            }}
             aria-label="Editar"
           >
             <Pencil className="size-4" />
           </Button>
-          <form action={eliminar}>
-            <Button type="submit" size="sm" variant="ghost">
-              Quitar
-            </Button>
-          </form>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              setEliminando((v) => !v);
+              setEditando(false);
+            }}
+          >
+            Quitar
+          </Button>
         </div>
       </div>
+
+      {eliminando && (
+        <form action={accionDel} className="mt-3 space-y-2.5 border-t pt-3">
+          <input type="hidden" name="id" value={m.id} />
+          <p className="text-sm">
+            ¿Eliminar este método? Confirma con tu clave.
+          </p>
+          <Input
+            type="password"
+            name="clave"
+            value={claveDel}
+            onChange={(e) => setClaveDel(e.target.value)}
+            placeholder="Tu clave de la cuenta"
+            autoComplete="current-password"
+          />
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              className="flex-1"
+              onClick={() => setEliminando(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="destructive"
+              className="flex-1"
+              disabled={claveDel.trim().length === 0 || pendienteDel}
+            >
+              {pendienteDel ? "Eliminando..." : "Eliminar"}
+            </Button>
+          </div>
+        </form>
+      )}
 
       {editando && (
         <form action={accion} className="mt-3 space-y-2.5 border-t pt-3">
@@ -226,6 +281,16 @@ export function MetodoPagoItem({ m }: { m: MetodoCompleto }) {
             <Input value={alias} onChange={(e) => setAlias(e.target.value)} />
           </Campo>
 
+          <Campo label="Confirma con tu clave">
+            <Input
+              type="password"
+              name="clave"
+              value={claveEdit}
+              onChange={(e) => setClaveEdit(e.target.value)}
+              autoComplete="current-password"
+            />
+          </Campo>
+
           <div className="flex gap-2">
             <Button
               type="button"
@@ -239,7 +304,7 @@ export function MetodoPagoItem({ m }: { m: MetodoCompleto }) {
               type="submit"
               variant="secondary"
               className="flex-1"
-              disabled={pendiente}
+              disabled={claveEdit.trim().length === 0 || pendiente}
             >
               {pendiente ? "Guardando..." : "Guardar cambios"}
             </Button>

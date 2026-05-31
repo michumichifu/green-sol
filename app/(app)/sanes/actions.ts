@@ -5,7 +5,11 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { crearRecolectaSchema } from "@/lib/validations/recolecta";
-import { crearNotificacion, notificarVarios } from "@/lib/notificaciones";
+import {
+  crearNotificacion,
+  notificarVarios,
+  notificarYCorreo,
+} from "@/lib/notificaciones";
 
 export type EstadoRecolecta = { error?: string };
 
@@ -84,6 +88,15 @@ export async function crearRecolecta(
       datosPago,
     },
   });
+  await notificarYCorreo(
+    { id: usuario.id, correo: usuario.correo },
+    {
+      tipo: "ahorro",
+      titulo: "¡Creaste tu ahorro!",
+      cuerpo: `Tu ${tipo === "san" ? "san" : "vaca"} "${nombre}" se creó correctamente. Invita a tu gente para empezar.`,
+      enlace: `/sanes/${recolecta.id}`,
+    },
+  );
   redirect(`/sanes/${recolecta.id}`);
 }
 
