@@ -9,7 +9,7 @@ import { verificarContrasena } from "@/lib/auth/password";
 import { puedeTransicionar } from "@/lib/kyc/estados";
 import { guardarConfig } from "@/lib/config";
 import { PASOS_KYC, type PasoKyc } from "@/lib/kyc/config";
-import { notificarYCorreo } from "@/lib/notificaciones";
+import { notificarEvento } from "@/lib/notificaciones";
 
 export type EstadoRevision = { ok?: boolean; error?: string };
 
@@ -109,31 +109,19 @@ export async function resolverKyc(
     }
   });
 
-  // Notificar al usuario (app + correo)
-  const avisos: Record<AccionRevision, { titulo: string; cuerpo: string }> = {
-    aprobar: {
-      titulo: "¡Verificación aprobada! 🎉",
-      cuerpo: "Tu identidad fue verificada. Ya apareces como Verificado en tu perfil.",
-    },
-    rechazar: {
-      titulo: "No pudimos verificar tu identidad",
-      cuerpo: `Motivo: ${motivo?.trim()}. Si crees que es un error, contacta a soporte.`,
-    },
-    reenvio: {
-      titulo: "Tu verificación necesita correcciones",
-      cuerpo: `${motivo?.trim()}. Vuelve a Configuración → Verificación para reenviar.`,
-    },
-    banear: {
-      titulo: "Tu cuenta fue suspendida",
-      cuerpo: "Detectamos una irregularidad en tu verificación. Contacta a soporte.",
-    },
+  // Notificar al usuario con la plantilla del catálogo (editable en el editor).
+  const CLAVE_EVENTO: Record<AccionRevision, string> = {
+    aprobar: "kyc_aprobada",
+    rechazar: "kyc_rechazada",
+    reenvio: "kyc_reenvio",
+    banear: "kyc_baneada",
   };
-  await notificarYCorreo(v.usuario, {
-    tipo: "kyc",
-    titulo: avisos[accion].titulo,
-    cuerpo: avisos[accion].cuerpo,
-    enlace: "/configuracion?tab=verificacion",
-  });
+  await notificarEvento(
+    v.usuario,
+    CLAVE_EVENTO[accion],
+    { motivo: motivo?.trim() ?? "" },
+    { tipo: "kyc", enlace: "/configuracion?tab=verificacion" },
+  );
 
   revalidatePath("/admin");
   return { ok: true };

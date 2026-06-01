@@ -8,7 +8,7 @@ import { subirArchivo } from "@/lib/almacenamiento";
 import { pasosRequeridos } from "@/lib/kyc/config";
 import { ultimaVerificacion } from "@/lib/kyc/consultas";
 import { ESTADOS_EN_CURSO } from "@/lib/kyc/estados";
-import { notificarYCorreo } from "@/lib/notificaciones";
+import { notificarEvento } from "@/lib/notificaciones";
 
 export type EstadoEnvioKyc = { ok?: boolean; error?: string };
 
@@ -154,11 +154,8 @@ export async function enviarVerificacion(
     return { error: e instanceof Error ? e.message : "No se pudo subir los archivos." };
   }
 
-  await notificarYCorreo(u, {
+  await notificarEvento(u, "kyc_recibida", {}, {
     tipo: "kyc",
-    titulo: "Recibimos tu verificación 📋",
-    cuerpo:
-      "Estamos revisando tu identidad. La revisión puede tardar de 24 a 48 horas aproximadamente; te avisaremos por aquí y por correo cuando haya respuesta. Gracias por tu paciencia.",
     enlace: "/configuracion?tab=verificacion",
   });
 

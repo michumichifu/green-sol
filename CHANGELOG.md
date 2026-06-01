@@ -4,6 +4,18 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.67] — 2026-06-01 — KYC: notificaciones conectadas al editor de plantillas
+
+### Añadido
+- **5 eventos de verificación en el catálogo** (`lib/correo/catalogo.ts`, categoría "Verificación"): `kyc_recibida`, `kyc_aprobada`, `kyc_reenvio`, `kyc_rechazada`, `kyc_baneada`, con plantillas app + correo de marca y variable `{{motivo}}`. Quedan **editables desde el editor visual** del super-admin (con override en BD).
+- Helper **`notificarEvento(usuario, clave, datos, opts)`** (`lib/notificaciones.ts`): dispara un evento del catálogo por sus canales (app/correo), aplicando override o default y reemplazando variables.
+
+### Cambiado
+- Las acciones del KYC (`enviarVerificacion`, `resolverKyc`) ahora usan `notificarEvento` en vez de textos fijos: el contenido de las notificaciones KYC sale del catálogo/editor.
+
+### Verificado
+- Typecheck limpio; resolución de eventos KYC probada (variables aplicadas). Suite E2E 6/6.
+
 ## [0.0.66] — 2026-06-01 — Documentación completa al día (PRD, PRD HTML)
 
 ### Cambiado

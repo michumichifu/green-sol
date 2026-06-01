@@ -241,6 +241,131 @@ export const EVENTOS_NOTIFICACION: EventoNotificacion[] = [
       }),
     },
   },
+  {
+    clave: "kyc_recibida",
+    nombre: "Verificación recibida",
+    descripcion: "Al enviar el usuario su verificación de identidad (KYC).",
+    categoria: "Verificación",
+    canales: ["app", "correo"],
+    variables: {},
+    datosMuestra: {},
+    app: {
+      titulo: "Recibimos tu verificación 📋",
+      cuerpo:
+        "Estamos revisando tu identidad. La revisión puede tardar de 24 a 48 horas aproximadamente; te avisaremos por aquí y por correo. ¡Gracias por tu paciencia!",
+    },
+    correo: {
+      asunto: "Recibimos tu verificación — Green Sol",
+      html: correoBase({
+        titulo: "Recibimos tu verificación 📋",
+        preheader: "Estamos revisando tu identidad",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'>Recibimos tus documentos y estamos <strong>revisando tu identidad</strong>.</p>" +
+          "<p style='margin:0;'>La revisión puede tardar de <strong>24 a 48 horas</strong>. Te avisaremos por aquí y por correo cuando haya respuesta. ¡Gracias por tu paciencia!</p>",
+      }),
+    },
+  },
+  {
+    clave: "kyc_aprobada",
+    nombre: "Verificación aprobada",
+    descripcion: "Cuando el super-admin aprueba la verificación de identidad.",
+    categoria: "Verificación",
+    canales: ["app", "correo"],
+    variables: {},
+    datosMuestra: {},
+    app: {
+      titulo: "¡Verificación aprobada! 🎉",
+      cuerpo:
+        "Tu identidad fue verificada. Ya apareces como Verificado en tu perfil. ✅",
+    },
+    correo: {
+      asunto: "¡Tu identidad fue verificada! 🎉",
+      html: correoBase({
+        titulo: "¡Verificación aprobada! 🎉",
+        preheader: "Tu identidad fue verificada",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'>¡Buenas noticias! Tu identidad fue <strong>verificada</strong> con éxito.</p>" +
+          "<p style='margin:0;'>Ya apareces como <strong>Verificado</strong> en tu perfil.</p>",
+        ctaTexto: "Ver mi perfil",
+        ctaUrl: "https://greensol.creceideas.com/perfil",
+      }),
+    },
+  },
+  {
+    clave: "kyc_reenvio",
+    nombre: "Verificación: corregir y reenviar",
+    descripcion: "Cuando se le pide al usuario reenviar (con motivo).",
+    categoria: "Verificación",
+    canales: ["app", "correo"],
+    variables: { motivo: "Motivo de la corrección" },
+    datosMuestra: { motivo: "La foto del documento se ve borrosa." },
+    app: {
+      titulo: "Tu verificación necesita correcciones",
+      cuerpo:
+        "{{motivo}} Vuelve a Configuración → Verificación para reenviarla.",
+    },
+    correo: {
+      asunto: "Tu verificación necesita correcciones",
+      html: correoBase({
+        titulo: "Necesitamos que reenvíes tu verificación",
+        preheader: "Una corrección y listo",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'>Revisamos tu solicitud y necesitamos que la corrijas:</p>" +
+          "<p style='margin:0 0 12px;padding:12px;background:#FFF7E6;border-radius:10px;'><strong>{{motivo}}</strong></p>" +
+          "<p style='margin:0;'>Vuelve a enviarla cuando quieras; es rápido.</p>",
+        ctaTexto: "Reenviar verificación",
+        ctaUrl: "https://greensol.creceideas.com/configuracion?tab=verificacion",
+      }),
+    },
+  },
+  {
+    clave: "kyc_rechazada",
+    nombre: "Verificación rechazada",
+    descripcion: "Cuando el super-admin rechaza la verificación (con motivo).",
+    categoria: "Verificación",
+    canales: ["app", "correo"],
+    variables: { motivo: "Motivo del rechazo" },
+    datosMuestra: { motivo: "Los datos no coinciden con el documento." },
+    app: {
+      titulo: "No pudimos verificar tu identidad",
+      cuerpo: "Motivo: {{motivo}} Si crees que es un error, contacta a soporte.",
+    },
+    correo: {
+      asunto: "No pudimos verificar tu identidad",
+      html: correoBase({
+        titulo: "No pudimos verificar tu identidad",
+        preheader: "Detalles de la revisión",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'>Revisamos tu solicitud y no pudimos aprobarla.</p>" +
+          "<p style='margin:0 0 12px;padding:12px;background:#FDECEC;border-radius:10px;'><strong>{{motivo}}</strong></p>" +
+          "<p style='margin:0;'>Si crees que es un error, contacta a soporte.</p>",
+      }),
+    },
+  },
+  {
+    clave: "kyc_baneada",
+    nombre: "Verificación: cuenta suspendida",
+    descripcion: "Cuando el super-admin rechaza y banea por fraude/suplantación.",
+    categoria: "Verificación",
+    canales: ["app", "correo"],
+    variables: {},
+    datosMuestra: {},
+    app: {
+      titulo: "Tu cuenta fue suspendida",
+      cuerpo:
+        "Detectamos una irregularidad en tu verificación. Contacta a soporte.",
+    },
+    correo: {
+      asunto: "Tu cuenta fue suspendida",
+      html: correoBase({
+        titulo: "Tu cuenta fue suspendida",
+        preheader: "Contacta a soporte",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'>Detectamos una irregularidad en tu proceso de verificación y <strong>suspendimos tu cuenta</strong>.</p>" +
+          "<p style='margin:0;'>Si crees que es un error, contacta a soporte.</p>",
+      }),
+    },
+  },
 ];
 
 export function eventoPorClave(clave: string): EventoNotificacion | undefined {
