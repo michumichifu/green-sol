@@ -4,6 +4,17 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.60] — 2026-06-01 — KYC: asistente en pop-up + flujo progresivo y textos claros
+
+### Cambiado
+- El asistente de verificación ahora abre en un **pop-up modal** (overlay con fondo difuminado), no desplegándose dentro de la sección, para mantener el foco.
+- **Flujo progresivo** del paso de documento: primero se elige el tipo (cédula/pasaporte); recién entonces aparecen nacionalidad (V/E) y el número; y **solo con esos datos** se piden las fotos. Antes los campos de foto aparecían de entrada, confundiendo.
+- **Textos/CTA claros**: "Selecciona el tipo de documento con el que deseas iniciar tu verificación"; label "Número de cédula/pasaporte" con ejemplo en el campo; "Sube la foto frontal del documento" + instrucciones (superficie plana, sin reflejos ni borrosidad), e igual para el reverso.
+- No deja enviar sin tipo, nacionalidad (si cédula), número y fotos.
+
+### Verificado
+- Typecheck limpio. Suite E2E 6/6 verde (incl. ciclo integral usuario→admin con el nuevo flujo).
+
 ## [0.0.59] — 2026-06-01 — Build más rápido (Dockerfile)
 
 ### Cambiado

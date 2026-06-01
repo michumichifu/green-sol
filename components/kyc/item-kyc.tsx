@@ -79,7 +79,9 @@ export function ItemKyc({
         </div>
       )}
 
-      {abierto && puedeIniciar && <AsistenteKyc pasos={pasos} />}
+      {abierto && puedeIniciar && (
+        <AsistenteKyc pasos={pasos} onCerrar={() => setAbierto(false)} />
+      )}
     </div>
   );
 }

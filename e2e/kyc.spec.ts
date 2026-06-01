@@ -10,11 +10,11 @@ test("KYC: el usuario abre el asistente de verificación", async ({ page }) => {
   // El ítem KYC aparece en la sección Verificación.
   await expect(page.getByText("Verificación de identidad (KYC)")).toBeVisible();
 
-  // Iniciar abre el asistente.
+  // Iniciar abre el asistente (modal).
   await page.getByRole("button", { name: /Iniciar/ }).click();
-  await expect(page.getByText("Tu documento de identidad")).toBeVisible();
+  await expect(page.getByText(/Selecciona el tipo de documento/)).toBeVisible();
 
   // Elegir cédula muestra el selector de nacionalidad V/E.
-  await page.getByRole("button", { name: "Cédula" }).click();
+  await page.getByRole("button", { name: "Cédula de identidad" }).click();
   await expect(page.getByRole("button", { name: /Venezolano/ })).toBeVisible();
 });

@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react";
+import { createPortal } from "react-dom";
+import { ArrowLeft, ArrowRight, ShieldCheck, AlertCircle, X } from "lucide-react";
 import {
   enviarVerificacion,
   type EstadoEnvioKyc,
@@ -14,7 +15,16 @@ import { cn } from "@/lib/utils";
 
 type PasoId = "documento" | "selfie" | "video" | "direccion" | "revisar";
 
-export function AsistenteKyc({ pasos }: { pasos: PasosRequeridos }) {
+const INSTR_DOC =
+  "Colócalo sobre una superficie plana y lisa, sin otros objetos alrededor. Que se lea bien y completo, sin reflejos, sombras ni borrosidad.";
+
+export function AsistenteKyc({
+  pasos,
+  onCerrar,
+}: {
+  pasos: PasosRequeridos;
+  onCerrar: () => void;
+}) {
   const [estado, accion, pendiente] = useActionState<EstadoEnvioKyc, FormData>(
     enviarVerificacion,
     {},
@@ -45,12 +55,14 @@ export function AsistenteKyc({ pasos }: { pasos: PasosRequeridos }) {
   const pasoActual = orden[i];
 
   const esCedula = tipoDocumento === "cedula";
+  // Datos de texto del documento listos → recién entonces se piden las fotos.
+  const datosDocListos =
+    !!tipoDocumento &&
+    numeroDocumento.trim().length > 0 &&
+    (!esCedula || !!nacionalidad);
   const docOk =
     !pasos.DOCUMENTO ||
-    (!!tipoDocumento &&
-      numeroDocumento.trim().length > 0 &&
-      !!docFrente &&
-      (!esCedula || (!!nacionalidad && !!docReverso)));
+    (datosDocListos && !!docFrente && (!esCedula || !!docReverso));
   const selfieOk = !pasos.SELFIE || !!selfie;
   const videoOk = !pasos.VIDEO || !!video;
   const direccionOk =
@@ -84,173 +96,228 @@ export function AsistenteKyc({ pasos }: { pasos: PasosRequeridos }) {
     accion(fd);
   }
 
-  // Al enviarse bien, el server revalida y este asistente se desmonta solo.
+  // Al enviarse bien, cerrar el modal (el item pasa a "En revisión" tras revalidar).
   useEffect(() => {
-    if (estado.ok) window.scrollTo({ top: 0, behavior: "smooth" });
+    if (estado.ok) onCerrar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [estado.ok]);
 
-  return (
-    <div className="space-y-4 rounded-2xl border bg-card p-4">
-      {/* Progreso */}
-      <div className="flex items-center gap-2">
-        <ShieldCheck className="size-4 text-brand" />
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4"
+      onClick={onCerrar}
+    >
+      <div
+        className="flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-card shadow-2xl animate-in slide-in-from-bottom-5 duration-300 sm:max-w-md sm:rounded-3xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center gap-2 border-b px-5 py-4">
+          <ShieldCheck className="size-5 text-brand" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">Verificación de identidad</p>
+            <p className="text-xs text-muted-foreground">
+              Paso {i + 1} de {orden.length}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onCerrar}
+            aria-label="Cerrar"
+            className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+
+        {/* Barra de progreso */}
+        <div className="h-1 bg-muted">
           <div
-            className="h-full rounded-full bg-brand transition-all"
+            className="h-full bg-brand transition-all duration-300"
             style={{ width: `${((i + 1) / orden.length) * 100}%` }}
           />
         </div>
-        <span className="text-xs text-muted-foreground">
-          {i + 1}/{orden.length}
-        </span>
-      </div>
 
-      <div key={pasoActual} className="animate-in fade-in slide-in-from-right-2 duration-300">
-        {pasoActual === "documento" && (
-          <div className="space-y-3">
-            <p className="text-sm font-medium">Tu documento de identidad</p>
-            <div className="grid grid-cols-2 gap-2">
-              {(["cedula", "pasaporte"] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setTipoDocumento(t)}
-                  className={cn(
-                    "rounded-xl border bg-transparent py-2.5 text-sm font-medium capitalize transition-colors",
-                    tipoDocumento === t ? "border-brand text-brand" : "border-input hover:border-brand/40",
-                  )}
-                >
-                  {t === "cedula" ? "Cédula" : "Pasaporte"}
-                </button>
-              ))}
-            </div>
-            {esCedula && (
-              <div className="flex gap-2">
-                {(["V", "E"] as const).map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setNacionalidad(n)}
-                    className={cn(
-                      "flex-1 rounded-xl border bg-transparent py-2 text-sm font-medium transition-colors",
-                      nacionalidad === n ? "border-brand text-brand" : "border-input hover:border-brand/40",
+        {/* Contenido del paso */}
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          <div key={pasoActual} className="animate-in fade-in slide-in-from-right-2 duration-300">
+            {pasoActual === "documento" && (
+              <div className="space-y-4">
+                <p className="text-sm font-medium">
+                  Selecciona el tipo de documento con el que deseas iniciar tu verificación
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {(["cedula", "pasaporte"] as const).map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setTipoDocumento(t)}
+                      className={cn(
+                        "rounded-xl border bg-transparent py-3 text-sm font-medium transition-colors",
+                        tipoDocumento === t
+                          ? "border-brand text-brand"
+                          : "border-input hover:border-brand/40",
+                      )}
+                    >
+                      {t === "cedula" ? "Cédula de identidad" : "Pasaporte"}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Paso 2 (progresivo): nacionalidad + número */}
+                {!!tipoDocumento && (
+                  <div className="space-y-3 border-t pt-4 animate-in fade-in slide-in-from-top-1 duration-300">
+                    {esCedula && (
+                      <div className="space-y-1.5">
+                        <p className="text-sm font-medium">Nacionalidad</p>
+                        <div className="flex gap-2">
+                          {(["V", "E"] as const).map((n) => (
+                            <button
+                              key={n}
+                              type="button"
+                              onClick={() => setNacionalidad(n)}
+                              className={cn(
+                                "flex-1 rounded-xl border bg-transparent py-2 text-sm font-medium transition-colors",
+                                nacionalidad === n
+                                  ? "border-brand text-brand"
+                                  : "border-input hover:border-brand/40",
+                              )}
+                            >
+                              {n === "V" ? "V · Venezolano" : "E · Extranjero"}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     )}
-                  >
-                    {n === "V" ? "V — Venezolano" : "E — Extranjero"}
-                  </button>
-                ))}
+                    <div className="space-y-1.5">
+                      <label htmlFor="numdoc" className="text-sm font-medium">
+                        {esCedula ? "Número de cédula" : "Número de pasaporte"}
+                      </label>
+                      <Input
+                        id="numdoc"
+                        value={numeroDocumento}
+                        onChange={(e) => setNumeroDocumento(e.target.value)}
+                        inputMode={esCedula ? "numeric" : "text"}
+                        placeholder={esCedula ? "Ej. 12.345.678" : "Ej. 123456789"}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Paso 3 (progresivo): fotos del documento, solo con los datos listos */}
+                {datosDocListos && (
+                  <div className="space-y-3 border-t pt-4 animate-in fade-in slide-in-from-top-1 duration-300">
+                    <SubirImagen
+                      label="Sube la foto frontal del documento"
+                      hint={INSTR_DOC}
+                      onArchivo={setDocFrente}
+                      testId="kyc-doc-frente"
+                    />
+                    {esCedula && (
+                      <SubirImagen
+                        label="Ahora la foto del reverso"
+                        hint={INSTR_DOC}
+                        onArchivo={setDocReverso}
+                        testId="kyc-doc-reverso"
+                      />
+                    )}
+                  </div>
+                )}
               </div>
             )}
-            {!!tipoDocumento && (
-              <Input
-                value={numeroDocumento}
-                onChange={(e) => setNumeroDocumento(e.target.value)}
-                inputMode="numeric"
-                placeholder={esCedula ? "Número de cédula" : "Número de pasaporte"}
-              />
-            )}
-            <SubirImagen
-              label="Foto del frente"
-              hint="Que se lea bien y sin reflejos."
-              onArchivo={setDocFrente}
-              testId="kyc-doc-frente"
-            />
-            {esCedula && (
+
+            {pasoActual === "selfie" && (
               <SubirImagen
-                label="Foto del reverso"
-                onArchivo={setDocReverso}
-                testId="kyc-doc-reverso"
+                label="Tómate una selfie"
+                hint="Mira de frente a la cámara, con buena luz, sin lentes ni gorra. Tu cara debe verse completa y nítida."
+                onArchivo={setSelfie}
+                testId="kyc-selfie"
               />
             )}
+
+            {pasoActual === "video" && <CapturaVideo onArchivo={setVideo} />}
+
+            {pasoActual === "direccion" && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Tu dirección de residencia</p>
+                <Input value={direccion} onChange={(e) => setDireccion(e.target.value)} placeholder="Dirección" />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input value={ciudad} onChange={(e) => setCiudad(e.target.value)} placeholder="Ciudad" />
+                  <Input value={estadoRegion} onChange={(e) => setEstadoRegion(e.target.value)} placeholder="Estado" />
+                </div>
+              </div>
+            )}
+
+            {pasoActual === "revisar" && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium">Revisa y envía</p>
+                <ul className="space-y-1.5 text-sm text-muted-foreground">
+                  {pasos.DOCUMENTO && (
+                    <li>
+                      Documento:{" "}
+                      <span className="text-foreground">
+                        {esCedula ? `Cédula ${nacionalidad}-${numeroDocumento}` : `Pasaporte ${numeroDocumento}`}
+                      </span>
+                    </li>
+                  )}
+                  {pasos.SELFIE && <li>Selfie: <span className="text-foreground">{selfie ? "lista ✓" : "—"}</span></li>}
+                  {pasos.VIDEO && <li>Video: <span className="text-foreground">{video ? "grabado ✓" : "—"}</span></li>}
+                  {pasos.DIRECCION && <li>Dirección: <span className="text-foreground">{ciudad}, {estadoRegion}</span></li>}
+                </ul>
+                <p className="text-xs text-muted-foreground">
+                  Al enviar, un administrador revisará tu identidad. Te avisaremos por
+                  la campanita y por correo.
+                </p>
+              </div>
+            )}
           </div>
-        )}
 
-        {pasoActual === "selfie" && (
-          <SubirImagen
-            label="Selfie de tu cara"
-            hint="Sin lentes ni gorra, buena luz, mirando a la cámara."
-            onArchivo={setSelfie}
-            testId="kyc-selfie"
-          />
-        )}
-
-        {pasoActual === "video" && <CapturaVideo onArchivo={setVideo} />}
-
-        {pasoActual === "direccion" && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Tu dirección</p>
-            <Input value={direccion} onChange={(e) => setDireccion(e.target.value)} placeholder="Dirección" />
-            <div className="grid grid-cols-2 gap-2">
-              <Input value={ciudad} onChange={(e) => setCiudad(e.target.value)} placeholder="Ciudad" />
-              <Input value={estadoRegion} onChange={(e) => setEstadoRegion(e.target.value)} placeholder="Estado" />
+          {estado.error && (
+            <div className="mt-3 flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/5 p-2.5 text-xs text-destructive">
+              <AlertCircle className="size-4 shrink-0" /> {estado.error}
             </div>
-          </div>
-        )}
-
-        {pasoActual === "revisar" && (
-          <div className="space-y-3">
-            <p className="text-sm font-medium">Revisa y envía</p>
-            <ul className="space-y-1.5 text-sm text-muted-foreground">
-              {pasos.DOCUMENTO && (
-                <li>
-                  Documento: <span className="text-foreground">{tipoDocumento === "cedula" ? `Cédula ${nacionalidad}-${numeroDocumento}` : `Pasaporte ${numeroDocumento}`}</span>
-                </li>
-              )}
-              {pasos.SELFIE && <li>Selfie: <span className="text-foreground">{selfie ? "lista" : "—"}</span></li>}
-              {pasos.VIDEO && <li>Video: <span className="text-foreground">{video ? "grabado" : "—"}</span></li>}
-              {pasos.DIRECCION && <li>Dirección: <span className="text-foreground">{ciudad}, {estadoRegion}</span></li>}
-            </ul>
-            <p className="text-xs text-muted-foreground">
-              Al enviar, un administrador revisará tu identidad. Te avisaremos por la
-              campanita y por correo.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {estado.error && (
-        <div className="flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/5 p-2.5 text-xs text-destructive">
-          <AlertCircle className="size-4 shrink-0" /> {estado.error}
+          )}
         </div>
-      )}
 
-      {/* Navegación */}
-      <div className="flex gap-2">
-        {i > 0 && (
-          <button
-            type="button"
-            onClick={() => setI((n) => n - 1)}
-            className="flex items-center gap-1 rounded-xl border px-4 py-2.5 text-sm font-medium"
-          >
-            <ArrowLeft className="size-4" /> Atrás
-          </button>
-        )}
-        {pasoActual !== "revisar" ? (
-          <button
-            type="button"
-            disabled={!pasoOk[pasoActual]}
-            onClick={() => setI((n) => n + 1)}
-            className={cn(
-              "flex flex-1 items-center justify-center gap-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-colors",
-              pasoOk[pasoActual] ? "bg-brand" : "bg-muted-foreground/40",
-            )}
-          >
-            Siguiente <ArrowRight className="size-4" />
-          </button>
-        ) : (
-          <button
-            type="button"
-            disabled={!todoOk || pendiente}
-            onClick={enviar}
-            className={cn(
-              "flex flex-1 items-center justify-center gap-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-colors",
-              todoOk && !pendiente ? "bg-brand" : "bg-muted-foreground/40",
-            )}
-          >
-            {pendiente ? "Enviando…" : "Enviar verificación"}
-          </button>
-        )}
+        {/* Navegación */}
+        <div className="flex gap-2 border-t px-5 py-4">
+          {i > 0 && (
+            <button
+              type="button"
+              onClick={() => setI((n) => n - 1)}
+              className="flex items-center gap-1 rounded-xl border px-4 py-2.5 text-sm font-medium"
+            >
+              <ArrowLeft className="size-4" /> Atrás
+            </button>
+          )}
+          {pasoActual !== "revisar" ? (
+            <button
+              type="button"
+              disabled={!pasoOk[pasoActual]}
+              onClick={() => setI((n) => n + 1)}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-colors",
+                pasoOk[pasoActual] ? "bg-brand" : "bg-muted-foreground/40",
+              )}
+            >
+              Siguiente <ArrowRight className="size-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={!todoOk || pendiente}
+              onClick={enviar}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-colors",
+                todoOk && !pendiente ? "bg-brand" : "bg-muted-foreground/40",
+              )}
+            >
+              {pendiente ? "Enviando…" : "Enviar verificación"}
+            </button>
+          )}
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

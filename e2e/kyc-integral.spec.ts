@@ -33,9 +33,10 @@ test("KYC integral: usuario envía (sin video) y el admin aprueba", async ({ bro
     await user.request.post("/api/test/sesion", { data: { correo: correoUser } });
     await user.goto("/configuracion?tab=verificacion");
     await user.getByRole("button", { name: /Iniciar/ }).click();
-    await user.getByRole("button", { name: "Cédula" }).click();
+    await user.getByRole("button", { name: "Cédula de identidad" }).click();
     await user.getByRole("button", { name: /Venezolano/ }).click();
-    await user.getByPlaceholder(/Número de cédula/).fill("12345678");
+    await user.getByLabel("Número de cédula").fill("12345678");
+    // Las fotos solo aparecen tras completar los datos (flujo progresivo).
     await user.getByTestId("kyc-doc-frente").setInputFiles(archivo("frente.png"));
     await user.getByTestId("kyc-doc-reverso").setInputFiles(archivo("reverso.png"));
     await user.getByRole("button", { name: /Siguiente/ }).click();
