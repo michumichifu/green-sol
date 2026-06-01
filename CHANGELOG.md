@@ -4,6 +4,11 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.59] — 2026-06-01 — Build más rápido (Dockerfile)
+
+### Cambiado
+- El Dockerfile usa `--chown` en las copias en vez de un `RUN chown -R /app` posterior, que sobre el `node_modules` completo tardaba ~3.5 min por build.
+
 ## [0.0.58] — 2026-06-01 — Login y registro sin distinguir mayúsculas
 
 ### Cambiado

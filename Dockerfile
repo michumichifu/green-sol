@@ -28,16 +28,18 @@ RUN apk add --no-cache libc6-compat
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 
 # standalone trae server.js + node_modules mínimos; static y public van aparte.
-COPY --from=build /app/.next/standalone ./
-COPY --from=build /app/.next/static ./.next/static
-COPY --from=build /app/public ./public
+# Se usa --chown en cada COPY (en vez de un `chown -R /app` posterior, que sobre
+# el node_modules completo tardaba minutos).
+COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=build --chown=nextjs:nodejs /app/public ./public
 # node_modules completo del build: el CLI de Prisma (`migrate deploy` en el
 # arranque) necesita sus deps transitivas (@prisma/config y demás); copiarlo
 # entero es lo robusto. Incluye el cliente y engine generados para alpine.
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/prisma ./prisma
-COPY entrypoint.sh ./entrypoint.sh
-RUN chmod +x ./entrypoint.sh && chown -R nextjs:nodejs /app
+COPY --from=build --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=build --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --chown=nextjs:nodejs entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
 USER nextjs
 EXPOSE 3000
