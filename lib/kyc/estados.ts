@@ -13,7 +13,8 @@ export const TRANSICIONES: Record<EstadoKyc, EstadoKyc[]> = {
   pendiente: ["en_revision"],
   en_revision: ["aprobada", "rechazada", "reenvio_solicitado", "baneada"],
   reenvio_solicitado: [],
-  aprobada: [],
+  // Desde "aprobada" el super-admin puede revertir (desverificar) o banear.
+  aprobada: ["rechazada", "reenvio_solicitado", "baneada"],
   rechazada: [],
   baneada: [],
 };

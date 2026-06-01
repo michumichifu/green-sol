@@ -4,6 +4,23 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.63] — 2026-06-01 — KYC revisión: confirmación con credencial, revertir, buscador y arreglos de video
+
+### Añadido
+- **Confirmación con credencial** (PIN o contraseña del super-admin) antes de aprobar/rechazar/pedir reenvío/banear, para evitar clics accidentales.
+- **Revertir verificación** desde "Aprobadas" (gestionar → desverificar/rechazar/banear); al revertir o banear se baja `nivelKyc`.
+- **Buscador** en la cola por nombre, usuario o correo.
+
+### Cambiado
+- Estados mostrados con **etiquetas legibles** (Pendiente, En revisión, Aprobada, Rechazada, Reenvío solicitado, Baneada) en vez del valor crudo.
+- Video: instrucción del paso 3 completa ("Muestra 3 dedos frente a tu cara") visible desde antes de grabar.
+
+### Corregido
+- **Preview del video en negro / 0:00**: el webm de MediaRecorder no trae duración; se fuerza su cálculo con un seek, dejándolo reproducible.
+
+### Verificado
+- Typecheck limpio. Suite E2E 6/6 (el integral cubre el nuevo flujo con confirmación por credencial).
+
 ## [0.0.62] — 2026-06-01 — KYC: documentos visibles en revisión (proxy) y botón de grabar
 
 ### Corregido

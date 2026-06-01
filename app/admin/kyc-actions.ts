@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { verify } from "@node-rs/argon2";
 import type { EstadoKyc } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
+import { verificarContrasena } from "@/lib/auth/password";
 import { puedeTransicionar } from "@/lib/kyc/estados";
 import { guardarConfig } from "@/lib/config";
 import { PASOS_KYC, type PasoKyc } from "@/lib/kyc/config";
@@ -14,6 +16,16 @@ export type EstadoRevision = { ok?: boolean; error?: string };
 async function esAdmin(): Promise<boolean> {
   const u = await obtenerUsuario();
   return u?.rol === "super_admin";
+}
+
+/** Valida la credencial del super-admin (PIN si lo tiene, o su contraseña). */
+async function credencialValida(adminId: string, credencial: string): Promise<boolean> {
+  if (!credencial?.trim()) return false;
+  const a = await prisma.usuario.findUnique({ where: { id: adminId } });
+  if (!a) return false;
+  if (a.pinHash && (await verify(a.pinHash, credencial))) return true;
+  if (a.hashContrasena && (await verificarContrasena(a.hashContrasena, credencial))) return true;
+  return false;
 }
 
 /** Un super-admin toma una solicitud pendiente para revisarla. */
@@ -42,14 +54,22 @@ const DESTINO: Record<AccionRevision, EstadoKyc> = {
   banear: "baneada",
 };
 
-/** Resuelve una solicitud (debe estar en_revision). */
+/**
+ * Resuelve una solicitud. Requiere la credencial del super-admin (PIN o clave)
+ * para evitar clics accidentales. Permite revertir desde "aprobada".
+ */
 export async function resolverKyc(
   id: string,
   accion: AccionRevision,
+  credencial: string,
   motivo?: string,
   nota?: string,
 ): Promise<EstadoRevision> {
   if (!(await esAdmin())) return { error: "No autorizado." };
+  const revisor = await obtenerUsuario();
+  if (!(await credencialValida(revisor!.id, credencial))) {
+    return { error: "PIN o contraseña incorrectos." };
+  }
   const v = await prisma.verificacionKyc.findUnique({
     where: { id },
     include: { usuario: { select: { id: true, correo: true } } },
@@ -58,13 +78,12 @@ export async function resolverKyc(
 
   const destino = DESTINO[accion];
   if (!puedeTransicionar(v.estado, destino)) {
-    return { error: "Primero toma la solicitud para revisarla." };
+    return { error: "Esa acción no es válida para el estado actual." };
   }
   if ((accion === "rechazar" || accion === "reenvio") && !motivo?.trim()) {
     return { error: "Indica el motivo para el usuario." };
   }
 
-  const revisor = await obtenerUsuario();
   await prisma.$transaction(async (tx) => {
     await tx.verificacionKyc.update({
       where: { id },
@@ -79,7 +98,14 @@ export async function resolverKyc(
     if (accion === "aprobar") {
       await tx.usuario.update({ where: { id: v.usuarioId }, data: { nivelKyc: 1 } });
     } else if (accion === "banear") {
-      await tx.usuario.update({ where: { id: v.usuarioId }, data: { baneado: true } });
+      // Banear desverifica además de bloquear.
+      await tx.usuario.update({
+        where: { id: v.usuarioId },
+        data: { baneado: true, nivelKyc: 0 },
+      });
+    } else {
+      // Rechazar / pedir reenvío: si estaba verificado, lo desverifica.
+      await tx.usuario.update({ where: { id: v.usuarioId }, data: { nivelKyc: 0 } });
     }
   });
 

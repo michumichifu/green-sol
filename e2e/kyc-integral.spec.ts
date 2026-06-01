@@ -56,6 +56,9 @@ test("KYC integral: usuario envía (sin video) y el admin aprueba", async ({ bro
     await expect(tarjeta.getByText("Frente")).toBeVisible({ timeout: 10_000 });
     await tarjeta.getByRole("button", { name: /Tomar para revisar/ }).click();
     await tarjeta.getByRole("button", { name: /^Aprobar/ }).click();
+    // Confirmación con credencial del super-admin (clave del usuario QA).
+    await tarjeta.getByPlaceholder("PIN o contraseña").fill("GreenSolQA2026!");
+    await tarjeta.getByRole("button", { name: /Confirmar/ }).click();
     // Esperar a que la acción termine (la tarjeta sale de "Pendientes").
     await expect(tarjeta).toBeHidden({ timeout: 10_000 });
 

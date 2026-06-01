@@ -12,7 +12,7 @@ const MAX_BYTES = 20 * 1024 * 1024;
 const GUIA = [
   { en: 0, corto: "Pestañea 3 veces", txt: "Pestañea 3 veces mirando a la cámara" },
   { en: 3, corto: "Abre la boca 3 veces", txt: "Abre y cierra la boca 3 veces" },
-  { en: 6, corto: "Muestra 3 dedos", txt: "Muestra 3 dedos frente a tu cara" },
+  { en: 6, corto: "Muestra 3 dedos frente a tu cara", txt: "Muestra 3 dedos frente a tu cara" },
 ];
 
 /**
@@ -31,6 +31,7 @@ export function CapturaVideo({
   const streamRef = useRef<MediaStream | null>(null);
   const recRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const fixRef = useRef(false); // para corregir la duración del webm en el preview
   const [estado, setEstado] = useState<"idle" | "listo" | "grabando" | "hecho">("idle");
   const [seg, setSeg] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -162,10 +163,24 @@ export function CapturaVideo({
           <video
             src={urlPreview}
             controls
-            autoPlay
             muted
-            loop
             playsInline
+            // El webm de MediaRecorder no trae duración en el header (sale 0:00 y
+            // no reproduce). Forzamos su cálculo con un seek al "final".
+            onLoadedMetadata={(e) => {
+              const v = e.currentTarget;
+              if (!isFinite(v.duration)) {
+                fixRef.current = true;
+                v.currentTime = 1e101;
+              }
+            }}
+            onTimeUpdate={(e) => {
+              const v = e.currentTarget;
+              if (fixRef.current && isFinite(v.duration)) {
+                fixRef.current = false;
+                v.currentTime = 0;
+              }
+            }}
             className="size-full object-cover"
           />
         ) : (
