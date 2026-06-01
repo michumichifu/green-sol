@@ -15,10 +15,12 @@ export function SubirImagen({
   label,
   hint,
   onArchivo,
+  testId,
 }: {
   label: string;
   hint?: string;
   onArchivo: (f: File | null) => void;
+  testId?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previo, setPrevio] = useState<string | null>(null);
@@ -58,6 +60,7 @@ export function SubirImagen({
         type="file"
         accept="image/jpeg,image/png,application/pdf"
         capture="environment"
+        data-testid={testId}
         className="hidden"
         onChange={(e) => elegir(e.target.files?.[0] ?? null)}
       />

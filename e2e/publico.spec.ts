@@ -8,7 +8,7 @@ test("la home muestra la marca y el botón lleva a registro", async ({
   await page.getByRole("link", { name: "Crear cuenta" }).click();
   await expect(page).toHaveURL(/\/registro$/);
   await expect(
-    page.getByRole("heading", { name: "Crear cuenta" }),
+    page.getByRole("heading", { name: "Crea tu cuenta gratis" }),
   ).toBeVisible();
 });
 

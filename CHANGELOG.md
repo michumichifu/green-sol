@@ -4,6 +4,19 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.53] — 2026-06-01 — KYC Fase 4: cola de revisión en el super-admin
+
+### Añadido
+- Pestaña **"Verificaciones"** en el panel super-admin (`components/kyc/cola-kyc.tsx`): sub-listas **Pendientes / Aprobadas / Rechazadas** (última solicitud por usuario), con **toggles de pasos requeridos** (`KYC_REQUIERE_*`) arriba.
+- Por solicitud: datos del usuario y documento, **"Ver documentos"** (carga las imágenes/video con **URLs firmadas temporales** de MinIO bajo demanda), **Tomar para revisar**, y acciones **Aprobar / Pedir reenvío / Rechazar / Rechazar y banear** con campos de **motivo** (para el usuario) y **nota interna** (solo admin).
+- `colaVerificaciones()` en `lib/kyc/consultas.ts` (agrupa por estado, última por usuario). `testId` en `SubirImagen` para QA.
+
+### Corregido
+- E2E `publico.spec.ts`: el heading de registro tras el rediseño es "Crea tu cuenta gratis" (estaba desactualizado).
+
+### Verificado
+- Typecheck limpio. **E2E integral** (`e2e/kyc-integral.spec.ts`): admin apaga el paso video → usuario envía documento+selfie (subida real a MinIO) → admin carga documentos (URL firmada), toma y aprueba → usuario queda verificado. **Suite completa 6/6 verde.**
+
 ## [0.0.52] — 2026-06-01 — KYC Fase 3: asistente de verificación del usuario
 
 ### Añadido

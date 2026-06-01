@@ -153,9 +153,14 @@ export function AsistenteKyc({ pasos }: { pasos: PasosRequeridos }) {
               label="Foto del frente"
               hint="Que se lea bien y sin reflejos."
               onArchivo={setDocFrente}
+              testId="kyc-doc-frente"
             />
             {esCedula && (
-              <SubirImagen label="Foto del reverso" onArchivo={setDocReverso} />
+              <SubirImagen
+                label="Foto del reverso"
+                onArchivo={setDocReverso}
+                testId="kyc-doc-reverso"
+              />
             )}
           </div>
         )}
@@ -165,6 +170,7 @@ export function AsistenteKyc({ pasos }: { pasos: PasosRequeridos }) {
             label="Selfie de tu cara"
             hint="Sin lentes ni gorra, buena luz, mirando a la cámara."
             onArchivo={setSelfie}
+            testId="kyc-selfie"
           />
         )}
 

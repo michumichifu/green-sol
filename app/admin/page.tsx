@@ -13,7 +13,10 @@ import {
   guardarAppConfig,
   guardarRestricciones,
 } from "./actions";
+import { colaVerificaciones } from "@/lib/kyc/consultas";
+import { pasosRequeridos } from "@/lib/kyc/config";
 import { PanelTabs } from "@/components/panel-tabs";
+import { ColaKyc } from "@/components/kyc/cola-kyc";
 import { FormSmtp } from "@/components/form-smtp";
 import { EditorPlantillas } from "@/components/editor-plantillas";
 import { Button } from "@/components/ui/button";
@@ -134,6 +137,10 @@ export default async function AdminPage() {
   ]);
   const restricciones = await obtenerRestriccionesTexto();
   const plantillas = await obtenerPlantillasGuardadas();
+  const [cola, pasosKyc] = await Promise.all([
+    colaVerificaciones(),
+    pasosRequeridos(),
+  ]);
 
   return (
     <main className="mx-auto w-full max-w-3xl space-y-6 overflow-x-hidden px-4 pb-6 sm:px-6 pt-[max(2.75rem,calc(env(safe-area-inset-top)+1.5rem))]">
@@ -149,7 +156,7 @@ export default async function AdminPage() {
         </Link>
       </div>
 
-      <PanelTabs tabs={["Métricas", "Usuarios", "Configuración"]}>
+      <PanelTabs tabs={["Métricas", "Usuarios", "Verificaciones", "Configuración"]}>
         {/* Métricas */}
         <div className="space-y-6">
           <section className="space-y-3">
@@ -259,6 +266,14 @@ export default async function AdminPage() {
             })}
           </ul>
         </section>
+
+        {/* Verificaciones (KYC) */}
+        <ColaKyc
+          pendientes={cola.pendientes}
+          aprobadas={cola.aprobadas}
+          rechazadas={cola.rechazadas}
+          pasos={pasosKyc}
+        />
 
         {/* Configuración (subpestañas) */}
         <PanelTabs
