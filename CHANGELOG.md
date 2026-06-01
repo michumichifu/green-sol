@@ -4,6 +4,17 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.50] — 2026-06-01 — KYC Fase 1: modelo de datos y migración
+
+### Añadido
+- Modelo **`VerificacionKyc`** (una fila por intento, historial): documento (`tipoDocumento` cédula/pasaporte, `nacionalidad` V/E, número, `docFrenteKey`/`docReversoKey`), `selfieKey`, `videoKey`, dirección opcional, `estado` (`EstadoKyc`), `motivoRechazo`, `notaInterna`, `revisadoPorId`, fechas. Índices por `usuarioId` y `estado`.
+- Enums **`TipoDocumento`**, **`Nacionalidad`**, **`EstadoKyc`**.
+- Campos en `Usuario`: **`nivelKyc`** (0 no verificado / 1 verificado), **`baneado`**, **`telefono`**, **`telefonoVerificado`**, y relaciones `verificaciones` / `verificacionesRevisadas`.
+- Migración `20260601005502_kyc`.
+
+### Verificado
+- Typecheck limpio; cliente Prisma regenerado y dev reiniciado (enums KYC expuestos).
+
 ## [0.0.49] — 2026-05-31 — KYC Fase 0: almacenamiento privado (MinIO) + usuario de prueba
 
 ### Añadido

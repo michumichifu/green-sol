@@ -26,6 +26,10 @@ model Usuario {
   monedaPreferida  String?
   onboardingCerrado Int           @default(0)
   ingresos          Int           @default(0)
+  nivelKyc          Int           @default(0)
+  baneado           Boolean        @default(false)
+  telefono          String?
+  telefonoVerificado Boolean       @default(false)
   creadoEn         DateTime       @default(now())
   sesiones         Sesion[]
   codigosOtp       CodigoOtp[]
@@ -35,6 +39,8 @@ model Usuario {
   metodosPago      MetodoPago[]
   valoracionesDadas     Valoracion[] @relation("dadas")
   valoracionesRecibidas Valoracion[] @relation("recibidas")
+  verificaciones          VerificacionKyc[] @relation("verificaciones")
+  verificacionesRevisadas VerificacionKyc[] @relation("revisor")
 }
 
 model Sesion {
@@ -194,6 +200,51 @@ enum Rol {
   usuario
   admin_grupo
   super_admin
+}
+
+enum TipoDocumento {
+  cedula
+  pasaporte
+}
+
+enum Nacionalidad {
+  V
+  E
+}
+
+enum EstadoKyc {
+  pendiente
+  en_revision
+  aprobada
+  rechazada
+  reenvio_solicitado
+  baneada
+}
+
+model VerificacionKyc {
+  id              String         @id @default(cuid())
+  usuarioId       String
+  usuario         Usuario        @relation("verificaciones", fields: [usuarioId], references: [id], onDelete: Cascade)
+  tipoDocumento   TipoDocumento?
+  nacionalidad    Nacionalidad?
+  numeroDocumento String?
+  docFrenteKey    String?
+  docReversoKey   String?
+  selfieKey       String?
+  videoKey        String?
+  direccion       String?
+  ciudad          String?
+  estadoRegion    String?
+  estado          EstadoKyc      @default(pendiente)
+  motivoRechazo   String?
+  notaInterna     String?
+  revisadoPorId   String?
+  revisadoPor     Usuario?       @relation("revisor", fields: [revisadoPorId], references: [id])
+  creadaEn        DateTime       @default(now())
+  revisadaEn      DateTime?
+
+  @@index([usuarioId])
+  @@index([estado])
 }
 
 enum OtpProposito {
