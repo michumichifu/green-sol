@@ -4,6 +4,12 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.66] — 2026-06-01 — Documentación completa al día (PRD, PRD HTML)
+
+### Cambiado
+- **`PRD.md` §0 (Estado del proyecto)** reescrito a v0.0.65: KYC propio completo con todo el detalle (almacenamiento MinIO + proxy de lectura autenticado, máquina de estados con revertir, asistente en pop-up con flujo progresivo, video con fotograma de confirmación y colores por paso, cola de revisión con buscador/métricas/confirmación por credencial, tags Verificado/Sin verificar, disclaimer 24-48 h), **beta desplegada y en vivo en la VPS-2** (Docker web+db+minio, nginx+certbot, DB migrada, limpieza de cache) y **afinado del login** (campo persistente, trim, usuario case-insensitive). Pendientes nuevos (reproducción de video del usuario, conectar plantillas KYC, teléfono 2FA, niveles con límites, índice único case-insensitive, limpieza de huérfanos, proveedor externo) y próximo foco (san → cripto → seguridad).
+- **`PRD.html`**: badges, descripción, **sección Despliegue** (beta en vivo), roadmap (Fases 1 y 3) y footer a v0.0.65.
+
 ## [0.0.65] — 2026-06-01 — KYC video: confirmación con fotograma, colores por paso y botones más arriba
 
 ### Cambiado
