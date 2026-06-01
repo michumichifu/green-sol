@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { validarRestricciones } from "@/lib/restricciones";
-import { verificarFactores } from "@/lib/seguridad";
+import { verificarContrasena } from "@/lib/auth/password";
 import { notificarYCorreo } from "@/lib/notificaciones";
 
 function str(v: FormDataEntryValue | null): string | null {
@@ -82,10 +82,14 @@ export async function agregarMetodoPago(
   if (!categoria || !moneda || !metodo)
     return { error: "Faltan datos del método." };
 
-  const ver = await verificarFactores(usuario.id, {
-    clave: str(formData.get("clave")) ?? undefined,
-  });
-  if (!ver.ok) return { error: ver.error };
+  const clave = str(formData.get("clave"));
+  if (
+    !usuario.hashContrasena ||
+    !clave ||
+    !(await verificarContrasena(usuario.hashContrasena, clave))
+  ) {
+    return { error: "Clave incorrecta." };
+  }
 
   await prisma.metodoPago.create({
     data: { usuarioId: usuario.id, categoria, moneda, metodo, ...datosMetodo(formData) },
@@ -112,10 +116,14 @@ export async function editarMetodoPago(
   if (!usuario) return { error: "Tu sesión expiró." };
   const id = str(formData.get("id"));
   if (!id) return { error: "Método no encontrado." };
-  const ver = await verificarFactores(usuario.id, {
-    clave: str(formData.get("clave")) ?? undefined,
-  });
-  if (!ver.ok) return { error: ver.error };
+  const clave = str(formData.get("clave"));
+  if (
+    !usuario.hashContrasena ||
+    !clave ||
+    !(await verificarContrasena(usuario.hashContrasena, clave))
+  ) {
+    return { error: "Clave incorrecta." };
+  }
   const res = await prisma.metodoPago.updateMany({
     where: { id, usuarioId: usuario.id },
     data: datosMetodo(formData),
@@ -143,10 +151,14 @@ export async function eliminarMetodoPago(
   if (!usuario) return { error: "Tu sesión expiró." };
   const id = str(formData.get("id"));
   if (!id) return { error: "Método no encontrado." };
-  const ver = await verificarFactores(usuario.id, {
-    clave: str(formData.get("clave")) ?? undefined,
-  });
-  if (!ver.ok) return { error: ver.error };
+  const clave = str(formData.get("clave"));
+  if (
+    !usuario.hashContrasena ||
+    !clave ||
+    !(await verificarContrasena(usuario.hashContrasena, clave))
+  ) {
+    return { error: "Clave incorrecta." };
+  }
   const res = await prisma.metodoPago.deleteMany({
     where: { id, usuarioId: usuario.id },
   });

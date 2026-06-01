@@ -4,6 +4,14 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.68] — 2026-06-01 — Fix: confirmar método de pago con la clave (no exigir el PIN)
+
+### Corregido
+- **No se podía agregar/editar/eliminar un método de pago** si el usuario tenía PIN activo: las acciones usaban `verificarFactores`, que exige **todos** los factores activos (clave + PIN + OTP), pero el formulario solo tiene el campo de **clave** — daba "clave incorrecta" en bucle. Ahora confirman **solo con la clave** (`verificarContrasena`), consistente con el texto del formulario. El refuerzo con PIN/2FA irá en el futuro "modal de verificación con jerarquía".
+
+### Verificado
+- Typecheck limpio.
+
 ## [0.0.67] — 2026-06-01 — KYC: notificaciones conectadas al editor de plantillas
 
 ### Añadido
