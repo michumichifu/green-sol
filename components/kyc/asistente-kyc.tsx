@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState, startTransition } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, ShieldCheck, AlertCircle, X } from "lucide-react";
 import {
@@ -93,7 +93,8 @@ export function AsistenteKyc({
       fd.set("ciudad", ciudad);
       fd.set("estadoRegion", estadoRegion);
     }
-    accion(fd);
+    // useActionState exige que el dispatch corra dentro de una transición.
+    startTransition(() => accion(fd));
   }
 
   // Al enviarse bien, cerrar el modal (el item pasa a "En revisión" tras revalidar).
@@ -108,7 +109,7 @@ export function AsistenteKyc({
       onClick={onCerrar}
     >
       <div
-        className="flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-card shadow-2xl animate-in slide-in-from-bottom-5 duration-300 sm:max-w-md sm:rounded-3xl"
+        className="flex h-[88dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-card shadow-2xl animate-in slide-in-from-bottom-5 duration-300 sm:h-auto sm:max-h-[88vh] sm:max-w-md sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -166,7 +167,7 @@ export function AsistenteKyc({
 
                 {/* Paso 2 (progresivo): nacionalidad + número */}
                 {!!tipoDocumento && (
-                  <div className="space-y-3 border-t pt-4 animate-in fade-in slide-in-from-top-1 duration-300">
+                  <div className="space-y-3 border-t pt-4 animate-in fade-in slide-in-from-top-2 duration-700 ease-out">
                     {esCedula && (
                       <div className="space-y-1.5">
                         <p className="text-sm font-medium">Nacionalidad</p>
@@ -206,11 +207,12 @@ export function AsistenteKyc({
 
                 {/* Paso 3 (progresivo): fotos del documento, solo con los datos listos */}
                 {datosDocListos && (
-                  <div className="space-y-3 border-t pt-4 animate-in fade-in slide-in-from-top-1 duration-300">
+                  <div className="space-y-3 border-t pt-4 animate-in fade-in slide-in-from-top-2 duration-700 ease-out">
                     <SubirImagen
                       label="Sube la foto frontal del documento"
                       hint={INSTR_DOC}
                       onArchivo={setDocFrente}
+                      valor={docFrente}
                       testId="kyc-doc-frente"
                     />
                     {esCedula && (
@@ -218,6 +220,7 @@ export function AsistenteKyc({
                         label="Ahora la foto del reverso"
                         hint={INSTR_DOC}
                         onArchivo={setDocReverso}
+                        valor={docReverso}
                         testId="kyc-doc-reverso"
                       />
                     )}
@@ -231,6 +234,7 @@ export function AsistenteKyc({
                 label="Tómate una selfie"
                 hint="Mira de frente a la cámara, con buena luz, sin lentes ni gorra. Tu cara debe verse completa y nítida."
                 onArchivo={setSelfie}
+                valor={selfie}
                 testId="kyc-selfie"
               />
             )}
@@ -268,6 +272,13 @@ export function AsistenteKyc({
                   Al enviar, un administrador revisará tu identidad. Te avisaremos por
                   la campanita y por correo.
                 </p>
+                <div className="flex items-start gap-2 rounded-xl border border-gold/40 bg-gold/5 p-2.5 text-xs">
+                  <AlertCircle className="size-4 shrink-0 text-gold" />
+                  <span>
+                    La revisión puede tardar de <b>24 a 48 horas</b>. Gracias por tu
+                    paciencia.
+                  </span>
+                </div>
               </div>
             )}
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Upload, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -10,22 +10,33 @@ const TIPOS = ["image/jpeg", "image/png", "application/pdf"];
 /**
  * Captura una imagen/PDF (documento o selfie). No sube nada: entrega el File al
  * padre, que lo envía junto al resto en un solo formulario (Server Action).
+ * `valor` permite recuperar la vista previa al volver a un paso ya completado.
  */
 export function SubirImagen({
   label,
   hint,
   onArchivo,
+  valor,
   testId,
 }: {
   label: string;
   hint?: string;
   onArchivo: (f: File | null) => void;
+  valor?: File | null;
   testId?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previo, setPrevio] = useState<string | null>(null);
   const [nombre, setNombre] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Reconstruir la vista previa si ya hay un archivo elegido (al remontar el paso).
+  useEffect(() => {
+    if (!valor) return;
+    setNombre(valor.name);
+    setPrevio(valor.type === "application/pdf" ? null : URL.createObjectURL(valor));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [valor]);
 
   function elegir(f: File | null) {
     setError(null);

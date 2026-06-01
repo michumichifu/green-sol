@@ -4,6 +4,21 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.61] — 2026-06-01 — KYC: pulido del asistente (bugs + UX) y disclaimer 24-48 h
+
+### Corregido
+- **Error crítico al enviar**: `useActionState` se llamaba fuera de una transición (consola roja y `isPending` incorrecto); ahora el dispatch va dentro de `startTransition`.
+- **La foto ya no se pierde al retroceder** de paso: `SubirImagen` y `CapturaVideo` reciben el archivo ya elegido y reconstruyen la vista previa.
+
+### Cambiado
+- **Posición del pop-up**: altura estable (88dvh en móvil) para que el contenido fluya hacia abajo (lectura natural F/Z), en vez de crecer desde abajo.
+- **Animaciones más suaves** (~0.7 s, fade) al desplegar nacionalidad/número/fotos.
+- **Paso de video**: los 3 gestos se muestran como tarjetas en una sola línea (se leen antes de grabar), el recuadro es más cuadrado (4/5), la indicación durante la grabación está más resaltada, y el preview reproduce en bucle para confirmar que grabó (más robusto: timeslice + control de blob vacío).
+- **Disclaimer "puede tardar de 24 a 48 horas"** en el paso de revisar y en la notificación/correo "Recibimos tu verificación".
+
+### Verificado
+- Typecheck limpio. E2E KYC (smoke + integral) verdes.
+
 ## [0.0.60] — 2026-06-01 — KYC: asistente en pop-up + flujo progresivo y textos claros
 
 ### Cambiado

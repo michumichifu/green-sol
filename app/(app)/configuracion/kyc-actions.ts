@@ -158,7 +158,7 @@ export async function enviarVerificacion(
     tipo: "kyc",
     titulo: "Recibimos tu verificación 📋",
     cuerpo:
-      "Estamos revisando tu identidad. Te avisaremos por aquí y por correo cuando haya respuesta.",
+      "Estamos revisando tu identidad. La revisión puede tardar de 24 a 48 horas aproximadamente; te avisaremos por aquí y por correo cuando haya respuesta. Gracias por tu paciencia.",
     enlace: "/configuracion?tab=verificacion",
   });
 
