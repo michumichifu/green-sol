@@ -50,3 +50,32 @@ export const loginSchema = z.object({
 export const otpSchema = z.object({
   codigo: z.string().regex(/^\d{6}$/, "Código de 6 dígitos"),
 });
+
+// PIN: definición y confirmación
+export const pinSchema = z
+  .object({
+    pin: z.string().regex(/^\d{6}$/, "El PIN es de 6 dígitos"),
+    confirmar: z.string(),
+  })
+  .refine((d) => d.pin === d.confirmar, {
+    message: "Los PIN no coinciden",
+    path: ["confirmar"],
+  });
+
+// Datos del registro (sin credencial; el PIN se define en su propio paso)
+export const registroDatosSchema = z.object({
+  nombre: z.string().min(1, "Indica tu nombre"),
+  apellido: z.string().min(1, "Indica tu apellido"),
+  nombreUsuario: z
+    .string()
+    .min(3, "Mínimo 3 caracteres")
+    .max(15, "Máximo 15 caracteres")
+    .regex(/^[a-zA-Z0-9_]+$/, "Solo letras, números y guion bajo"),
+  pais: z.string().min(2, "Elige tu país"),
+});
+
+// Login: correo/usuario + PIN
+export const loginPinSchema = z.object({
+  identificador: z.string().trim().min(1, "Correo o nombre de usuario"),
+  pin: z.string().regex(/^\d{6}$/, "PIN de 6 dígitos"),
+});
