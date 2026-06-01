@@ -4,6 +4,19 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.51] — 2026-06-01 — KYC Fase 2: máquina de estados y Server Actions
+
+### Añadido
+- **`lib/kyc/estados.ts`**: máquina de estados con diccionario de transiciones (`puedeTransicionar`); las transiciones inválidas se bloquean. `ESTADOS_EN_CURSO` para impedir envíos duplicados.
+- **`lib/kyc/config.ts`**: pasos configurables (`DOCUMENTO/SELFIE/VIDEO/DIRECCION`) con `pasosRequeridos()` leyendo los toggles `KYC_REQUIERE_*` (defaults: documento/selfie/video activos, dirección no).
+- **`lib/kyc/consultas.ts`**: `ultimaVerificacion(usuarioId)`.
+- **Acciones del usuario** (`app/(app)/configuracion/kyc-actions.ts`): `enviarVerificacion` valida según los pasos activos, sube los archivos a MinIO (vía servidor, validando tipo/tamaño: imágenes ≤5 MB, video ≤20 MB), crea la solicitud en `pendiente` y notifica app+correo. Bloquea envíos si hay uno en curso o ya aprobado.
+- **Acciones del revisor** (`app/admin/kyc-actions.ts`, solo super-admin): `tomarRevision`, `resolverKyc` (aprobar/rechazar/reenvío/banear con motivo y nota interna; aprobar sube `nivelKyc`, banear marca `baneado`), `urlsRevision` (URLs firmadas temporales) y `guardarPasosKyc` (toggles).
+- **`next.config.ts`**: `serverActions.bodySizeLimit: "25mb"` para la subida de documentos.
+
+### Verificado
+- Typecheck limpio; tabla de transiciones probada (válidas/invalidas).
+
 ## [0.0.50] — 2026-06-01 — KYC Fase 1: modelo de datos y migración
 
 ### Añadido
