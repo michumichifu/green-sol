@@ -7,6 +7,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Imagen Docker mínima para el despliegue en el VPS (server.js autónomo).
+  output: "standalone",
   // Los documentos KYC (imágenes ≤5 MB, video ≤20 MB) se suben vía Server Action;
   // el límite por defecto (1 MB) no alcanza.
   experimental: {

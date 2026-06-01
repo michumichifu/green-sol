@@ -4,6 +4,21 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.55] — 2026-06-01 — KYC Fase 6: infraestructura de despliegue (beta VPS-2)
+
+### Añadido
+- **`next.config.ts`**: `output: "standalone"` para una imagen Docker mínima.
+- **`Dockerfile`** multi-stage (deps → build → runner, `node:22-alpine`): copia `.next/standalone` + `static` + `public` + Prisma (schema, migraciones y CLI). **Imagen validada localmente con podman (build verde, 812 MB).**
+- **`entrypoint.sh`**: `prisma migrate deploy` y arranque de `server.js`.
+- **`docker-compose.prod.yml`**: servicios **web + db (Postgres 16) + minio** en red interna; solo `web` publicado en `127.0.0.1:3100`; volúmenes persistentes.
+- **`.dockerignore`** y **`docs/DESPLIEGUE_VPS.md`** (primer despliegue, subir DB local, nginx + certbot, re-despliegue, verificación; **sin tocar** n8n/chatwoot/evolution).
+
+### Pendiente (ejecución en el VPS, requiere al usuario)
+- Falta el **SMTP_PASS** del buzón (el usuario lo introduce; no va al repo) y su **presencia** para ejecutar el `docker compose up` + `nginx`/`certbot` en el host de producción compartido sin riesgo a los servicios en vivo.
+
+### Verificado
+- Typecheck limpio. Imagen Docker construida con podman sin errores.
+
 ## [0.0.54] — 2026-06-01 — KYC Fase 5: tag "Verificado", indicadores y docs
 
 ### Añadido

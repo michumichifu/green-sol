@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.env
+.env.local
+_privado
+.almacen
+test-results
+playwright-report
+e2e
+*.log
+.DS_Store
+npm-debug.log*
