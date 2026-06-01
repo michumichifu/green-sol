@@ -8,6 +8,8 @@ import { FormSeguridad } from "@/components/form-seguridad";
 import { SeccionVerificacion } from "@/components/seccion-verificacion";
 import { FormMetodoPago } from "@/components/form-metodo-pago";
 import { MetodoPagoItem } from "@/components/metodo-pago-item";
+import { ultimaVerificacion } from "@/lib/kyc/consultas";
+import { pasosRequeridos } from "@/lib/kyc/config";
 
 const TABS = ["datos", "verificacion", "pagos", "seguridad", "comunicaciones"];
 
@@ -25,6 +27,11 @@ export default async function ConfiguracionPage({
     include: { metodosPago: true },
   });
   const esAdmin = usuario!.rol === "super_admin";
+
+  const [kyc, pasosKyc] = await Promise.all([
+    ultimaVerificacion(usuario!.id),
+    pasosRequeridos(),
+  ]);
 
   return (
     <main className="mx-auto max-w-md space-y-5 px-5 py-6">
@@ -46,6 +53,9 @@ export default async function ConfiguracionPage({
         <SeccionVerificacion
           correoVerificado={usuario!.correoVerificado}
           tiene2FA={!!usuario!.pinHash || usuario!.otpCorreoActivo}
+          estadoKyc={kyc?.estado ?? null}
+          motivoRechazoKyc={kyc?.motivoRechazo ?? null}
+          pasosKyc={pasosKyc}
         />
 
         {/* Pagos */}

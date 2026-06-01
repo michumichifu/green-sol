@@ -4,6 +4,18 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.52] — 2026-06-01 — KYC Fase 3: asistente de verificación del usuario
+
+### Añadido
+- **`components/kyc/asistente-kyc.tsx`**: asistente por pasos (solo los pasos activos) con progreso, navegación y envío vía Server Action; arma un único `FormData` con campos + archivos.
+- **`components/kyc/subir-imagen.tsx`**: captura de documento/selfie (foto o archivo), con preview y validación de tipo/tamaño en cliente (≤5 MB, JPG/PNG/PDF).
+- **`components/kyc/captura-video.tsx`**: grabación de liveness con `MediaRecorder` (7-10 s), instrucciones guiadas en pantalla (pestañear → boca 3× → 3 dedos), preview y re-grabar.
+- **`components/kyc/item-kyc.tsx`**: estado del KYC en la sección Verificación (en revisión / aprobada / corregir y reenviar con motivo / suspendida) y apertura del asistente.
+- Integración en `seccion-verificacion.tsx` (paso 3 ahora dinámico) y `configuracion/page.tsx` (carga última verificación + pasos activos). Contador a `/3`.
+
+### Verificado
+- Typecheck limpio. **E2E Playwright** (`e2e/kyc.spec.ts`): login → abrir asistente → ver pasos (documento, nacionalidad). Verde.
+
 ## [0.0.51] — 2026-06-01 — KYC Fase 2: máquina de estados y Server Actions
 
 ### Añadido

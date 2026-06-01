@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { CheckCircle2, ChevronRight } from "lucide-react";
+import type { EstadoKyc } from "@prisma/client";
+import type { PasosRequeridos } from "@/lib/kyc/config";
+import { ItemKyc } from "@/components/kyc/item-kyc";
 
 function ItemVerif({
   numero,
@@ -48,18 +51,25 @@ function ItemVerif({
 export function SeccionVerificacion({
   correoVerificado,
   tiene2FA,
+  estadoKyc,
+  motivoRechazoKyc,
+  pasosKyc,
 }: {
   correoVerificado: boolean;
   tiene2FA: boolean;
+  estadoKyc: EstadoKyc | null;
+  motivoRechazoKyc: string | null;
+  pasosKyc: PasosRequeridos;
 }) {
-  const hechos = [correoVerificado, tiene2FA].filter(Boolean).length;
+  const kycHecho = estadoKyc === "aprobada";
+  const hechos = [correoVerificado, tiene2FA, kycHecho].filter(Boolean).length;
   return (
     <section className="space-y-3">
       <div>
         <h2 className="text-sm font-semibold">Verificación de la cuenta</h2>
         <p className="text-xs text-muted-foreground">
           Sigue estos pasos para proteger tu cuenta y desbloquear funciones.{" "}
-          ({hechos}/2 básicos)
+          ({hechos}/3)
         </p>
       </div>
       <ItemVerif
@@ -75,12 +85,11 @@ export function SeccionVerificacion({
         sub="Agrega al menos un método de seguridad adicional. Ejemplo: un PIN o el código por correo."
         enlace="/configuracion?tab=seguridad"
       />
-      <ItemVerif
+      <ItemKyc
         numero={3}
-        hecho={false}
-        titulo="Verificación de identidad (KYC)"
-        sub="Para límites y montos mayores."
-        pronto
+        estado={estadoKyc}
+        motivoRechazo={motivoRechazoKyc}
+        pasos={pasosKyc}
       />
     </section>
   );
