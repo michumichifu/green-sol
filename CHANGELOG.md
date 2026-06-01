@@ -4,6 +4,17 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.49] — 2026-05-31 — KYC Fase 0: almacenamiento privado (MinIO) + usuario de prueba
+
+### Añadido
+- **`lib/almacenamiento.ts`**: capa de almacenamiento de archivos privados (documentos KYC) sobre **MinIO/S3** (`@aws-sdk/client-s3`). `subirArchivo`, `leerArchivo`, `borrarArchivo`, `urlFirmadaLectura` (URLs temporales de solo lectura) y `asegurarBucket`. **El navegador nunca habla con MinIO**: sube al servidor y este reenvía (más seguro, sin CORS). Fallback a disco local (`.almacen/`) si no hay MinIO.
+- **MinIO local** en podman (contenedor `greensol-minio`, API `:9000`, consola `:9011`, bucket privado `greensol-kyc`).
+- **`prisma/seed-dev.ts`** + script `seed:dev`: usuario super-admin de pruebas idempotente (`qa@greensol.local`) para QA local. Credenciales en `_privado/` (no al repo).
+- Variables `S3_*` en `.env.example`; `.almacen/` ignorado por git.
+
+### Verificado
+- Typecheck limpio. Subida/lectura/URL-firmada/borrado probados contra MinIO; seed ejecutado OK.
+
 ## [0.0.48] — 2026-05-31 — Pestañas deslizantes, campanita en vivo y diseño KYC
 
 ### Añadido

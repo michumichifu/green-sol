@@ -134,7 +134,7 @@ Para recolectas en modo tradicional, el backend (Postgres) guarda, sin nada on-c
 - **Verificación por correo:** token de confirmación enviado vía **servidor de correo propio** sobre un **dominio de prueba** (SMTP en variables de entorno). Cuenta no verificada → acceso limitado.
 - **A futuro:** OAuth con **Google** (vincular a cuenta existente o registro directo); la app de Google se gestiona a nivel super-admin.
 - **Datos de pago del perfil** (off-chain, modelo `MetodoPago` rediseñado): por **categoría** fiat o cripto → **moneda** (VES/USD en el MVP) → **método** (transferencia/pago_movil/efectivo/zelle/zinli/walytech/banco para fiat; usdc/sol para cripto) → datos del titular (persona natural). El organizador **selecciona** uno de estos en el asistente del san (filtrado por la moneda del san) y sus datos se **copian** a `DatosPagoRecolecta`. Las wallet de Solana habilitan, a futuro, consulta de saldo vía RPC (modo espejo).
-- **Registro rápido** sin cédula. **KYC** solo para **funciones de dinero** (como los exchanges), con **proveedor tercero** (documento + selfie/video); ellos almacenan esa parte. No construir KYC propio ni manual.
+- **Registro rápido** sin cédula. **KYC** solo para **funciones de dinero** (como los exchanges). **Decisión actual (2026-05-31):** se construye un **KYC propio manual** revisado por el super-admin como primer paso (documento cédula/pasaporte + selfie + **video de liveness** grabado en el navegador y juzgado por un humano, **sin** detección automática). Pasos **configurables por toggles** (`KYC_REQUIERE_*`). Los archivos viven en **almacenamiento privado MinIO/S3** (`lib/almacenamiento.ts`), nunca en `/public`; se acceden con **URLs firmadas temporales**. Un **proveedor tercero** (Sumsub/Veriff/MetaMap) automatizará el proceso a futuro. Diseño en `docs/superpowers/specs/2026-05-31-kyc-verificacion-identidad-design.md`.
 - **Roles:** usuario, administrador de grupo, y **super-admin** con un panel interno (ruta y credenciales aparte, permisos estrictos) para auditar usuarios, grupos, métodos de pago y documentos, enviar notificaciones y frenar estafas.
 
 ## 10. Despliegue y operación
@@ -142,6 +142,7 @@ Para recolectas en modo tradicional, el backend (Postgres) guarda, sin nada on-c
 - **Pruebas / MVP:** **Vercel** (Next.js nativo, HTTPS y servidor gestionados; seguro y gratis para empezar) + Postgres gestionada + object storage para comprobantes.
 - **Producción seria:** **VPS propio en contenedor** (Docker), superficie cerrada, backups, cuando el proyecto madure y haya datos reales.
 - Almacenamiento ligero (capturas + texto). Secretos (API de tasas, claves de KYC, RPC) siempre en variables de entorno, nunca en el repo.
+- **Almacenamiento de archivos privados (KYC):** **MinIO** (S3-compatible, self-hosted) en contenedor — en local con **podman** (`greensol-minio`, bucket `greensol-kyc`) y en el VPS junto a la app. Acceso vía SDK de S3 con **URLs firmadas** de corta expiración; el navegador sube al servidor y este reenvía a MinIO (MinIO nunca se expone a internet). Migrable a Cloudflare R2/AWS S3 sin cambiar código. Implementado en `lib/almacenamiento.ts`.
 
 ## 11. Reputación, analítica y marketplace
 
