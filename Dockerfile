@@ -31,12 +31,11 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
-# Prisma: schema, migraciones y CLI para `migrate deploy` en el arranque.
+# node_modules completo del build: el CLI de Prisma (`migrate deploy` en el
+# arranque) necesita sus deps transitivas (@prisma/config y demás); copiarlo
+# entero es lo robusto. Incluye el cliente y engine generados para alpine.
+COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/node_modules/prisma ./node_modules/prisma
-COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=build /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 COPY entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh && chown -R nextjs:nodejs /app
 

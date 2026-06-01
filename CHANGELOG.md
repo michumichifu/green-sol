@@ -4,6 +4,11 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.56] — 2026-06-01 — Fix despliegue: Prisma CLI en la imagen
+
+### Corregido
+- El contenedor `web` fallaba al arrancar (`MODULE_NOT_FOUND` en `@prisma/config`) porque el Dockerfile copiaba Prisma de forma selectiva y faltaban deps transitivas del CLI usado por `migrate deploy`. Ahora se copia el **`node_modules` completo** del stage de build al runner.
+
 ## [0.0.55] — 2026-06-01 — KYC Fase 6: infraestructura de despliegue (beta VPS-2)
 
 ### Añadido
