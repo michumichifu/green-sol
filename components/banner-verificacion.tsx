@@ -3,7 +3,7 @@ import { ShieldAlert, ArrowRight } from "lucide-react";
 
 /**
  * Aviso discreto (ámbar) que invita a completar la verificación. Se muestra
- * mientras al usuario le falte el paso básico (agregar un método de 2FA).
+ * mientras al usuario le falte algún paso (2FA o verificación de identidad/KYC).
  */
 export function BannerVerificacion({
   completo,
@@ -20,7 +20,7 @@ export function BannerVerificacion({
     >
       <ShieldAlert className="size-4 shrink-0 text-gold" />
       <span className="flex-1 text-[13px] font-medium leading-tight">
-        Completa tu verificación — agrega un método de seguridad.
+        Completa tu verificación para acceder a todas las funciones.
       </span>
       <ArrowRight className="size-4 shrink-0 text-gold" />
     </Link>

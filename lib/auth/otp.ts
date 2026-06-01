@@ -2,6 +2,7 @@ import { hash, verify } from "@node-rs/argon2";
 import type { OtpProposito } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { enviarCorreo } from "@/lib/mailer";
+import { resolverNotificacion } from "@/lib/correo/resolver";
 
 const VIGENCIA_MIN = 10;
 
@@ -19,11 +20,17 @@ export async function crearYEnviarOtp(
   await prisma.codigoOtp.create({
     data: { usuarioId, hashCodigo, proposito, expiraEn },
   });
-  await enviarCorreo(
-    correo,
-    "Tu código de Green Sol",
-    `Tu código de verificación es: ${codigo}\nVálido por ${VIGENCIA_MIN} minutos.`,
-  );
+  // Usa la plantilla de marca "correo_otp" (HTML), editable desde el editor.
+  const tpl = await resolverNotificacion("correo_otp", "correo", { codigo });
+  if (tpl) {
+    await enviarCorreo(correo, tpl.asunto, tpl.texto, tpl.contenido);
+  } else {
+    await enviarCorreo(
+      correo,
+      "Tu código de Green Sol",
+      `Tu código de verificación es: ${codigo}\nVálido por ${VIGENCIA_MIN} minutos.`,
+    );
+  }
 }
 
 /** Valida el OTP más reciente y vigente; si coincide, lo marca como usado. */

@@ -4,6 +4,18 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.69] — 2026-06-01 — Fixes: OTP con plantilla de marca + banner de verificación reaparece
+
+### Corregido
+- **El OTP del registro llegaba en texto plano.** Ahora `crearYEnviarOtp` usa la plantilla de marca `correo_otp` (HTML con el código resaltado), editable desde el editor de plantillas; con fallback a texto si no resuelve.
+- **El banner "Completa tu verificación" del dashboard/perfil no reaparecía** al rechazar/pedir reenvío del KYC (solo miraba el 2FA). Ahora se muestra mientras falte 2FA **o** la verificación de identidad (`nivelKyc < 1`), con texto genérico "Completa tu verificación para acceder a todas las funciones".
+
+### Otros
+- `tsconfig` excluye `_privado` (código de referencia de Noah no debe entrar al typecheck).
+
+### Verificado
+- Typecheck limpio; plantilla OTP resuelve con HTML de marca; suite E2E 6/6.
+
 ## [0.0.68] — 2026-06-01 — Fix: confirmar método de pago con la clave (no exigir el PIN)
 
 ### Corregido

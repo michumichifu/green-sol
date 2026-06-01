@@ -48,6 +48,7 @@ export default async function PerfilPage() {
   const nivel = nivelPorReputacion(rep);
   const esAdmin = usuario!.rol === "super_admin";
   const tiene2FA = !!usuario!.pinHash || usuario!.otpCorreoActivo;
+  const verificacionCompleta = tiene2FA && usuario!.nivelKyc >= 1;
 
   const nombreCompleto =
     [usuario!.nombre, usuario!.apellido].filter(Boolean).join(" ") || "Tu perfil";
@@ -85,7 +86,7 @@ export default async function PerfilPage() {
           </div>
         </div>
 
-        <BannerVerificacion completo={tiene2FA} className="mt-4" />
+        <BannerVerificacion completo={verificacionCompleta} className="mt-4" />
 
         <div className="mt-4 flex items-center justify-between rounded-2xl bg-gradient-to-br from-brand to-brand-2 p-3 text-white">
           <div>
