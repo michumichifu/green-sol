@@ -112,7 +112,22 @@ certbot --nginx -d greensol.creceideas.com   # DNS en gris para HTTP-01
 cd /opt/greensol
 git pull
 docker compose -f docker-compose.prod.yml up -d --build
+# IMPRESCINDIBLE tras cada build, o el disco se llena:
+docker image prune -f      # imágenes sin tag (dangling)
+docker builder prune -f    # build cache de BuildKit (aquí se acumula de verdad:
+                           # cada build deja varios GB; es la causa real)
 ```
+
+> ⚠️ **Host compartido (n8n, chatwoot, evolution).** Usar **solo** las variantes
+> `-f` de arriba. **NUNCA** `docker image prune -a` ni `docker system prune -a`:
+> esos borran imágenes *con* tag que no estén en uso en ese momento y pueden
+> eliminar las de los otros servicios, rompiéndolos al reiniciar.
+> `docker builder prune -f` sí es seguro (solo toca el cache de build, no imágenes).
+> Para **rollback**: `git checkout <versión>` + rebuild (no hace falta conservar
+> imágenes anteriores).
+>
+> Verificar el uso cuando haga falta: `docker system df` (mira la fila
+> **Build Cache** — si crece, `docker builder prune -f`).
 
 ## 6. Verificación
 
