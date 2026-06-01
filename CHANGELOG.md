@@ -4,6 +4,12 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.57] — 2026-06-01 — Fixes de login (campo que se borraba + correo con espacio)
+
+### Corregido
+- **El correo/usuario ya no se borra** al fallar la contraseña: el campo `identificador` del login era no controlado y React 19 resetea los forms con Server Actions; ahora es controlado y se conserva para corregir solo la clave.
+- **Entrar con el correo** funciona igual que con el usuario: el `identificador` se recorta (`trim`) antes de buscar, evitando que un espacio del autocompletado del navegador impida encontrar la cuenta.
+
 ## [0.0.56] — 2026-06-01 — Fix despliegue: Prisma CLI en la imagen
 
 ### Corregido

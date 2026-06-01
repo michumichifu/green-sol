@@ -41,7 +41,9 @@ export const registroCompletoSchema = z
 
 // Login: acepta correo o nombre de usuario
 export const loginSchema = z.object({
-  identificador: z.string().min(1, "Correo o nombre de usuario"),
+  // trim: evita que un espacio del autocompletado (típico en el correo) impida
+  // encontrar la cuenta. La búsqueda por correo además normaliza a minúsculas.
+  identificador: z.string().trim().min(1, "Correo o nombre de usuario"),
   contrasena: z.string().min(1, "Requerida"),
 });
 

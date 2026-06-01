@@ -20,6 +20,10 @@ export default function LoginPage() {
     iniciarSesion,
     {},
   );
+  // Controlados para que NO se borren al reenviar el formulario (React 19
+  // resetea los forms con Server Actions). Así, si la clave falla, el
+  // correo/usuario se conserva y solo se corrige la contraseña.
+  const [identificador, setIdentificador] = useState("");
   const [contrasena, setContrasena] = useState("");
 
   return (
@@ -61,6 +65,8 @@ export default function LoginPage() {
               id="identificador"
               name="identificador"
               autoComplete="username"
+              value={identificador}
+              onChange={(e) => setIdentificador(e.target.value)}
               className={CAMPO_FILLED}
             />
           </div>
