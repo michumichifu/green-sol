@@ -4,6 +4,18 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.62] — 2026-06-01 — KYC: documentos visibles en revisión (proxy) y botón de grabar
+
+### Corregido
+- **Los documentos no se veían en la cola del super-admin** en la beta: las URLs firmadas apuntaban a `minio:9000` (dirección interna del VPS, inaccesible desde el navegador). Ahora se sirven por un **route handler proxy autenticado** (`/api/almacen/[...key]`) que lee de MinIO interno y entrega solo al super-admin. Funciona igual en local y en producción, sin exponer MinIO.
+
+### Cambiado
+- **Botón "Empezar a grabar" superpuesto sobre el video y rojo** (estilo cámara), para que no se confunda la vista previa en vivo con que ya se está grabando.
+- Instrucciones del video más claras: "Pestañea 3 veces", "Abre la boca 3 veces", "Muestra 3 dedos frente a tu cara".
+
+### Verificado
+- Typecheck limpio. E2E integral verde (incluye ver documentos vía proxy).
+
 ## [0.0.61] — 2026-06-01 — KYC: pulido del asistente (bugs + UX) y disclaimer 24-48 h
 
 ### Corregido

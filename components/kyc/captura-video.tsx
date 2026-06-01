@@ -10,7 +10,7 @@ const MAX_BYTES = 20 * 1024 * 1024;
 
 // Los 3 gestos del liveness. `corto` se muestra en las tarjetas; `txt` encima del video.
 const GUIA = [
-  { en: 0, corto: "Pestañea", txt: "Mira a la cámara y pestañea despacio" },
+  { en: 0, corto: "Pestañea 3 veces", txt: "Pestañea 3 veces mirando a la cámara" },
   { en: 3, corto: "Abre la boca 3 veces", txt: "Abre y cierra la boca 3 veces" },
   { en: 6, corto: "Muestra 3 dedos", txt: "Muestra 3 dedos frente a tu cara" },
 ];
@@ -202,17 +202,21 @@ export function CapturaVideo({
             <Check className="size-3.5" /> Grabado
           </div>
         )}
+
+        {/* Botón de grabar SUPERPUESTO y rojo: deja claro que aún no se está grabando */}
+        {estado === "listo" && (
+          <div className="absolute inset-x-0 bottom-4 flex justify-center">
+            <button
+              type="button"
+              onClick={empezar}
+              className="flex items-center gap-2 rounded-full bg-destructive px-5 py-2.5 text-sm font-bold text-white shadow-lg ring-4 ring-white/30"
+            >
+              <span className="size-3 rounded-full bg-white" /> Empezar a grabar
+            </button>
+          </div>
+        )}
       </div>
 
-      {estado === "listo" && (
-        <button
-          type="button"
-          onClick={empezar}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-2.5 text-sm font-semibold text-white"
-        >
-          <Video className="size-4" /> Empezar a grabar
-        </button>
-      )}
       {estado === "grabando" && (
         <button
           type="button"

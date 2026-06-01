@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import type { EstadoKyc } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
-import { urlFirmadaLectura } from "@/lib/almacenamiento";
 import { puedeTransicionar } from "@/lib/kyc/estados";
 import { guardarConfig } from "@/lib/config";
 import { PASOS_KYC, type PasoKyc } from "@/lib/kyc/config";
@@ -114,7 +113,12 @@ export async function resolverKyc(
   return { ok: true };
 }
 
-/** URLs firmadas (temporales) de los archivos de una solicitud — solo super-admin. */
+/** Ruta del proxy autenticado para leer un archivo del almacén (solo super-admin). */
+function rutaArchivo(key: string): string {
+  return `/api/almacen/${key.split("/").map(encodeURIComponent).join("/")}`;
+}
+
+/** Rutas de los archivos de una solicitud (vía proxy interno) — solo super-admin. */
 export async function urlsRevision(
   id: string,
 ): Promise<{ docFrente?: string; docReverso?: string; selfie?: string; video?: string }> {
@@ -122,10 +126,10 @@ export async function urlsRevision(
   const v = await prisma.verificacionKyc.findUnique({ where: { id } });
   if (!v) return {};
   const out: Record<string, string> = {};
-  if (v.docFrenteKey) out.docFrente = await urlFirmadaLectura(v.docFrenteKey, 300);
-  if (v.docReversoKey) out.docReverso = await urlFirmadaLectura(v.docReversoKey, 300);
-  if (v.selfieKey) out.selfie = await urlFirmadaLectura(v.selfieKey, 300);
-  if (v.videoKey) out.video = await urlFirmadaLectura(v.videoKey, 300);
+  if (v.docFrenteKey) out.docFrente = rutaArchivo(v.docFrenteKey);
+  if (v.docReversoKey) out.docReverso = rutaArchivo(v.docReversoKey);
+  if (v.selfieKey) out.selfie = rutaArchivo(v.selfieKey);
+  if (v.videoKey) out.video = rutaArchivo(v.videoKey);
   return out;
 }
 
