@@ -290,8 +290,8 @@ export function AsistenteKyc({
           )}
         </div>
 
-        {/* Navegación (con margen seguro para la barra del sistema en móvil) */}
-        <div className="flex gap-2 border-t px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        {/* Navegación (siempre separada de la barra del sistema del teléfono) */}
+        <div className="flex gap-2 border-t px-5 pt-4 pb-[calc(env(safe-area-inset-bottom)+1.75rem)]">
           {i > 0 && (
             <button
               type="button"

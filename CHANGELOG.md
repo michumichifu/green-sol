@@ -4,6 +4,16 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.65] — 2026-06-01 — KYC video: confirmación con fotograma, colores por paso y botones más arriba
+
+### Cambiado
+- **Vista del video grabado**: en vez de un reproductor (el webm de MediaRecorder no reproduce por su falta de duración), se muestra el **fotograma capturado + "Video grabado correctamente"** con check. El usuario confirma que se grabó; el super-admin sí lo reproduce completo en su cola.
+- **Indicaciones durante la grabación con color por paso** (verde / ámbar / azul) y etiqueta "Paso N de 3", para que se perciba cuándo cambia la instrucción. Los números de las tarjetas también toman ese color.
+- **Botones Atrás/Siguiente del modal más arriba** (margen inferior garantizado), para no quedar pegados a la barra del sistema del teléfono.
+
+### Verificado
+- Typecheck limpio. E2E smoke verde; integral pasa (con reintento por timing).
+
 ## [0.0.64] — 2026-06-01 — KYC: métricas en la cola, tag "Sin verificar", póster de video y pulido
 
 ### Añadido

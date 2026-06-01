@@ -1,18 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Video, Square, RotateCcw, Check } from "lucide-react";
+import { Video, Square, RotateCcw, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const MIN_SEG = 7;
 const MAX_SEG = 10;
 const MAX_BYTES = 20 * 1024 * 1024;
 
-// Los 3 gestos del liveness. `corto` se muestra en las tarjetas; `txt` encima del video.
+// Los 3 gestos del liveness. `corto` va en las tarjetas; `txt` encima del video;
+// `color`/`chip` dan un color distinto a cada paso para que se note el cambio.
 const GUIA = [
-  { en: 0, corto: "Pestañea 3 veces", txt: "Pestañea 3 veces mirando a la cámara" },
-  { en: 3, corto: "Abre la boca 3 veces", txt: "Abre y cierra la boca 3 veces" },
-  { en: 6, corto: "Muestra 3 dedos frente a tu cara", txt: "Muestra 3 dedos frente a tu cara" },
+  { en: 0, corto: "Pestañea 3 veces", txt: "Pestañea 3 veces mirando a la cámara", color: "bg-brand", chip: "bg-brand/20 text-brand" },
+  { en: 3, corto: "Abre la boca 3 veces", txt: "Abre y cierra la boca 3 veces", color: "bg-gold", chip: "bg-gold/20 text-gold" },
+  { en: 6, corto: "Muestra 3 dedos frente a tu cara", txt: "Muestra 3 dedos frente a tu cara", color: "bg-sky-600", chip: "bg-sky-500/20 text-sky-600" },
 ];
 
 /**
@@ -31,11 +32,9 @@ export function CapturaVideo({
   const streamRef = useRef<MediaStream | null>(null);
   const recRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const fixRef = useRef(false); // para corregir la duración del webm en el preview
   const [estado, setEstado] = useState<"idle" | "listo" | "grabando" | "hecho">("idle");
   const [seg, setSeg] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [urlPreview, setUrlPreview] = useState<string | null>(null);
   const [poster, setPoster] = useState<string | null>(null);
 
   // Captura el fotograma actual del stream para usarlo como póster del preview
@@ -57,7 +56,6 @@ export function CapturaVideo({
   // Si ya hay un video grabado (volvimos a este paso), recuperar la vista previa.
   useEffect(() => {
     if (valor && estado === "idle") {
-      setUrlPreview(URL.createObjectURL(valor));
       setEstado("hecho");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,7 +112,6 @@ export function CapturaVideo({
         return;
       }
       const file = new File([blob], "liveness.webm", { type: "video/webm" });
-      setUrlPreview(URL.createObjectURL(blob));
       onArchivo(file);
       setEstado("hecho");
       streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -147,14 +144,14 @@ export function CapturaVideo({
   }
 
   function rehacer() {
-    setUrlPreview(null);
     setPoster(null);
     setSeg(0);
     setEstado("idle");
     onArchivo(null);
   }
 
-  const guiaActual = [...GUIA].reverse().find((g) => seg >= g.en)?.txt ?? GUIA[0].txt;
+  const idxGuia = GUIA.reduce((acc, g, i) => (seg >= g.en ? i : acc), 0);
+  const guia = GUIA[idxGuia];
 
   return (
     <div className="space-y-3">
@@ -165,11 +162,11 @@ export function CapturaVideo({
         </p>
       </div>
 
-      {/* Los 3 pasos en una sola línea, para que se lean ANTES de grabar */}
+      {/* Los 3 pasos en una sola línea, cada uno con su color */}
       <div className="grid grid-cols-3 gap-1.5">
         {GUIA.map((g, idx) => (
           <div key={g.corto} className="rounded-lg border bg-muted/40 p-2 text-center">
-            <span className="mx-auto mb-1 flex size-5 items-center justify-center rounded-full bg-brand/15 text-[11px] font-bold text-brand">
+            <span className={cn("mx-auto mb-1 flex size-5 items-center justify-center rounded-full text-[11px] font-bold", g.chip)}>
               {idx + 1}
             </span>
             <p className="text-[10px] font-medium leading-tight">{g.corto}</p>
@@ -178,31 +175,25 @@ export function CapturaVideo({
       </div>
 
       <div className="relative mx-auto aspect-[4/5] w-full overflow-hidden rounded-2xl border bg-black">
-        {estado === "hecho" && urlPreview ? (
-          <video
-            src={urlPreview}
-            poster={poster ?? undefined}
-            controls
-            muted
-            playsInline
-            // El webm de MediaRecorder no trae duración en el header (sale 0:00 y
-            // no reproduce). Forzamos su cálculo con un seek al "final".
-            onLoadedMetadata={(e) => {
-              const v = e.currentTarget;
-              if (!isFinite(v.duration)) {
-                fixRef.current = true;
-                v.currentTime = 1e101;
-              }
-            }}
-            onTimeUpdate={(e) => {
-              const v = e.currentTarget;
-              if (fixRef.current && isFinite(v.duration)) {
-                fixRef.current = false;
-                v.currentTime = 0;
-              }
-            }}
-            className="size-full object-cover"
-          />
+        {estado === "hecho" ? (
+          // Confirmación con el fotograma capturado (no un reproductor: el webm de
+          // MediaRecorder no reproduce bien por su falta de duración). El super-admin
+          // sí ve el video completo en su cola.
+          <div className="relative size-full">
+            {poster ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={poster} alt="Tu video" className="size-full object-cover" />
+            ) : (
+              <div className="size-full bg-black" />
+            )}
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 text-white">
+              <CheckCircle2 className="size-12 text-brand" />
+              <p className="text-sm font-semibold">Video grabado correctamente</p>
+              <p className="px-6 text-center text-xs text-white/80">
+                Lo revisará un administrador. Si quieres, vuelve a grabarlo.
+              </p>
+            </div>
+          </div>
         ) : (
           <video ref={videoRef} playsInline muted className="size-full object-cover" />
         )}
@@ -222,9 +213,17 @@ export function CapturaVideo({
 
         {estado === "grabando" && (
           <>
-            {/* Indicación resaltada para que se note y se lea a tiempo */}
-            <div className="absolute inset-x-3 top-3 rounded-xl bg-black/75 px-3 py-2 text-center text-sm font-semibold text-white shadow-lg">
-              {guiaActual}
+            {/* Indicación con color por paso: se nota cuando cambia la instrucción */}
+            <div
+              className={cn(
+                "absolute inset-x-3 top-3 rounded-xl px-3 py-2 text-center text-white shadow-lg transition-colors duration-300",
+                guia.color,
+              )}
+            >
+              <p className="text-[11px] font-bold uppercase tracking-wide opacity-90">
+                Paso {idxGuia + 1} de {GUIA.length}
+              </p>
+              <p className="text-sm font-semibold leading-tight">{guia.txt}</p>
             </div>
             <div className="absolute right-3 bottom-3 flex items-center gap-1.5 rounded-full bg-destructive px-2.5 py-1 text-xs font-bold text-white">
               <span className="size-2 animate-pulse rounded-full bg-white" /> {seg}s
@@ -235,7 +234,7 @@ export function CapturaVideo({
         {estado === "hecho" && (
           <>
             <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-white">
-              <Check className="size-3.5" /> Grabado
+              <CheckCircle2 className="size-3.5" /> Grabado
             </div>
             {/* "Volver a grabar" superpuesto y visible (libera espacio abajo) */}
             <button
