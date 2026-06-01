@@ -13,3 +13,20 @@ export async function marcarTodasLeidas(): Promise<void> {
   });
   revalidatePath("/notificaciones");
 }
+
+export async function marcarLeida(id: string): Promise<void> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return;
+  await prisma.notificacion.updateMany({
+    where: { id, usuarioId: usuario.id },
+    data: { leida: true },
+  });
+  revalidatePath("/notificaciones");
+}
+
+export async function eliminarNotificacion(id: string): Promise<void> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return;
+  await prisma.notificacion.deleteMany({ where: { id, usuarioId: usuario.id } });
+  revalidatePath("/notificaciones");
+}

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { enviarCorreo } from "@/lib/mailer";
+import { correoBase } from "@/lib/correo/plantillas";
 
 type BaseNoti = {
   tipo: string;
@@ -17,9 +18,16 @@ export async function notificarYCorreo(
   base: BaseNoti,
 ): Promise<void> {
   await crearNotificacion(usuario.id, base);
-  const cuerpo = base.cuerpo ? `${base.titulo}\n\n${base.cuerpo}` : base.titulo;
+  const texto = base.cuerpo ? `${base.titulo}\n\n${base.cuerpo}` : base.titulo;
+  // Layout de marca general: el título/cuerpo cambian según la acción.
+  const html = correoBase({
+    titulo: base.titulo,
+    cuerpoHtml: base.cuerpo
+      ? `<p style="margin:0;">${base.cuerpo}</p>`
+      : "",
+  });
   try {
-    await enviarCorreo(usuario.correo, base.titulo, `${cuerpo}\n\n— Green Sol`);
+    await enviarCorreo(usuario.correo, base.titulo, `${texto}\n\n— Green Sol`, html);
   } catch {
     // si el SMTP falla, la notificación in-app ya quedó registrada
   }

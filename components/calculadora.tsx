@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Tasas } from "@/lib/rates/cache";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { useIndicador } from "@/components/use-indicador";
 
 const MONEDAS = [
   { id: "bs", nombre: "Bolívares", simbolo: "Bs" },
@@ -23,6 +24,7 @@ export function Calculadora({ tasas }: { tasas: Tasas }) {
   const [monto, setMonto] = useState("1");
   const [moneda, setMoneda] = useState<Moneda>("bs");
   const n = Number(monto) || 0;
+  const { ref: selRef, caja } = useIndicador(moneda);
 
   const bcv = tasas.bcv?.usd ?? 0; // Bs por dólar BCV
   const usdt = tasas.usdt?.promedio ?? 0; // Bs por USDT (paralelo)
@@ -64,22 +66,34 @@ export function Calculadora({ tasas }: { tasas: Tasas }) {
       {/* 1. Elegir moneda */}
       <div className="space-y-2">
         <p className="text-sm font-medium">¿Qué moneda quieres convertir?</p>
-        <div className="grid grid-cols-4 gap-2">
+        <div ref={selRef} className="relative grid grid-cols-4 gap-2">
+          {caja && (
+            <span
+              className="pointer-events-none absolute z-0 rounded-xl bg-brand/5 transition-all duration-300 ease-out"
+              style={{
+                left: caja.left,
+                top: caja.top,
+                width: caja.width,
+                height: caja.height,
+              }}
+            />
+          )}
           {MONEDAS.map((m) => (
             <button
               key={m.id}
               type="button"
+              data-activo={moneda === m.id ? "true" : undefined}
               onClick={() => setMoneda(m.id)}
               className={cn(
-                "flex flex-col items-center gap-1 rounded-xl border px-1 py-2 transition-colors",
+                "relative z-10 flex flex-col items-center gap-1 rounded-xl border bg-transparent px-1 py-2 transition-colors",
                 moneda === m.id
-                  ? "border-brand bg-brand/5"
-                  : "hover:border-brand/40",
+                  ? "border-brand"
+                  : "border-input hover:border-brand/40",
               )}
             >
               <span
                 className={cn(
-                  "flex size-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold",
+                  "flex size-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold transition-colors",
                   moneda === m.id
                     ? "bg-brand text-white"
                     : "bg-muted text-muted-foreground",
@@ -124,7 +138,11 @@ export function Calculadora({ tasas }: { tasas: Tasas }) {
       {/* 3. Resultados */}
       <div className="space-y-2">
         <p className="text-sm font-medium">Equivale a</p>
-        {MONEDAS.filter((m) => m.id !== moneda).map((m) => {
+        <div
+          key={moneda}
+          className="animate-in fade-in space-y-2 duration-300"
+        >
+          {MONEDAS.filter((m) => m.id !== moneda).map((m) => {
           const v = convertir(m.id);
           return (
             <div
@@ -141,8 +159,9 @@ export function Calculadora({ tasas }: { tasas: Tasas }) {
                 {v === null ? "—" : `${m.simbolo} ${fmt(v)}`}
               </span>
             </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {!tasas.actualizado && (

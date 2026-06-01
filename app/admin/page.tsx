@@ -1,28 +1,26 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { obtenerConfigSmtp, obtenerConfigApp } from "@/lib/config";
+import {
+  obtenerConfigSmtp,
+  obtenerConfigApp,
+  obtenerPlantillasGuardadas,
+} from "@/lib/config";
+import { EVENTOS_NOTIFICACION } from "@/lib/correo/catalogo";
 import { obtenerRestriccionesTexto } from "@/lib/restricciones";
 import { METODO_LABEL } from "@/lib/monedas";
 import {
   cambiarRol,
-  guardarSmtp,
   guardarAppConfig,
   guardarRestricciones,
 } from "./actions";
 import { PanelTabs } from "@/components/panel-tabs";
+import { FormSmtp } from "@/components/form-smtp";
+import { EditorPlantillas } from "@/components/editor-plantillas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const ROLES = ["usuario", "admin_grupo", "super_admin"];
-const CAMPOS_SMTP: [string, string][] = [
-  ["SMTP_HOST", "Host"],
-  ["SMTP_PORT", "Puerto"],
-  ["SMTP_USER", "Usuario"],
-  ["SMTP_PASS", "Contraseña"],
-  ["SMTP_FROM", "Remitente"],
-  ["SMTP_SECURE", "Seguro (true/false)"],
-];
 const METODO_RECOLECTA_LABEL: Record<string, string> = {
   tradicional: "Tradicional",
   cripto: "Cripto",
@@ -34,9 +32,9 @@ function fmt(n: number) {
 
 function Stat({ label, valor }: { label: string; valor: string | number }) {
   return (
-    <div className="rounded-xl border bg-card p-3">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-0.5 text-2xl font-bold">{valor}</p>
+    <div className="min-w-0 rounded-xl border bg-card p-3">
+      <p className="truncate text-xs text-muted-foreground">{label}</p>
+      <p className="mt-0.5 truncate text-2xl font-bold tabular-nums">{valor}</p>
     </div>
   );
 }
@@ -135,19 +133,23 @@ export default async function AdminPage() {
     obtenerConfigApp(),
   ]);
   const restricciones = await obtenerRestriccionesTexto();
+  const plantillas = await obtenerPlantillasGuardadas();
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 px-4 pb-6 sm:px-6 pt-[max(2.75rem,calc(env(safe-area-inset-top)+1.5rem))]">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold sm:text-2xl">Panel super-admin</h1>
-        <Link href="/dashboard" className="text-sm text-brand underline">
+    <main className="mx-auto w-full max-w-3xl space-y-6 overflow-x-hidden px-4 pb-6 sm:px-6 pt-[max(2.75rem,calc(env(safe-area-inset-top)+1.5rem))]">
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="min-w-0 truncate text-xl font-bold sm:text-2xl">
+          Panel super-admin
+        </h1>
+        <Link
+          href="/dashboard"
+          className="shrink-0 text-sm text-brand underline"
+        >
           Volver
         </Link>
       </div>
 
-      <PanelTabs
-        tabs={["Métricas", "Usuarios", "Restricciones", "SMTP", "App"]}
-      >
+      <PanelTabs tabs={["Métricas", "Usuarios", "Configuración"]}>
         {/* Métricas */}
         <div className="space-y-6">
           <section className="space-y-3">
@@ -258,143 +260,130 @@ export default async function AdminPage() {
           </ul>
         </section>
 
-        {/* Restricciones */}
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold">Restricciones de palabras</h2>
-          <p className="text-xs text-muted-foreground">
-            Palabras separadas por coma. Se bloquean en cuentas de usuario (tú,
-            como super-admin, quedas exento).
-          </p>
-          <form action={guardarRestricciones} className="space-y-3">
-            <div className="space-y-1">
-              <Label htmlFor="r_nombre">Nombre</Label>
-              <textarea
-                id="r_nombre"
-                name="nombre"
-                rows={2}
-                defaultValue={restricciones.nombre}
-                className="w-full rounded-md border bg-background p-2 text-sm"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="r_apellido">Apellido</Label>
-              <textarea
-                id="r_apellido"
-                name="apellido"
-                rows={2}
-                defaultValue={restricciones.apellido}
-                className="w-full rounded-md border bg-background p-2 text-sm"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="r_usuario">Nombre de usuario</Label>
-              <textarea
-                id="r_usuario"
-                name="nombreUsuario"
-                rows={2}
-                defaultValue={restricciones.nombreUsuario}
-                className="w-full rounded-md border bg-background p-2 text-sm"
-              />
-            </div>
-            <Button type="submit" variant="outline">
-              Guardar restricciones
-            </Button>
-          </form>
-        </section>
-
-        {/* SMTP */}
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold">Configuración de correo (SMTP)</h2>
-          <p className="text-xs text-muted-foreground">
-            De aquí salen la verificación, los OTP y el reseteo de contraseña.
-          </p>
-          <form action={guardarSmtp} className="grid gap-3 sm:grid-cols-2">
-            {CAMPOS_SMTP.map(([clave, label]) => (
-              <div key={clave} className="space-y-1">
-                <Label htmlFor={clave}>{label}</Label>
+        {/* Configuración (subpestañas) */}
+        <PanelTabs
+          variante="sub"
+          tabs={["General", "SMTP", "Plantillas", "Restricciones"]}
+        >
+          {/* General (configuración de la app) */}
+          <section className="space-y-3">
+            <h2 className="text-sm font-semibold">
+              Configuración general de la app
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Datos públicos de la aplicación (marca, contacto y metadatos).
+            </p>
+            <form action={guardarAppConfig} className="space-y-3">
+              <div className="space-y-1">
+                <Label htmlFor="APP_NOMBRE">Nombre de la app</Label>
                 <Input
-                  key={`${clave}-${smtp[clave] ?? ""}`}
-                  id={clave}
-                  name={clave}
-                  defaultValue={smtp[clave] ?? ""}
-                  type={clave === "SMTP_PASS" ? "password" : "text"}
+                  key={`nombre-${app.APP_NOMBRE ?? ""}`}
+                  id="APP_NOMBRE"
+                  name="APP_NOMBRE"
+                  defaultValue={app.APP_NOMBRE ?? ""}
+                  placeholder="Green Sol"
                 />
               </div>
-            ))}
-            <div className="sm:col-span-2">
+              <div className="space-y-1">
+                <Label htmlFor="APP_DESCRIPCION">Descripción</Label>
+                <textarea
+                  id="APP_DESCRIPCION"
+                  name="APP_DESCRIPCION"
+                  defaultValue={app.APP_DESCRIPCION ?? ""}
+                  rows={2}
+                  className="w-full rounded-md border bg-background p-2 text-sm"
+                  placeholder="Ahorra solo o en grupo, claro y transparente."
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="APP_CORREO_CONTACTO">Correo de contacto</Label>
+                <Input
+                  key={`correo-${app.APP_CORREO_CONTACTO ?? ""}`}
+                  id="APP_CORREO_CONTACTO"
+                  name="APP_CORREO_CONTACTO"
+                  type="email"
+                  defaultValue={app.APP_CORREO_CONTACTO ?? ""}
+                  placeholder="hola@greensol.app"
+                />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <Label htmlFor="APP_LOGO_URL">URL del logo</Label>
+                  <Input
+                    key={`logo-${app.APP_LOGO_URL ?? ""}`}
+                    id="APP_LOGO_URL"
+                    name="APP_LOGO_URL"
+                    defaultValue={app.APP_LOGO_URL ?? ""}
+                    placeholder="/green-sol-logo.svg"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="APP_FAVICON_URL">URL del favicon</Label>
+                  <Input
+                    key={`favicon-${app.APP_FAVICON_URL ?? ""}`}
+                    id="APP_FAVICON_URL"
+                    name="APP_FAVICON_URL"
+                    defaultValue={app.APP_FAVICON_URL ?? ""}
+                    placeholder="/favicon.ico"
+                  />
+                </div>
+              </div>
               <Button type="submit" variant="outline">
-                Guardar SMTP
+                Guardar configuración
               </Button>
-            </div>
-          </form>
-        </section>
+            </form>
+          </section>
 
-        {/* App (configuración general) */}
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold">Configuración general de la app</h2>
-          <p className="text-xs text-muted-foreground">
-            Datos públicos de la aplicación (marca, contacto y metadatos).
-          </p>
-          <form action={guardarAppConfig} className="space-y-3">
-            <div className="space-y-1">
-              <Label htmlFor="APP_NOMBRE">Nombre de la app</Label>
-              <Input
-                key={`nombre-${app.APP_NOMBRE ?? ""}`}
-                id="APP_NOMBRE"
-                name="APP_NOMBRE"
-                defaultValue={app.APP_NOMBRE ?? ""}
-                placeholder="Green Sol"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="APP_DESCRIPCION">Descripción</Label>
-              <textarea
-                id="APP_DESCRIPCION"
-                name="APP_DESCRIPCION"
-                defaultValue={app.APP_DESCRIPCION ?? ""}
-                rows={2}
-                className="w-full rounded-md border bg-background p-2 text-sm"
-                placeholder="Ahorra solo o en grupo, claro y transparente."
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="APP_CORREO_CONTACTO">Correo de contacto</Label>
-              <Input
-                key={`correo-${app.APP_CORREO_CONTACTO ?? ""}`}
-                id="APP_CORREO_CONTACTO"
-                name="APP_CORREO_CONTACTO"
-                type="email"
-                defaultValue={app.APP_CORREO_CONTACTO ?? ""}
-                placeholder="hola@greensol.app"
-              />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+          {/* SMTP */}
+          <FormSmtp smtp={smtp} />
+
+          {/* Plantillas de correo */}
+          <EditorPlantillas eventos={EVENTOS_NOTIFICACION} overrides={plantillas} />
+
+          {/* Restricciones */}
+          <section className="space-y-3">
+            <h2 className="text-sm font-semibold">Restricciones de palabras</h2>
+            <p className="text-xs text-muted-foreground">
+              Palabras separadas por coma. Se bloquean en cuentas de usuario (tú,
+              como super-admin, quedas exento).
+            </p>
+            <form action={guardarRestricciones} className="space-y-3">
               <div className="space-y-1">
-                <Label htmlFor="APP_LOGO_URL">URL del logo</Label>
-                <Input
-                  key={`logo-${app.APP_LOGO_URL ?? ""}`}
-                  id="APP_LOGO_URL"
-                  name="APP_LOGO_URL"
-                  defaultValue={app.APP_LOGO_URL ?? ""}
-                  placeholder="/green-sol-logo.svg"
+                <Label htmlFor="r_nombre">Nombre</Label>
+                <textarea
+                  id="r_nombre"
+                  name="nombre"
+                  rows={2}
+                  defaultValue={restricciones.nombre}
+                  className="w-full rounded-md border bg-background p-2 text-sm"
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="APP_FAVICON_URL">URL del favicon</Label>
-                <Input
-                  key={`favicon-${app.APP_FAVICON_URL ?? ""}`}
-                  id="APP_FAVICON_URL"
-                  name="APP_FAVICON_URL"
-                  defaultValue={app.APP_FAVICON_URL ?? ""}
-                  placeholder="/favicon.ico"
+                <Label htmlFor="r_apellido">Apellido</Label>
+                <textarea
+                  id="r_apellido"
+                  name="apellido"
+                  rows={2}
+                  defaultValue={restricciones.apellido}
+                  className="w-full rounded-md border bg-background p-2 text-sm"
                 />
               </div>
-            </div>
-            <Button type="submit" variant="outline">
-              Guardar configuración
-            </Button>
-          </form>
-        </section>
+              <div className="space-y-1">
+                <Label htmlFor="r_usuario">Nombre de usuario</Label>
+                <textarea
+                  id="r_usuario"
+                  name="nombreUsuario"
+                  rows={2}
+                  defaultValue={restricciones.nombreUsuario}
+                  className="w-full rounded-md border bg-background p-2 text-sm"
+                />
+              </div>
+              <Button type="submit" variant="outline">
+                Guardar restricciones
+              </Button>
+            </form>
+          </section>
+        </PanelTabs>
       </PanelTabs>
     </main>
   );

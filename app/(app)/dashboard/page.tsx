@@ -12,6 +12,7 @@ import { obtenerUsuario } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
 import { obtenerReputacion, nivelPorReputacion } from "@/lib/reputacion";
 import { TasasResumen } from "@/components/tasas-resumen";
+import { BannerVerificacion } from "@/components/banner-verificacion";
 import { cn } from "@/lib/utils";
 
 const ESTADO_ESTILO: Record<string, string> = {
@@ -22,7 +23,7 @@ const ESTADO_ESTILO: Record<string, string> = {
 
 export default async function DashboardPage() {
   const usuario = await obtenerUsuario();
-  const [recolectas, reputacion] = await Promise.all([
+  const [recolectas, reputacion, verif] = await Promise.all([
     prisma.recolecta.findMany({
       where: { participantes: { some: { usuarioId: usuario!.id } } },
       include: { _count: { select: { participantes: true } } },
@@ -30,7 +31,12 @@ export default async function DashboardPage() {
       take: 4,
     }),
     obtenerReputacion(usuario!.id),
+    prisma.usuario.findUnique({
+      where: { id: usuario!.id },
+      select: { pinHash: true, otpCorreoActivo: true },
+    }),
   ]);
+  const tiene2FA = !!verif?.pinHash || !!verif?.otpCorreoActivo;
 
   const nombre = usuario?.nombre?.split(" ")[0] ?? "";
   const nivel = nivelPorReputacion(reputacion);
@@ -60,6 +66,8 @@ export default async function DashboardPage() {
           Tu ahorro, claro y en orden.
         </h1>
       </section>
+
+      <BannerVerificacion completo={tiene2FA} />
 
       {/* Accesos rápidos */}
       <section className="grid grid-cols-2 gap-3">

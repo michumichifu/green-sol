@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { hashContrasena, verificarContrasena } from "@/lib/auth/password";
 import { crearYEnviarOtp, validarOtp } from "@/lib/auth/otp";
+import { crearNotificacion } from "@/lib/notificaciones";
 import { crearSesion, cerrarSesion, obtenerUsuario } from "@/lib/auth/session";
 import { debeMostrarOnboarding } from "@/lib/onboarding";
 import { validarRestricciones } from "@/lib/restricciones";
@@ -79,6 +80,16 @@ export async function registrarse(
   const usuario = existente
     ? await prisma.usuario.update({ where: { correo: correoLower }, data })
     : await prisma.usuario.create({ data: { correo: correoLower, ...data } });
+
+  if (!existente) {
+    await crearNotificacion(usuario.id, {
+      tipo: "verificacion",
+      titulo: "Completa tu verificación 🔐",
+      cuerpo:
+        "Agrega un método de seguridad (PIN o código por correo) para proteger tu cuenta.",
+      enlace: "/configuracion?tab=verificacion",
+    });
+  }
 
   await crearYEnviarOtp(usuario.id, correoLower, "verificacion");
   await guardarPendiente(correoLower);

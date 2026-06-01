@@ -4,6 +4,81 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.48] — 2026-05-31 — Pestañas deslizantes, campanita en vivo y diseño KYC
+
+### Añadido
+- **`components/use-indicador.ts`**: hook reutilizable que mide el elemento activo (`data-activo="true"`) de un contenedor para deslizar un indicador con transición; re-mide al cambiar la selección o al redimensionar.
+- **Indicador deslizante** aplicado a los selectores tipo-pestaña: moneda de la **calculadora**, **Fiat/Cripto** en método de pago, **San/Vaca** del asistente (deslizamiento vertical) y el contenido entre pasos del asistente con fade + slide. `PanelTabs` (perfil y super-admin) ya lo tenía.
+- **`docs/superpowers/specs/2026-05-31-kyc-verificacion-identidad-design.md`**: diseño aprobado del KYC propio (MinIO + URLs firmadas, liveness manual revisado por humano, proceso configurable por toggles, máquina de estados, cola en super-admin). Se evaluó el repo `AbhiEE03/TrustFlow_KYC` y se decidió **portar el patrón** nativo en vez de conectarlo por API.
+
+### Corregido
+- **Campanita desincronizada**: el `AppHeader` guardaba las notificaciones en estado local y no se refrescaba al revalidar; ahora un `useEffect` resincroniza con el servidor cuando cambia el contenido. Por eso al agregar un PIN llegaba el correo pero no aparecía el aviso in-app.
+- **Panel "Avisos y notificaciones"**: se abre debajo de la campana vía `createPortal` (escapa al `backdrop-blur`), cierra al clic fuera, puntito ámbar en no leídas, marcar leída al pulsar y botón borrar.
+
+### Cambiado
+- Paso 2 de Verificación: título **"Método de seguridad adicional (2FA)"** y descripción "Agrega al menos un método de seguridad adicional. Ejemplo: un PIN o el código por correo."
+
+### Verificado
+- Typecheck limpio (`tsc --noEmit`).
+
+## [0.0.47] — 2026-05-31 — Documentación completa al día (PRD, planes nuevos)
+
+### Cambiado
+- **PRD.md → "Estado del proyecto"** reescrito con todo lo de la sesión (SMTP real, panel reorganizado, plantillas con editor visual, 2FA, verificación inicial) y los nuevos pendientes (modal de verificación con jerarquía, TOTP/biometría/teléfono, flujo de cambio de contraseña con bloqueo 24 h, KYC, gestión de usuarios super-admin, notificaciones personalizadas, conectar plantillas a eventos).
+- **`PLAN_SEGURIDAD.md`** ampliado: política de verificación retail-friendly (clave obligatoria + 2FA opcionales), jerarquía de factores y flujo de cambio de contraseña estilo Binance.
+
+### Añadido
+- **`docs/PLAN_NOTIFICACIONES.md`**, **`docs/PLAN_KYC.md`** (KYC manual propio, liveness, panel de revisión) y **`docs/PLAN_ADMIN.md`** (gestión de usuarios super-admin + notificaciones personalizadas).
+
+## [0.0.46] — 2026-05-31 — Proceso de verificación inicial (notificación, banner, sección)
+
+### Añadido
+- **Notificación in-app al registrarse** (`app/(auth)/actions.ts`): "Completa tu verificación — agrega un método de seguridad" con enlace a Configuración → Verificación. Solo in-app.
+- **Banner ámbar** en el dashboard (`components/banner-verificacion.tsx`), entre el hero y los accesos rápidos; se muestra mientras no haya un 2FA activo y enlaza a la verificación.
+- **Pestaña "Verificación"** en Configuración (`components/seccion-verificacion.tsx`): checklist con ✓ verde (correo verificado · agrega un 2FA · KYC "Pronto") y contador.
+
+### Verificado
+- Typecheck limpio.
+
+## [0.0.45] — 2026-05-31 — Cimientos de seguridad: 2FA (PIN, OTP) y cambio de contraseña
+
+### Añadido
+- Campos **`pinHash`** y **`otpCorreoActivo`** en `Usuario` (migración `seguridad_factores`).
+- **`verificarFactores`** (`lib/seguridad.ts`) valida **clave (siempre) + PIN + OTP por correo**, exigiendo solo los factores que el usuario tenga activos; helper `factoresActivos`.
+- Pantalla **Configuración → Seguridad** "Autenticación de dos factores (2FA)" (`components/form-seguridad.tsx`): tarjetas con ✓ verde — **PIN** (configurar/quitar con clave), **código por correo** (toggle), **biometría** (Recomendado) y **app de autenticador** como "Pronto".
+- **Cambio de contraseña** (`configuracion/actions.ts → cambiarContrasena`) con la regla: **no se permite sin al menos un método de 2FA activo**; valida la contraseña actual y la política.
+
+### Verificado
+- Typecheck limpio.
+
+## [0.0.44] — 2026-05-31 — Sistema de plantillas de notificaciones con editor visual
+
+### Añadido
+- **`lib/correo/`**: layout HTML de marca (`plantillas.ts`), **catálogo de eventos** (`catalogo.ts`) con los **canales** que aplica cada uno (app y/o correo) y plantillas por defecto, motor de variables `{{...}}`, y **resolver** (`resolver.ts`) que usa el override de la base de datos o el default.
+- **Editor visual** en super-admin (`components/editor-plantillas.tsx`): **grid de tarjetas** por categoría con iconos ver/editar, **modal con pestañas Aplicación / Correo**, **barra de formato** (negrita, cursiva, subrayado, tachado, color, resaltado; enlace, imagen por URL, lista y línea divisoria en correo), **vista previa** (iframe en correo, tarjeta en app), **variables clickeables**, guardar / restablecer / enviar prueba, y **borrador en localStorage** (no se pierde al cerrar). El clic fuera no cierra el modal.
+- El **correo de prueba del SMTP** usa este sistema (plantilla `prueba_smtp`).
+
+### Corregido
+- Selector de color/resaltado: ya no inserta código en cada movimiento (aplica una sola vez al cerrar el selector).
+- **Ctrl+Z** funciona en el editor (inserciones con el mecanismo nativo del navegador).
+
+### Verificado
+- Typecheck limpio.
+
+## [0.0.43] — 2026-05-31 — SMTP real + reorganización del panel super-admin
+
+### Añadido / Cambiado
+- **SMTP funcional**: envío real por `mail.proyecciondigital.org:465` (SSL) con el buzón `no-responder@greensol.creceideas.com`. `lib/mailer.ts` soporta HTML y `verificarConexionSmtp` (handshake sin enviar).
+- **Panel super-admin** reorganizado: pestañas principales **Métricas · Usuarios · Configuración**; Configuración con **subpestañas** General · SMTP · Plantillas · Restricciones (`components/panel-tabs.tsx` con variante "sub").
+- **Form SMTP** (`components/form-smtp.tsx`): **toggle de conexión segura (SSL/TLS)**, **remitente en dos campos** (nombre + correo) con "Aparece como…" en vivo, botón verde, **toast** al guardar y **enviar correo de prueba**; la contraseña se conserva si se deja vacía.
+
+### Corregido
+- **Scroll horizontal** del panel super-admin en móvil (faltaba `w-full` en el `main`; medido con Playwright). Pestañas scrollables en móvil.
+- **Pantalla blanca en local** por correr `next build` con el `next dev` activo (corrompe `.next`): de ahora en adelante se verifica con `tsc --noEmit`.
+
+### Verificado
+- Typecheck limpio.
+
 ## [0.0.42] — 2026-05-30 — Documentación al día (PRD 0.10) + auditoría y estado del proyecto
 
 ### Cambiado

@@ -13,6 +13,7 @@ import {
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { obtenerReputacion, nivelPorReputacion } from "@/lib/reputacion";
+import { BannerVerificacion } from "@/components/banner-verificacion";
 import { cerrarSesionAction } from "@/app/(auth)/actions";
 
 function ItemMenu({
@@ -44,6 +45,7 @@ export default async function PerfilPage() {
   const rep = await obtenerReputacion(usuario!.id);
   const nivel = nivelPorReputacion(rep);
   const esAdmin = usuario!.rol === "super_admin";
+  const tiene2FA = !!usuario!.pinHash || usuario!.otpCorreoActivo;
 
   const nombreCompleto =
     [usuario!.nombre, usuario!.apellido].filter(Boolean).join(" ") || "Tu perfil";
@@ -66,6 +68,8 @@ export default async function PerfilPage() {
             )}
           </div>
         </div>
+
+        <BannerVerificacion completo={tiene2FA} className="mt-4" />
 
         <div className="mt-4 flex items-center justify-between rounded-2xl bg-gradient-to-br from-brand to-brand-2 p-3 text-white">
           <div>

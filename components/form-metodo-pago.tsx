@@ -15,6 +15,7 @@ import {
   CRIPTO_OPCIONES,
 } from "@/lib/monedas";
 import { SelectBanco } from "@/components/select-banco";
+import { useIndicador } from "@/components/use-indicador";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ export function FormMetodoPago() {
   );
 
   const [categoria, setCategoria] = useState("");
+  const { ref: catRef, caja: cajaCat } = useIndicador(categoria);
   const [moneda, setMoneda] = useState("");
   const [metodo, setMetodo] = useState("");
   const [q, setQ] = useState("");
@@ -163,35 +165,48 @@ export function FormMetodoPago() {
       </div>
 
       {/* Categoría */}
-      <div className="grid grid-cols-2 gap-2">
+      <div ref={catRef} className="relative grid grid-cols-2 gap-2">
+        {cajaCat && (
+          <span
+            className="pointer-events-none absolute z-0 rounded-xl bg-brand/5 transition-all duration-300 ease-out"
+            style={{
+              left: cajaCat.left,
+              top: cajaCat.top,
+              width: cajaCat.width,
+              height: cajaCat.height,
+            }}
+          />
+        )}
         <button
           type="button"
+          data-activo={categoria === "fiat" ? "true" : undefined}
           onClick={() => {
             setCategoria("fiat");
             setMoneda("");
             setMetodo("");
           }}
           className={cn(
-            "flex items-center justify-center gap-2 rounded-xl border p-3 text-sm transition-colors",
+            "relative z-10 flex items-center justify-center gap-2 rounded-xl border bg-transparent p-3 text-sm transition-colors",
             categoria === "fiat"
-              ? "border-brand bg-brand/5 text-brand"
-              : "hover:border-brand/40",
+              ? "border-brand text-brand"
+              : "border-input hover:border-brand/40",
           )}
         >
           <Banknote className="size-4" /> Fiat
         </button>
         <button
           type="button"
+          data-activo={categoria === "cripto" ? "true" : undefined}
           onClick={() => {
             setCategoria("cripto");
             setMoneda("");
             setMetodo("");
           }}
           className={cn(
-            "flex items-center justify-center gap-2 rounded-xl border p-3 text-sm transition-colors",
+            "relative z-10 flex items-center justify-center gap-2 rounded-xl border bg-transparent p-3 text-sm transition-colors",
             categoria === "cripto"
-              ? "border-brand bg-brand/5 text-brand"
-              : "hover:border-brand/40",
+              ? "border-brand text-brand"
+              : "border-input hover:border-brand/40",
           )}
         >
           <Wallet className="size-4" /> Cripto

@@ -11,12 +11,14 @@ export function CampoContrasena({
   onChange,
   autoComplete,
   conGenerador = false,
+  inputClassName,
 }: {
   name: string;
   value: string;
   onChange: (v: string) => void;
   autoComplete?: string;
   conGenerador?: boolean;
+  inputClassName?: string;
 }) {
   const [mostrar, setMostrar] = useState(false);
   return (
@@ -28,7 +30,7 @@ export function CampoContrasena({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         autoComplete={autoComplete}
-        className="pr-16"
+        className={`pr-16 ${inputClassName ?? ""}`}
       />
       <div className="absolute inset-y-0 right-0 flex items-center gap-1 pr-2">
         {conGenerador && (

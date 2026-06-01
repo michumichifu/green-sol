@@ -11,7 +11,7 @@ Versión visual: [PRD.html](PRD.html). Técnica: [ARQUITECTURA_TECNICA.md](ARQUI
 
 ---
 
-## 0. Estado del proyecto (app v0.0.41)
+## 0. Estado del proyecto (sesión 2026-05-31, sobre v0.0.42)
 
 Foto rápida de qué funciona, qué falta y qué se decidió en la última conversación.
 
@@ -32,8 +32,13 @@ Foto rápida de qué funciona, qué falta y qué se decidió en la última conve
 - **Datasets:** `lib/bancos-venezuela.ts` (25 bancos), `lib/monedas.ts` (monedas fiat + futuras + métodos por moneda + cripto).
 - **Páginas** Recompensa (`/recompensa`) y Centro de ayuda (`/ayuda`).
 - **Tasas:** caché global refrescado por cron (`/api/cron/tasas`); toda la app lee del caché.
+- **SMTP real funcionando:** el super-admin carga el SMTP (host `mail.proyecciondigital.org` —el del certificado, mismo servidor que `mail.creceideas.com`—, puerto **465** SSL, buzón `no-responder@greensol.creceideas.com`), con **Verificar conexión** y **Enviar correo de prueba**. `lib/mailer.ts` toma la config de la base de datos y, si no, de variables de entorno; soporta correo HTML.
+- **Panel super-admin reorganizado:** pestañas principales **Métricas · Usuarios · Configuración**; dentro de Configuración, **subpestañas** General · SMTP · Plantillas · Restricciones. El form SMTP tiene **toggle de conexión segura (SSL/TLS)**, **remitente en dos campos** (nombre + correo) con un "Aparece como…" automático, botón verde de marca y **toast**; la contraseña se conserva si se deja vacía. Responsive corregido (sin scroll horizontal; pestañas scrollables en móvil).
+- **Sistema de plantillas de notificaciones** (`lib/correo/`): catálogo de eventos, cada uno con los **canales que aplica** (app y/o correo — p. ej. el OTP es solo correo); plantillas **HTML con la marca** (verde, wordmark, footer) y **override editable en la base de datos** (fallback al default del catálogo). **Editor visual** en super-admin: **grid de tarjetas** por categoría con iconos ver/editar, **modal con pestañas Aplicación / Correo**, **barra de formato** (negrita, cursiva, subrayado, tachado, color, resaltado; y enlace, imagen por URL, lista y línea divisoria en correo), **vista previa** en iframe (correo) o tarjeta (app), **variables clickeables**, guardar / restablecer / enviar prueba, y **borrador en localStorage** (no se pierde al cerrar). El correo de prueba del SMTP usa este sistema.
+- **Cimientos de seguridad — 2FA:** campos `pinHash` y `otpCorreoActivo` en `Usuario`; `lib/seguridad.ts → verificarFactores` valida **clave (siempre) + PIN + OTP por correo** (solo los factores activos). Pantalla **Configuración → Seguridad** "Autenticación de dos factores (2FA)" con **tarjetas** (PIN configurar/quitar con clave, código por correo con toggle, **biometría** —Recomendado— y **app de autenticador** como "Pronto"). **Cambio de contraseña** funcional con la regla: **no se permite sin al menos un 2FA activo**.
+- **Proceso de verificación inicial:** **notificación in-app** al registrarse ("Completa tu verificación — agrega un método de seguridad"); **banner ámbar** discreto en el dashboard (entre el hero y los accesos rápidos) que desaparece al activar un 2FA; pestaña **Configuración → Verificación** con checklist (correo verificado · agrega 2FA · KYC "Pronto").
 
-### ⏳ Pendiente (roadmap, de IDEAS_FUTURAS / PLAN_METODOS_PAGO / PLAN_SEGURIDAD)
+### ⏳ Pendiente (roadmap, de IDEAS_FUTURAS / PLAN_METODOS_PAGO / PLAN_SEGURIDAD / PLAN_NOTIFICACIONES / PLAN_KYC / PLAN_ADMIN)
 
 - **Integración cripto:** wallet embebida no-custodial entregada en el **registro** (mostrar dirección + llave difuminada con ícono de ojo, bajo responsabilidad del usuario), **billetera en el dashboard**, **depósitos/retiros/transferencias**, multifirma/modo espejo; todo primero en **DevNet**. La wallet **principal** como método de pago predefinido sale de aquí.
 - **Sistema de referidos:** código por usuario (copiar/compartir), **+40 puntos a ambos** cuando el referido se registra con el código y hace su **primer aporte**, **máximo 5** premiados, **solo cuentas nuevas**, acreditación única; luego **club de canje** de puntos. Toca el esquema (`codigoReferido`, `referidoPorId` en `Usuario`).
@@ -44,17 +49,17 @@ Foto rápida de qué funciona, qué falta y qué se decidió en la última conve
 - **Monedas y bancos de otros países** (reactivar `MONEDAS_FIAT_FUTURAS` país por país).
 - **Marketplace público**, dividir cuentas, KYC con proveedor, login con Google y con wallet.
 
-### 🆕 Pendientes nuevos de esta conversación
+### 🆕 Pendientes nuevos de esta conversación (2026-05-31)
 
-- **Pestaña de Verificaciones** en Configuración → Seguridad:
-  - **Verificación de correo** (la más fácil, primera en implementarse).
-  - **Verificación de identidad nivel 1** y **nivel 2** — cada nivel habilita **límites/montos distintos** para san/pote.
-  - **Verificación de teléfono** (futuro): como alternativa al SMS, enviar el código por **WhatsApp mediante Evolution API** desde una instancia propia.
-  - Cada acción sensible podrá **exigir el factor adecuado** según el nivel del usuario.
-- **Aplicar verificación por clave/2FA a más acciones:** retiros (cripto), cambio de clave, cierre de san, además de los métodos de pago (ya cubiertos).
+- **Modal de verificación con jerarquía** (estilo Binance — funcionalidad, estética nuestra): al confirmar una acción sensible, pedir **solo el factor más fuerte** que el usuario tenga activo (**biometría > authenticator > email > PIN**); si no tiene ninguno, no se pide pero igual se avisa. Enganchar a **crear/publicar san** y **métodos de pago**. Ver [PLAN_SEGURIDAD.md](PLAN_SEGURIDAD.md).
+- **Más factores 2FA:** **TOTP** (Google Authenticator: otplib + QR), **biometría** (WebAuthn/passkeys) y **teléfono** (SMS / WhatsApp vía Evolution API) como dato y como 2FA.
+- **Flujo de cambio de contraseña** completo: alerta **"Restricciones de cuenta"** (Cancelar/Continuar) + **bloqueo de 24 h** de retiros/P2P/pagos y de unirse/crear ahorros, y pedir el factor más fuerte antes de cambiar.
+- **KYC manual propio** (sin terceros por ahora): documento (cédula/pasaporte) + foto frontal + **video de liveness** (pestañear, abrir boca, 3 dedos); panel super-admin de revisión con **aprobar / rechazar+reenviar / rechazar / rechazar+banear** + **notas internas**; sube el nivel y desbloquea límites. Un proveedor externo queda como opción a futuro. Ver [PLAN_KYC.md](PLAN_KYC.md).
+- **Gestión de usuarios super-admin** rediseñada: **tarjetas** con datos básicos (nombre, @usuario, correo, teléfono), **detalle en pop-up** (participaciones, intentos de cambio de clave/correo/nombre, documentos KYC), **editar/sancionar**, **nombre de usuario cambiable solo cada 30–60 días**. Y **notificaciones personalizadas** del super-admin (global / un usuario / un grupo, in-app y/o correo). Ver [PLAN_ADMIN.md](PLAN_ADMIN.md).
+- **Conectar las plantillas a los eventos reales** (OTP del registro, métodos de pago, san creado / unión): hoy el catálogo y el editor existen, pero los disparos siguen con textos viejos. Y **renderizar el formato (HTML)** en la campanita in-app.
 - **Avisos por correo + app en todos los eventos del san:** invitación, sorteo de turnos, pago reportado/confirmado/rechazado, cierre (hoy varios solo in-app).
 
-> **Pendiente de prueba / QA manual por el usuario:** probar el **flujo completo de crear y finalizar un san**; el **registro + verificación OTP**; y el **panel super-admin** con **carga de SMTP** y **prueba de envío de correos**.
+> **Pendiente de prueba / QA manual por el usuario:** verificar visualmente lo de esta sesión — el **editor de plantillas** (barra de formato, vista previa, borrador, enviar prueba), la pantalla **2FA** (activar PIN/OTP, cambio de contraseña con la regla de 2FA), el **banner del dashboard** y la **sección Verificación**, y el panel **SMTP** (verificar conexión y envío de prueba con la plantilla de marca). Más el **flujo completo de crear y finalizar un san** y el **registro + verificación OTP**.
 
 ---
 

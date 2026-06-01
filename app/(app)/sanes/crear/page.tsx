@@ -22,6 +22,7 @@ import {
   FRECUENCIAS_PRESET,
 } from "@/lib/validations/recolecta";
 import { METODO_LABEL } from "@/lib/monedas";
+import { useIndicador } from "@/components/use-indicador";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +55,7 @@ export default function CrearPage() {
 
   const [paso, setPaso] = useState(0);
   const [tipo, setTipo] = useState<"" | "san" | "vaca">("");
+  const { ref: tipoRef, caja: cajaTipo } = useIndicador(tipo);
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [visibilidad, setVisibilidad] = useState<"privado" | "publico">(
@@ -160,19 +162,35 @@ export default function CrearPage() {
       </div>
 
       <div className="flex flex-1 flex-col">
-        <div className="flex-1 space-y-4">
+        <div
+          key={paso}
+          className="flex-1 space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-300"
+        >
           {/* Paso 0: tipo */}
           {paso === 0 && (
             <div className="space-y-3">
               <p className="text-sm font-medium">
                 ¿Qué tipo de ahorro quieres crear?
               </p>
+              <div ref={tipoRef} className="relative space-y-3">
+              {cajaTipo && (
+                <span
+                  className="pointer-events-none absolute z-0 rounded-2xl bg-brand/5 transition-all duration-300 ease-out"
+                  style={{
+                    left: cajaTipo.left,
+                    top: cajaTipo.top,
+                    width: cajaTipo.width,
+                    height: cajaTipo.height,
+                  }}
+                />
+              )}
               <button
                 type="button"
+                data-activo={esSan ? "true" : undefined}
                 onClick={() => setTipo("san")}
                 className={cn(
-                  "flex w-full items-start gap-3 rounded-2xl border p-4 text-left transition-colors",
-                  esSan ? "border-brand bg-brand/5" : "hover:border-brand/40",
+                  "relative z-10 flex w-full items-start gap-3 rounded-2xl border bg-transparent p-4 text-left transition-colors",
+                  esSan ? "border-brand" : "border-input hover:border-brand/40",
                 )}
               >
                 <RefreshCw className="mt-0.5 size-5 shrink-0 text-brand" />
@@ -189,12 +207,13 @@ export default function CrearPage() {
               </button>
               <button
                 type="button"
+                data-activo={tipo === "vaca" ? "true" : undefined}
                 onClick={() => setTipo("vaca")}
                 className={cn(
-                  "flex w-full items-start gap-3 rounded-2xl border p-4 text-left transition-colors",
+                  "relative z-10 flex w-full items-start gap-3 rounded-2xl border bg-transparent p-4 text-left transition-colors",
                   tipo === "vaca"
-                    ? "border-brand bg-brand/5"
-                    : "hover:border-brand/40",
+                    ? "border-brand"
+                    : "border-input hover:border-brand/40",
                 )}
               >
                 <Target className="mt-0.5 size-5 shrink-0 text-gold" />
@@ -209,6 +228,7 @@ export default function CrearPage() {
                   </span>
                 </span>
               </button>
+              </div>
             </div>
           )}
 

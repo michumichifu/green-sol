@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { debeMostrarOnboarding } from "@/lib/onboarding";
+import { FondoMarca } from "@/components/fondo-marca";
+import { Wordmark } from "@/components/wordmark";
 
 export default async function Home() {
   const usuario = await obtenerUsuario();
@@ -11,12 +13,16 @@ export default async function Home() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
+      <FondoMarca variante="inicio" />
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/green-sol-logo.svg" alt="Green Sol" className="size-20" />
+      <img
+        src="/green-sol-logo.svg"
+        alt="Green Sol"
+        className="size-20"
+        style={{ animation: "auth-logo-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both" }}
+      />
       <div className="space-y-3">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          Green Sol
-        </h1>
+        <Wordmark as="h1" size="lg" className="text-foreground" />
         <p className="mx-auto max-w-md text-lg text-muted-foreground">
           Tu ahorro en grupo —san, bolso, vaca— transparente y con control, al
           mundo cripto sobre Solana.

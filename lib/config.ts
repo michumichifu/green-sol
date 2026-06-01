@@ -38,3 +38,17 @@ export async function obtenerConfigApp(): Promise<Record<string, string>> {
   });
   return Object.fromEntries(filas.map((f) => [f.clave, f.valor]));
 }
+
+/** Overrides de plantillas guardados (claves PLANTILLA_*). */
+export async function obtenerPlantillasGuardadas(): Promise<
+  Record<string, string>
+> {
+  const filas = await prisma.configuracionApp.findMany({
+    where: { clave: { startsWith: "PLANTILLA_" } },
+  });
+  return Object.fromEntries(filas.map((f) => [f.clave, f.valor]));
+}
+
+export async function borrarConfig(claves: string[]): Promise<void> {
+  await prisma.configuracionApp.deleteMany({ where: { clave: { in: claves } } });
+}

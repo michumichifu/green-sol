@@ -8,5 +8,5 @@ export default async function AdminLayout({
 }) {
   const usuario = await obtenerUsuario();
   if (!usuario || usuario.rol !== "super_admin") notFound();
-  return <div className="flex flex-1 flex-col">{children}</div>;
+  return <div className="flex min-w-0 flex-1 flex-col">{children}</div>;
 }

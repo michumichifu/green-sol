@@ -1,13 +1,15 @@
-import { Shield, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { PanelTabs } from "@/components/panel-tabs";
 import { ToggleAdmin } from "@/components/toggle-admin";
 import { FormDatos } from "@/components/form-datos";
+import { FormSeguridad } from "@/components/form-seguridad";
+import { SeccionVerificacion } from "@/components/seccion-verificacion";
 import { FormMetodoPago } from "@/components/form-metodo-pago";
 import { MetodoPagoItem } from "@/components/metodo-pago-item";
 
-const TABS = ["datos", "pagos", "seguridad", "comunicaciones"];
+const TABS = ["datos", "verificacion", "pagos", "seguridad", "comunicaciones"];
 
 export default async function ConfiguracionPage({
   searchParams,
@@ -29,7 +31,7 @@ export default async function ConfiguracionPage({
       <h1 className="text-xl font-bold">Configuración</h1>
 
       <PanelTabs
-        tabs={["Datos", "Pagos", "Seguridad", "Avisos"]}
+        tabs={["Datos", "Verificación", "Pagos", "Seguridad", "Avisos"]}
         inicial={inicial}
       >
         {/* Datos */}
@@ -38,6 +40,12 @@ export default async function ConfiguracionPage({
           nombre={usuario!.nombre ?? ""}
           apellido={usuario!.apellido ?? ""}
           nombreUsuario={usuario!.nombreUsuario ?? ""}
+        />
+
+        {/* Verificación */}
+        <SeccionVerificacion
+          correoVerificado={usuario!.correoVerificado}
+          tiene2FA={!!usuario!.pinHash || usuario!.otpCorreoActivo}
         />
 
         {/* Pagos */}
@@ -59,13 +67,10 @@ export default async function ConfiguracionPage({
         </section>
 
         {/* Seguridad */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2 rounded-2xl border bg-card p-4 text-sm text-muted-foreground">
-            <Shield className="size-5 text-brand" />
-            Cambio de contraseña y verificación en dos pasos.{" "}
-            <span className="font-medium">Próximamente.</span>
-          </div>
-        </section>
+        <FormSeguridad
+          pinActivo={!!usuario!.pinHash}
+          otpActivo={usuario!.otpCorreoActivo}
+        />
 
         {/* Comunicaciones */}
         <section className="space-y-3">
