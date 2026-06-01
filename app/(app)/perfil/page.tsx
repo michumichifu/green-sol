@@ -7,6 +7,7 @@ import {
   LifeBuoy,
   Settings,
   ShieldCheck,
+  BadgeCheck,
   LogOut,
   ChevronRight,
 } from "lucide-react";
@@ -60,7 +61,14 @@ export default async function PerfilPage() {
             {inicial}
           </div>
           <div className="min-w-0">
-            <p className="truncate text-lg font-bold">{nombreCompleto}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="truncate text-lg font-bold">{nombreCompleto}</p>
+              {usuario!.nivelKyc >= 1 && (
+                <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-bold text-brand">
+                  <BadgeCheck className="size-3" /> Verificado
+                </span>
+              )}
+            </div>
             {usuario!.nombreUsuario && (
               <p className="truncate text-sm text-brand">
                 @{usuario!.nombreUsuario}

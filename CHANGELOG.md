@@ -4,6 +4,21 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.54] — 2026-06-01 — KYC Fase 5: tag "Verificado", indicadores y docs
+
+### Añadido
+- **Tag "Verificado"** (verde, con `BadgeCheck`) junto al nombre en el perfil cuando `nivelKyc >= 1`.
+- Indicadores de la sección Verificación al día: contador **/3**, paso de identidad con estado en vivo (en revisión / aprobada / corregir / suspendida) y motivo cuando aplica.
+
+### Notas
+- Las notificaciones del KYC (recibida / aprobada / reenvío / rechazada / baneada) ya se envían **app + correo** vía `notificarYCorreo` con la plantilla de marca. Conectarlas al **editor visual de plantillas** queda como mejora documentada (para no dejar plantillas sin uso en el editor).
+
+### Cambiado
+- **Documentación completa al día:** `PRD.md` (§ estado: KYC movido de pendiente a ✅ hecho, versión 0.11 / app v0.0.54), `PRD.html` (título, badges, fecha, footer y el bloque KYC que decía "vía proveedor tercero, no manual"), tras el KYC propio completo.
+
+### Verificado
+- Typecheck limpio. (UI del tag cubierta por el E2E integral de la Fase 4: el usuario queda verificado.)
+
 ## [0.0.53] — 2026-06-01 — KYC Fase 4: cola de revisión en el super-admin
 
 ### Añadido
