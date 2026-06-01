@@ -8,6 +8,7 @@ import {
   Settings,
   ShieldCheck,
   BadgeCheck,
+  ShieldAlert,
   LogOut,
   ChevronRight,
 } from "lucide-react";
@@ -63,10 +64,17 @@ export default async function PerfilPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <p className="truncate text-lg font-bold">{nombreCompleto}</p>
-              {usuario!.nivelKyc >= 1 && (
+              {usuario!.nivelKyc >= 1 ? (
                 <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-bold text-brand">
                   <BadgeCheck className="size-3" /> Verificado
                 </span>
+              ) : (
+                <Link
+                  href="/configuracion?tab=verificacion"
+                  className="flex shrink-0 items-center gap-0.5 rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-bold text-gold"
+                >
+                  <ShieldAlert className="size-3" /> Sin verificar
+                </Link>
               )}
             </div>
             {usuario!.nombreUsuario && (

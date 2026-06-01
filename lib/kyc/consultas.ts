@@ -21,6 +21,8 @@ export type SolicitudVista = {
   id: string;
   estado: EstadoKyc;
   creadaEn: string;
+  revisadaEn: string | null;
+  revisorNombre: string | null;
   motivoRechazo: string | null;
   notaInterna: string | null;
   tipoDocumento: TipoDocumento | null;
@@ -52,6 +54,9 @@ export async function colaVerificaciones(): Promise<{
       usuario: {
         select: { nombre: true, apellido: true, nombreUsuario: true, correo: true },
       },
+      revisadoPor: {
+        select: { nombre: true, apellido: true, nombreUsuario: true },
+      },
     },
   });
   // Quedarse con la última por usuario.
@@ -65,6 +70,11 @@ export async function colaVerificaciones(): Promise<{
     id: v.id,
     estado: v.estado,
     creadaEn: v.creadaEn.toISOString(),
+    revisadaEn: v.revisadaEn ? v.revisadaEn.toISOString() : null,
+    revisorNombre: v.revisadoPor
+      ? [v.revisadoPor.nombre, v.revisadoPor.apellido].filter(Boolean).join(" ") ||
+        v.revisadoPor.nombreUsuario
+      : null,
     motivoRechazo: v.motivoRechazo,
     notaInterna: v.notaInterna,
     tipoDocumento: v.tipoDocumento,

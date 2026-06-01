@@ -42,6 +42,15 @@ function nombreDe(u: SolicitudVista["usuario"]) {
   const n = [u.nombre, u.apellido].filter(Boolean).join(" ");
   return n || u.nombreUsuario || u.correo;
 }
+function fmtFecha(iso: string) {
+  return new Date(iso).toLocaleString("es-VE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 function docDe(s: SolicitudVista) {
   if (!s.tipoDocumento) return "—";
   return s.tipoDocumento === "cedula"
@@ -117,6 +126,15 @@ function Tarjeta({ s }: { s: SolicitudVista }) {
           {ETIQUETA_ESTADO[s.estado]}
         </span>
       </div>
+
+      {/* Metadatos: cuándo y quién */}
+      <p className="text-[11px] text-muted-foreground">
+        {s.estado === "pendiente" || s.estado === "en_revision"
+          ? `Recibida: ${fmtFecha(s.creadaEn)}`
+          : `${ETIQUETA_ESTADO[s.estado]} el ${fmtFecha(s.revisadaEn ?? s.creadaEn)}${
+              s.revisorNombre ? ` · por ${s.revisorNombre}` : ""
+            }`}
+      </p>
 
       {/* Archivos */}
       {urls ? (
@@ -198,17 +216,17 @@ function Tarjeta({ s }: { s: SolicitudVista }) {
           />
           <div className="grid grid-cols-2 gap-2">
             {enRevision && (
-              <BotonAccion onClick={() => pedirConfirmacion("aprobar")} disabled={pendiente} color="brand" icon={<Check className="size-4" />}>
+              <BotonAccion onClick={() => pedirConfirmacion("aprobar")} disabled={pendiente} color="brand" activo={pend?.accion === "aprobar"} icon={<Check className="size-4" />}>
                 Aprobar
               </BotonAccion>
             )}
-            <BotonAccion onClick={() => pedirConfirmacion("reenvio")} disabled={pendiente} color="gold" icon={<RotateCcw className="size-4" />}>
+            <BotonAccion onClick={() => pedirConfirmacion("reenvio")} disabled={pendiente} color="gold" activo={pend?.accion === "reenvio"} icon={<RotateCcw className="size-4" />}>
               {aprobada ? "Desverificar (reenvío)" : "Pedir reenvío"}
             </BotonAccion>
-            <BotonAccion onClick={() => pedirConfirmacion("rechazar")} disabled={pendiente} color="muted" icon={<X className="size-4" />}>
+            <BotonAccion onClick={() => pedirConfirmacion("rechazar")} disabled={pendiente} color="muted" activo={pend?.accion === "rechazar"} icon={<X className="size-4" />}>
               Rechazar
             </BotonAccion>
-            <BotonAccion onClick={() => pedirConfirmacion("banear")} disabled={pendiente} color="destructive" icon={<Ban className="size-4" />}>
+            <BotonAccion onClick={() => pedirConfirmacion("banear")} disabled={pendiente} color="destructive" activo={pend?.accion === "banear"} icon={<Ban className="size-4" />}>
               Rechazar y banear
             </BotonAccion>
           </div>
@@ -276,26 +294,38 @@ function BotonAccion({
   onClick,
   disabled,
   color,
+  activo,
   icon,
 }: {
   children: React.ReactNode;
   onClick: () => void;
   disabled: boolean;
   color: "brand" | "gold" | "muted" | "destructive";
+  activo?: boolean;
   icon: React.ReactNode;
 }) {
-  const clases = {
-    brand: "bg-brand text-white",
-    gold: "bg-gold/15 text-gold border border-gold/40",
+  // Estado normal (sutil) vs seleccionado (relleno + anillo), para confirmar la elección.
+  const base = {
+    brand: "bg-brand/10 text-brand border border-brand/40",
+    gold: "bg-gold/10 text-gold border border-gold/40",
     muted: "border text-foreground",
     destructive: "bg-destructive/10 text-destructive border border-destructive/40",
+  }[color];
+  const sel = {
+    brand: "bg-brand text-white ring-2 ring-brand/40",
+    gold: "bg-gold text-white ring-2 ring-gold/40",
+    muted: "bg-foreground text-background ring-2 ring-foreground/30",
+    destructive: "bg-destructive text-white ring-2 ring-destructive/40",
   }[color];
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={cn("flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold", clases)}
+      className={cn(
+        "flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold transition-all",
+        activo ? sel : base,
+      )}
     >
       {icon} {children}
     </button>

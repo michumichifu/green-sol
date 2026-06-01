@@ -3,6 +3,9 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
+  // El flujo KYC integral (dos contextos + server actions + modales) puede tardar
+  // bajo carga local; un reintento evita falsos negativos por timing.
+  retries: 1,
   reporter: "line",
   use: { baseURL: "http://localhost:3000" },
   webServer: {

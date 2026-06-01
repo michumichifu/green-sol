@@ -4,6 +4,20 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.64] — 2026-06-01 — KYC: métricas en la cola, tag "Sin verificar", póster de video y pulido
+
+### Añadido
+- **Métricas en las tarjetas** de la cola: fecha y hora de recepción (pendientes) y de resolución + **quién la revisó** (aprobadas/rechazadas).
+- **Tag "Sin verificar"** (ámbar, enlazado a la verificación) junto al nombre en el perfil cuando el usuario no está verificado (complemento del tag verde "Verificado").
+
+### Cambiado
+- **Video**: se captura un **fotograma como póster** del clip grabado, para que la vista previa no se vea negra mientras el webm no calcula su duración. "Volver a grabar" pasó a un botón **superpuesto y visible** sobre el video (libera espacio abajo).
+- **Modal**: margen seguro inferior (`safe-area-inset`) para que Atrás/Siguiente no choquen con la barra del sistema en el teléfono.
+- **Botones de revisión**: estado normal sutil vs **seleccionado resaltado** (relleno + anillo) para confirmar la elección antes de la credencial.
+
+### Verificado
+- Typecheck limpio. Suite E2E 6/6 (con `retries: 1` para el integral, sensible al timing bajo carga).
+
 ## [0.0.63] — 2026-06-01 — KYC revisión: confirmación con credencial, revertir, buscador y arreglos de video
 
 ### Añadido

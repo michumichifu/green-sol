@@ -36,6 +36,23 @@ export function CapturaVideo({
   const [seg, setSeg] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [urlPreview, setUrlPreview] = useState<string | null>(null);
+  const [poster, setPoster] = useState<string | null>(null);
+
+  // Captura el fotograma actual del stream para usarlo como póster del preview
+  // (evita la pantalla negra mientras el webm no reproduce por su falta de duración).
+  function capturarPoster() {
+    const v = videoRef.current;
+    if (!v || !v.videoWidth) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = v.videoWidth;
+    canvas.height = v.videoHeight;
+    canvas.getContext("2d")?.drawImage(v, 0, 0);
+    try {
+      setPoster(canvas.toDataURL("image/jpeg", 0.7));
+    } catch {
+      /* sin póster si falla */
+    }
+  }
 
   // Si ya hay un video grabado (volvimos a este paso), recuperar la vista previa.
   useEffect(() => {
@@ -124,12 +141,14 @@ export function CapturaVideo({
 
   function detener() {
     if (recRef.current && recRef.current.state !== "inactive") {
+      capturarPoster(); // antes de cortar el stream
       recRef.current.stop();
     }
   }
 
   function rehacer() {
     setUrlPreview(null);
+    setPoster(null);
     setSeg(0);
     setEstado("idle");
     onArchivo(null);
@@ -162,6 +181,7 @@ export function CapturaVideo({
         {estado === "hecho" && urlPreview ? (
           <video
             src={urlPreview}
+            poster={poster ?? undefined}
             controls
             muted
             playsInline
@@ -213,9 +233,19 @@ export function CapturaVideo({
         )}
 
         {estado === "hecho" && (
-          <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-white">
-            <Check className="size-3.5" /> Grabado
-          </div>
+          <>
+            <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-white">
+              <Check className="size-3.5" /> Grabado
+            </div>
+            {/* "Volver a grabar" superpuesto y visible (libera espacio abajo) */}
+            <button
+              type="button"
+              onClick={rehacer}
+              className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-black shadow"
+            >
+              <RotateCcw className="size-3.5" /> Volver a grabar
+            </button>
+          </>
         )}
 
         {/* Botón de grabar SUPERPUESTO y rojo: deja claro que aún no se está grabando */}
@@ -244,15 +274,6 @@ export function CapturaVideo({
         >
           <Square className="size-4" />
           {seg < MIN_SEG ? `Graba ${MIN_SEG - seg}s más…` : "Detener"}
-        </button>
-      )}
-      {estado === "hecho" && (
-        <button
-          type="button"
-          onClick={rehacer}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-medium"
-        >
-          <RotateCcw className="size-4" /> Volver a grabar
         </button>
       )}
       {error && <p className="text-xs text-destructive">{error}</p>}
