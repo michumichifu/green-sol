@@ -60,8 +60,10 @@ export async function registrarse(
   if (existente?.correoVerificado) {
     return { error: "Ese correo ya está registrado." };
   }
-  const userExistente = await prisma.usuario.findUnique({
-    where: { nombreUsuario },
+  // Unicidad del nombre de usuario sin distinguir mayúsculas (se guarda tal cual
+  // se escribió, pero "BeneicoLuis" y "beneicoluis" se consideran el mismo).
+  const userExistente = await prisma.usuario.findFirst({
+    where: { nombreUsuario: { equals: nombreUsuario, mode: "insensitive" } },
   });
   if (userExistente && userExistente.correo !== correoLower) {
     return { error: "Ese nombre de usuario ya está en uso." };
@@ -145,7 +147,7 @@ export async function iniciarSesion(
     where: {
       OR: [
         { correo: identificador.toLowerCase() },
-        { nombreUsuario: identificador },
+        { nombreUsuario: { equals: identificador, mode: "insensitive" } },
       ],
     },
   });

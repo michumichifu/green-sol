@@ -4,6 +4,12 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.58] — 2026-06-01 — Login y registro sin distinguir mayúsculas
+
+### Cambiado
+- **Nombre de usuario sin distinguir mayúsculas** al iniciar sesión, al registrarse y en la validación de disponibilidad en vivo (`mode: "insensitive"`), pero **se conserva y se muestra tal cual lo escribió** el usuario (p. ej. `BeneicoLuis`). Así `BeneicoLuis` y `beneicoluis` son la misma cuenta y se evitan duplicados que solo difieren en mayúsculas.
+- El **correo** ya se normalizaba a minúsculas; queda explícito que da igual cómo se escriba al entrar o registrarse.
+
 ## [0.0.57] — 2026-06-01 — Fixes de login (campo que se borraba + correo con espacio)
 
 ### Corregido

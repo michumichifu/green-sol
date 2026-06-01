@@ -10,8 +10,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ disponible: false, motivo: "formato" });
   }
   const [existente, sesion] = await Promise.all([
-    prisma.usuario.findUnique({
-      where: { nombreUsuario: u },
+    prisma.usuario.findFirst({
+      where: { nombreUsuario: { equals: u, mode: "insensitive" } },
       select: { id: true },
     }),
     obtenerUsuario(),
