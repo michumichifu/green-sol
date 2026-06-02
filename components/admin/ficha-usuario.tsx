@@ -406,6 +406,9 @@ function ContenidoFicha({
                 {m.titular && (
                   <p className="text-[10px] text-muted-foreground">Titular: {m.titular}</p>
                 )}
+                {m.cedula && (
+                  <p className="text-[10px] text-muted-foreground">Cédula: {m.cedula}</p>
+                )}
                 {m.banco && (
                   <p className="text-[10px] text-muted-foreground">Banco: {m.banco}</p>
                 )}
@@ -529,17 +532,26 @@ export function FichaUsuario({
 }) {
   const [ficha, setFicha] = useState<TFichaUsuario | null>(null);
   const [cargando, setCargando] = useState(true);
+  const [errorCarga, setErrorCarga] = useState(false);
 
   // Carga la ficha al abrir
   useEffect(() => {
     let activo = true;
     setCargando(true);
-    obtenerFicha(id).then((f) => {
-      if (activo) {
-        setFicha(f);
-        setCargando(false);
-      }
-    });
+    setErrorCarga(false);
+    obtenerFicha(id)
+      .then((f) => {
+        if (activo) {
+          setFicha(f);
+          setCargando(false);
+        }
+      })
+      .catch(() => {
+        if (activo) {
+          setCargando(false);
+          setErrorCarga(true);
+        }
+      });
     return () => { activo = false; };
   }, [id]);
 
@@ -551,6 +563,12 @@ export function FichaUsuario({
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [onCerrar]);
+
+  // Scroll-lock del body
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
@@ -590,6 +608,10 @@ export function FichaUsuario({
             <div className="flex items-center justify-center py-12">
               <Loader2 className="size-6 animate-spin text-muted-foreground" />
             </div>
+          ) : errorCarga ? (
+            <p className="py-8 text-center text-sm text-destructive">
+              No se pudo cargar la ficha. Inténtalo de nuevo.
+            </p>
           ) : !ficha ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
               Usuario no encontrado.

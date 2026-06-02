@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   Eye,
@@ -100,13 +100,32 @@ function ModalConfirmacion({
   const nombre =
     accion.usuario.nombreUsuario ?? accion.usuario.nombre ?? accion.usuario.correo;
 
+  // Cerrar con Escape
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (e.key === "Escape") onCancelar();
+    }
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onCancelar]);
+
+  // Scroll-lock del body
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
+      onClick={onCancelar}
+    >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-titulo"
         className="w-full max-w-sm rounded-[1.75rem] border border-border/60 bg-card p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-1 flex items-center gap-2">
           <Lock className="size-4 text-brand" />
@@ -178,7 +197,8 @@ function FilaUsuario({
 
       {/* Selector de rol */}
       <select
-        defaultValue={u.rol}
+        key={u.rol}
+        value={u.rol}
         onChange={(e) => onCambiarRol(u, e.target.value)}
         className="shrink-0 rounded-lg border bg-background px-2 py-1 text-xs"
         aria-label="Cambiar rol"
@@ -333,7 +353,9 @@ export function TablaUsuarios({
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <label htmlFor="buscar-usuarios" className="sr-only">Buscar usuarios</label>
           <input
+            id="buscar-usuarios"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && buscar()}
@@ -354,7 +376,7 @@ export function TablaUsuarios({
       {/* Chips de filtro */}
       <div className="flex flex-wrap gap-2">
         {CHIPS.map((c) => {
-          const activo = filtro === c.valor || (c.valor === "todos" && !filtro);
+          const activo = filtro === c.valor;
           return (
             <button
               key={c.valor}
