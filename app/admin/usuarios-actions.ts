@@ -1,11 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { Rol } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { puedeTransicionar } from "@/lib/kyc/estados";
+import { fichaUsuario, type FichaUsuario } from "@/lib/admin/usuarios";
 
 export type ResultadoAccion = { ok: true } | { error: string };
+
+const ROLES_VALIDOS: Rol[] = ["usuario", "super_admin"];
 
 async function obtenerSuperAdmin() {
   const u = await obtenerUsuario();
@@ -128,4 +132,58 @@ export async function eliminarUsuario(
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Error al eliminar el usuario." };
   }
+}
+
+/**
+ * Cambia el rol de un usuario devolviendo feedback explícito.
+ * Replica las mismas salvaguardas de `cambiarRol` en actions.ts pero
+ * retorna {ok}|{error} en lugar de void, para usarse desde cliente.
+ */
+export async function cambiarRolUsuario(
+  usuarioId: string,
+  rol: string,
+): Promise<ResultadoAccion> {
+  const admin = await obtenerSuperAdmin();
+  if (!admin) return { error: "No autorizado." };
+
+  if (!(ROLES_VALIDOS as string[]).includes(rol)) {
+    return { error: "Rol no válido." };
+  }
+  const rolTipado = rol as Rol;
+
+  // No degradar el propio rol.
+  if (usuarioId === admin.id && rolTipado !== "super_admin") {
+    return { error: "No puedes cambiar tu propio rol." };
+  }
+
+  try {
+    const objetivo = await prisma.usuario.findUnique({
+      where: { id: usuarioId },
+      select: { rol: true },
+    });
+    if (!objetivo) return { error: "Usuario no encontrado." };
+
+    // No dejar el sistema sin super-admin.
+    if (objetivo.rol === "super_admin" && rolTipado !== "super_admin") {
+      const total = await prisma.usuario.count({ where: { rol: "super_admin" } });
+      if (total <= 1) {
+        return { error: "No puedes quitar el único super-admin." };
+      }
+    }
+
+    await prisma.usuario.update({ where: { id: usuarioId }, data: { rol: rolTipado } });
+    revalidatePath("/admin");
+    return { ok: true };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Error al cambiar el rol." };
+  }
+}
+
+/**
+ * Carga la ficha completa de un usuario. Solo super-admin.
+ */
+export async function obtenerFicha(id: string): Promise<FichaUsuario | null> {
+  const admin = await obtenerSuperAdmin();
+  if (!admin) return null;
+  return fichaUsuario(id);
 }
