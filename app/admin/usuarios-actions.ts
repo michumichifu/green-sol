@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { Rol } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
+import { credencialValida } from "@/lib/auth/credencial";
 import { puedeTransicionar } from "@/lib/kyc/estados";
 import { fichaUsuario, type FichaUsuario } from "@/lib/admin/usuarios";
 
@@ -20,13 +21,18 @@ async function obtenerSuperAdmin() {
 /**
  * Suspende o reactiva una cuenta de usuario.
  * Un super-admin no puede suspenderse a sí mismo.
+ * Requiere la credencial (PIN o contraseña) del super-admin en sesión.
  */
 export async function suspenderUsuario(
   usuarioId: string,
   suspender: boolean,
+  credencial: string,
 ): Promise<ResultadoAccion> {
   const admin = await obtenerSuperAdmin();
   if (!admin) return { error: "No autorizado." };
+  if (!(await credencialValida(admin.id, credencial))) {
+    return { error: "Clave o PIN incorrecto." };
+  }
   if (usuarioId === admin.id) {
     return { error: "No puedes suspenderte a ti mismo." };
   }
@@ -48,12 +54,17 @@ export async function suspenderUsuario(
  * - Si tiene una VerificacionKyc reciente con una transición válida hacia
  *   "reenvio_solicitado", la marca con ese estado para que el usuario pueda
  *   reenviar. Si no es posible, solo baja nivelKyc (el banner reaparece igual).
+ * Requiere la credencial (PIN o contraseña) del super-admin en sesión.
  */
 export async function restablecerVerificacion(
   usuarioId: string,
+  credencial: string,
 ): Promise<ResultadoAccion> {
   const admin = await obtenerSuperAdmin();
   if (!admin) return { error: "No autorizado." };
+  if (!(await credencialValida(admin.id, credencial))) {
+    return { error: "Clave o PIN incorrecto." };
+  }
   try {
     // Busca la verificación más reciente del usuario.
     const verificacion = await prisma.verificacionKyc.findFirst({
@@ -89,12 +100,17 @@ export async function restablecerVerificacion(
  * Protecciones:
  * - No eliminar al propio super-admin en sesión.
  * - No eliminar al único super-admin del sistema.
+ * Requiere la credencial (PIN o contraseña) del super-admin en sesión.
  */
 export async function eliminarUsuario(
   usuarioId: string,
+  credencial: string,
 ): Promise<ResultadoAccion> {
   const admin = await obtenerSuperAdmin();
   if (!admin) return { error: "No autorizado." };
+  if (!(await credencialValida(admin.id, credencial))) {
+    return { error: "Clave o PIN incorrecto." };
+  }
   if (usuarioId === admin.id) {
     return { error: "No puedes eliminarte a ti mismo." };
   }
@@ -138,13 +154,18 @@ export async function eliminarUsuario(
  * Cambia el rol de un usuario devolviendo feedback explícito.
  * Replica las mismas salvaguardas de `cambiarRol` en actions.ts pero
  * retorna {ok}|{error} en lugar de void, para usarse desde cliente.
+ * Requiere la credencial (PIN o contraseña) del super-admin en sesión.
  */
 export async function cambiarRolUsuario(
   usuarioId: string,
   rol: string,
+  credencial: string,
 ): Promise<ResultadoAccion> {
   const admin = await obtenerSuperAdmin();
   if (!admin) return { error: "No autorizado." };
+  if (!(await credencialValida(admin.id, credencial))) {
+    return { error: "Clave o PIN incorrecto." };
+  }
 
   if (!(ROLES_VALIDOS as string[]).includes(rol)) {
     return { error: "Rol no válido." };

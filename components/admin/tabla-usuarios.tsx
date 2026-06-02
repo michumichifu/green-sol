@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   Eye,
@@ -38,20 +38,20 @@ type AccionPendiente =
 function InsigniaEstado({ u }: { u: UsuarioResumen }) {
   if (u.baneado) {
     return (
-      <span className="inline-flex items-center rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold text-destructive">
+      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold text-destructive">
         Suspendido
       </span>
     );
   }
   if (u.nivelKyc >= 1) {
     return (
-      <span className="inline-flex items-center rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-semibold text-brand">
+      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-semibold text-brand">
         Verificado
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
       Sin verificar
     </span>
   );
@@ -78,27 +78,42 @@ function Avatar({ u }: { u: UsuarioResumen }) {
   );
 }
 
-// ─── Modal de confirmación (patrón cola-kyc) ──────────────────────────────────
+// ─── Modal de confirmación con credencial ─────────────────────────────────────
 
 function ModalConfirmacion({
   accion,
   onCancelar,
   onConfirmar,
   pending,
+  errorServidor,
 }: {
   accion: AccionPendiente;
   onCancelar: () => void;
-  onConfirmar: () => void;
+  onConfirmar: (credencial: string) => void;
   pending: boolean;
+  errorServidor?: string;
 }) {
+  const [credencial, setCredencial] = useState("");
+  const [errorCred, setErrorCred] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const ETIQUETA: Record<AccionPendiente["tipo"], string> = {
     restablecer: "Restablecer verificación",
-    suspender: accion.tipo === "suspender" && !accion.suspender ? "Reactivar usuario" : "Suspender usuario",
+    suspender:
+      accion.tipo === "suspender" && !accion.suspender
+        ? "Reactivar usuario"
+        : "Suspender usuario",
     eliminar: "Eliminar usuario",
     rol: "Cambiar rol",
   };
   const nombre =
     accion.usuario.nombreUsuario ?? accion.usuario.nombre ?? accion.usuario.correo;
+
+  // Focus al campo al abrir
+  useEffect(() => {
+    const t = setTimeout(() => inputRef.current?.focus(), 50);
+    return () => clearTimeout(t);
+  }, []);
 
   // Cerrar con Escape
   useEffect(() => {
@@ -112,8 +127,19 @@ function ModalConfirmacion({
   // Scroll-lock del body
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, []);
+
+  function handleConfirmar() {
+    if (!credencial.trim()) {
+      setErrorCred("Ingresa tu PIN o contraseña.");
+      return;
+    }
+    setErrorCred("");
+    onConfirmar(credencial);
+  }
 
   return (
     <div
@@ -133,10 +159,39 @@ function ModalConfirmacion({
             {ETIQUETA[accion.tipo]}
           </h2>
         </div>
-        <p className="mb-5 text-xs text-muted-foreground">
-          ¿Confirmas esta acción para <span className="font-medium text-foreground">{nombre}</span>?
+        <p className="mb-4 text-xs text-muted-foreground">
+          ¿Confirmas esta acción para{" "}
+          <span className="font-medium text-foreground">{nombre}</span>?
           {accion.tipo === "eliminar" && " Esta acción no se puede deshacer."}
         </p>
+
+        {/* Campo de credencial */}
+        <div className="mb-4 space-y-1">
+          <label htmlFor="cred-modal" className="text-xs font-medium text-foreground">
+            Confirma con tu PIN o contraseña
+          </label>
+          <input
+            ref={inputRef}
+            id="cred-modal"
+            type="password"
+            autoComplete="current-password"
+            value={credencial}
+            onChange={(e) => {
+              setCredencial(e.target.value);
+              if (errorCred) setErrorCred("");
+            }}
+            onKeyDown={(e) => e.key === "Enter" && handleConfirmar()}
+            placeholder="••••••"
+            className={cn(
+              "w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/50",
+              errorCred && "border-destructive",
+            )}
+          />
+          {(errorCred || errorServidor) && (
+            <p className="text-xs text-destructive">{errorCred || errorServidor}</p>
+          )}
+        </div>
+
         <div className="flex gap-2">
           <button
             type="button"
@@ -147,7 +202,7 @@ function ModalConfirmacion({
           </button>
           <button
             type="button"
-            onClick={onConfirmar}
+            onClick={handleConfirmar}
             disabled={pending}
             className={cn(
               "flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold text-white",
@@ -163,7 +218,7 @@ function ModalConfirmacion({
   );
 }
 
-// ─── Fila de usuario ──────────────────────────────────────────────────────────
+// ─── Fila de usuario (mobile-first) ──────────────────────────────────────────
 
 function FilaUsuario({
   u,
@@ -177,86 +232,92 @@ function FilaUsuario({
   onCambiarRol: (u: UsuarioResumen, rol: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-2xl border bg-card p-3 sm:flex-nowrap">
-      {/* Avatar */}
-      <Avatar u={u} />
+    <div className="rounded-2xl border bg-card">
+      {/* ── Fila superior: avatar + identidad + estado/rol ── */}
+      <div className="flex items-center gap-3 p-3">
+        <Avatar u={u} />
 
-      {/* Info principal */}
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">
-          {u.nombreUsuario ?? u.nombre ?? "—"}
-        </p>
-        <p className="truncate text-xs text-muted-foreground">{u.correo}</p>
-        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+        {/* Identidad — min-w-0 es imprescindible para que truncate funcione */}
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">
+            {u.nombreUsuario ?? u.nombre ?? "—"}
+          </p>
+          <p className="truncate text-xs text-muted-foreground">{u.correo}</p>
+        </div>
+
+        {/* Estado + rol — siempre en una línea, a la derecha */}
+        <div className="flex shrink-0 flex-col items-end gap-1">
           <InsigniaEstado u={u} />
-          <span className="rounded-full border px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+          <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
             {u.rol === "super_admin" ? "Super-admin" : "Usuario"}
           </span>
         </div>
       </div>
 
-      {/* Selector de rol */}
-      <select
-        key={u.rol}
-        value={u.rol}
-        onChange={(e) => onCambiarRol(u, e.target.value)}
-        className="shrink-0 rounded-lg border bg-background px-2 py-1 text-xs"
-        aria-label="Cambiar rol"
-      >
-        <option value="usuario">Usuario</option>
-        <option value="super_admin">Super-admin</option>
-      </select>
+      {/* ── Fila inferior: selector de rol + acciones ── */}
+      <div className="flex items-center gap-2 border-t px-3 py-2">
+        <select
+          key={u.rol}
+          value={u.rol}
+          onChange={(e) => onCambiarRol(u, e.target.value)}
+          className="min-w-0 flex-1 rounded-lg border bg-background px-2 py-1.5 text-xs sm:flex-none sm:w-auto"
+          aria-label="Cambiar rol"
+        >
+          <option value="usuario">Usuario</option>
+          <option value="super_admin">Super-admin</option>
+        </select>
 
-      {/* Acciones */}
-      <div className="flex shrink-0 items-center gap-1">
-        <button
-          type="button"
-          aria-label="Ver ficha"
-          title="Ver ficha"
-          onClick={() => onVerFicha(u.id)}
-          className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-        >
-          <Eye className="size-4" />
-        </button>
-        <button
-          type="button"
-          aria-label="Restablecer verificación"
-          title="Restablecer verificación"
-          onClick={() => onAccion({ tipo: "restablecer", usuario: u })}
-          className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-        >
-          <RotateCcw className="size-4" />
-        </button>
-        {u.baneado ? (
+        {/* Acciones: 4 iconos con área táctil generosa */}
+        <div className="ml-auto flex shrink-0 items-center gap-0.5">
           <button
             type="button"
-            aria-label="Reactivar usuario"
-            title="Reactivar usuario"
-            onClick={() => onAccion({ tipo: "suspender", usuario: u, suspender: false })}
-            className="inline-flex size-8 items-center justify-center rounded-lg text-brand hover:bg-brand/10"
+            aria-label="Ver ficha"
+            title="Ver ficha"
+            onClick={() => onVerFicha(u.id)}
+            className="inline-flex size-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
           >
-            <CircleCheck className="size-4" />
+            <Eye className="size-4" />
           </button>
-        ) : (
           <button
             type="button"
-            aria-label="Suspender usuario"
-            title="Suspender usuario"
-            onClick={() => onAccion({ tipo: "suspender", usuario: u, suspender: true })}
-            className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive"
+            aria-label="Restablecer verificación"
+            title="Restablecer verificación"
+            onClick={() => onAccion({ tipo: "restablecer", usuario: u })}
+            className="inline-flex size-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
           >
-            <Ban className="size-4" />
+            <RotateCcw className="size-4" />
           </button>
-        )}
-        <button
-          type="button"
-          aria-label="Eliminar usuario"
-          title="Eliminar usuario"
-          onClick={() => onAccion({ tipo: "eliminar", usuario: u })}
-          className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 className="size-4" />
-        </button>
+          {u.baneado ? (
+            <button
+              type="button"
+              aria-label="Reactivar usuario"
+              title="Reactivar usuario"
+              onClick={() => onAccion({ tipo: "suspender", usuario: u, suspender: false })}
+              className="inline-flex size-10 items-center justify-center rounded-lg text-brand hover:bg-brand/10"
+            >
+              <CircleCheck className="size-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              aria-label="Suspender usuario"
+              title="Suspender usuario"
+              onClick={() => onAccion({ tipo: "suspender", usuario: u, suspender: true })}
+              className="inline-flex size-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive"
+            >
+              <Ban className="size-4" />
+            </button>
+          )}
+          <button
+            type="button"
+            aria-label="Eliminar usuario"
+            title="Eliminar usuario"
+            onClick={() => onAccion({ tipo: "eliminar", usuario: u })}
+            className="inline-flex size-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="size-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -294,6 +355,7 @@ export function TablaUsuarios({
 
   const [busqueda, setBusqueda] = useState(q);
   const [accionPendiente, setAccionPendiente] = useState<AccionPendiente | null>(null);
+  const [errorCredModal, setErrorCredModal] = useState("");
   const [fichaAbierta, setFichaAbierta] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -318,24 +380,34 @@ export function TablaUsuarios({
     navegar({ pagina: String(nueva) });
   }
 
-  function ejecutarAccion() {
+  function ejecutarAccion(credencial: string) {
     if (!accionPendiente) return;
     const a = accionPendiente;
-    setAccionPendiente(null);
+    // No cerramos el modal aquí: si la credencial es incorrecta el server
+    // devolverá un error y lo mostramos sin cerrar.
     startTransition(async () => {
       let resultado: { ok?: true; error?: string };
       if (a.tipo === "restablecer") {
-        resultado = await restablecerVerificacion(a.usuario.id);
+        resultado = await restablecerVerificacion(a.usuario.id, credencial);
       } else if (a.tipo === "suspender") {
-        resultado = await suspenderUsuario(a.usuario.id, a.suspender);
+        resultado = await suspenderUsuario(a.usuario.id, a.suspender, credencial);
       } else if (a.tipo === "eliminar") {
-        resultado = await eliminarUsuario(a.usuario.id);
+        resultado = await eliminarUsuario(a.usuario.id, credencial);
       } else {
-        resultado = await cambiarRolUsuario(a.usuario.id, a.rol);
+        resultado = await cambiarRolUsuario(a.usuario.id, a.rol, credencial);
       }
       if ("error" in resultado && resultado.error) {
-        toast.error(resultado.error);
+        if (resultado.error === "Clave o PIN incorrecto.") {
+          // Mantener el modal abierto y mostrar el error dentro
+          setErrorCredModal(resultado.error);
+        } else {
+          setAccionPendiente(null);
+          setErrorCredModal("");
+          toast.error(resultado.error);
+        }
       } else {
+        setAccionPendiente(null);
+        setErrorCredModal("");
         toast.success("Listo.");
         router.refresh();
       }
@@ -412,7 +484,10 @@ export function TablaUsuarios({
               key={u.id}
               u={u}
               onVerFicha={(id) => setFichaAbierta(id)}
-              onAccion={setAccionPendiente}
+              onAccion={(a) => {
+                setErrorCredModal("");
+                setAccionPendiente(a);
+              }}
               onCambiarRol={confirmarRol}
             />
           ))}
@@ -446,13 +521,17 @@ export function TablaUsuarios({
         </div>
       )}
 
-      {/* Diálogo de confirmación */}
+      {/* Diálogo de confirmación con credencial */}
       {accionPendiente && (
         <ModalConfirmacion
           accion={accionPendiente}
-          onCancelar={() => setAccionPendiente(null)}
+          onCancelar={() => {
+            setAccionPendiente(null);
+            setErrorCredModal("");
+          }}
           onConfirmar={ejecutarAccion}
           pending={pending}
+          errorServidor={errorCredModal}
         />
       )}
 

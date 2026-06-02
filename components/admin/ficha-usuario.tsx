@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   X,
@@ -109,28 +109,83 @@ function ConfirmInterna({
   onCancelar,
   onConfirmar,
   pending,
+  errorServidor,
 }: {
   accion: AccionInterna;
   nombre: string;
   onCancelar: () => void;
-  onConfirmar: () => void;
+  onConfirmar: (credencial: string) => void;
   pending: boolean;
+  errorServidor?: string;
 }) {
+  const [credencial, setCredencial] = useState("");
+  const [errorCred, setErrorCred] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const ETIQUETA: Record<AccionInterna["tipo"], string> = {
     restablecer: "Restablecer verificación",
-    suspender: accion.tipo === "suspender" && !accion.suspender ? "Reactivar usuario" : "Suspender usuario",
+    suspender:
+      accion.tipo === "suspender" && !accion.suspender
+        ? "Reactivar usuario"
+        : "Suspender usuario",
     eliminar: "Eliminar usuario",
     rol: "Cambiar rol",
   };
+
+  useEffect(() => {
+    const t = setTimeout(() => inputRef.current?.focus(), 50);
+    return () => clearTimeout(t);
+  }, []);
+
+  function handleConfirmar() {
+    if (!credencial.trim()) {
+      setErrorCred("Ingresa tu PIN o contraseña.");
+      return;
+    }
+    setErrorCred("");
+    onConfirmar(credencial);
+  }
+
+  const errorVisible = errorCred || errorServidor;
+
   return (
     <div className="mt-3 space-y-2 rounded-xl border border-brand/40 bg-brand/5 p-3">
       <p className="flex items-center gap-1.5 text-sm font-semibold">
         <Lock className="size-4 text-brand" /> {ETIQUETA[accion.tipo]}
       </p>
       <p className="text-xs text-muted-foreground">
-        ¿Confirmas para <span className="font-medium text-foreground">{nombre}</span>?
+        ¿Confirmas para{" "}
+        <span className="font-medium text-foreground">{nombre}</span>?
         {accion.tipo === "eliminar" && " No se puede deshacer."}
       </p>
+
+      {/* Credencial */}
+      <div className="space-y-1">
+        <label htmlFor="cred-ficha" className="text-xs font-medium text-foreground">
+          Confirma con tu PIN o contraseña
+        </label>
+        <input
+          ref={inputRef}
+          id="cred-ficha"
+          type="password"
+          autoComplete="current-password"
+          value={credencial}
+          onChange={(e) => {
+            setCredencial(e.target.value);
+            if (errorCred) setErrorCred("");
+          }}
+          onKeyDown={(e) => e.key === "Enter" && handleConfirmar()}
+          placeholder="••••••"
+          className={cn(
+            "w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/50",
+            errorVisible && "border-destructive",
+          )}
+        />
+        {errorVisible && (
+          <p className="text-xs text-destructive">{errorVisible}</p>
+        )}
+      </div>
+
       <div className="flex gap-2">
         <button
           type="button"
@@ -141,7 +196,7 @@ function ConfirmInterna({
         </button>
         <button
           type="button"
-          onClick={onConfirmar}
+          onClick={handleConfirmar}
           disabled={pending}
           className={cn(
             "flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold text-white",
@@ -169,6 +224,7 @@ function ContenidoFicha({
 }) {
   const router = useRouter();
   const [accionPendiente, setAccionPendiente] = useState<AccionInterna | null>(null);
+  const [errorServidor, setErrorServidor] = useState("");
   const [rolSeleccionado, setRolSeleccionado] = useState(ficha.rol);
   const [pending, startTransition] = useTransition();
 
@@ -182,22 +238,30 @@ function ContenidoFicha({
 
   const ver = ficha.verificacion;
 
-  function ejecutar(a: AccionInterna) {
-    setAccionPendiente(null);
+  function ejecutar(a: AccionInterna, credencial: string) {
+    // No cerramos el panel de confirmación hasta saber el resultado.
     startTransition(async () => {
       let resultado: { ok?: true; error?: string };
       if (a.tipo === "restablecer") {
-        resultado = await restablecerVerificacion(ficha.id);
+        resultado = await restablecerVerificacion(ficha.id, credencial);
       } else if (a.tipo === "suspender") {
-        resultado = await suspenderUsuario(ficha.id, a.suspender);
+        resultado = await suspenderUsuario(ficha.id, a.suspender, credencial);
       } else if (a.tipo === "eliminar") {
-        resultado = await eliminarUsuario(ficha.id);
+        resultado = await eliminarUsuario(ficha.id, credencial);
       } else {
-        resultado = await cambiarRolUsuario(ficha.id, a.rol);
+        resultado = await cambiarRolUsuario(ficha.id, a.rol, credencial);
       }
       if ("error" in resultado && resultado.error) {
-        toast.error(resultado.error);
+        if (resultado.error === "Clave o PIN incorrecto.") {
+          setErrorServidor(resultado.error);
+        } else {
+          setAccionPendiente(null);
+          setErrorServidor("");
+          toast.error(resultado.error);
+        }
       } else {
+        setAccionPendiente(null);
+        setErrorServidor("");
         toast.success("Listo.");
         if (a.tipo === "eliminar") {
           onEliminado();
@@ -454,9 +518,10 @@ function ContenidoFicha({
           <button
             type="button"
             disabled={rolSeleccionado === ficha.rol || pending}
-            onClick={() =>
-              setAccionPendiente({ tipo: "rol", rol: rolSeleccionado })
-            }
+            onClick={() => {
+              setErrorServidor("");
+              setAccionPendiente({ tipo: "rol", rol: rolSeleccionado });
+            }}
             className="rounded-lg border px-3 py-1.5 text-xs font-medium disabled:opacity-40"
           >
             Cambiar rol
@@ -468,7 +533,10 @@ function ContenidoFicha({
           <button
             type="button"
             disabled={pending}
-            onClick={() => setAccionPendiente({ tipo: "restablecer" })}
+            onClick={() => {
+              setErrorServidor("");
+              setAccionPendiente({ tipo: "restablecer" });
+            }}
             className="flex items-center justify-center gap-1.5 rounded-xl border py-2 text-xs font-medium disabled:opacity-40"
           >
             <RotateCcw className="size-3.5" /> Restablecer KYC
@@ -478,7 +546,10 @@ function ContenidoFicha({
             <button
               type="button"
               disabled={pending}
-              onClick={() => setAccionPendiente({ tipo: "suspender", suspender: false })}
+              onClick={() => {
+                setErrorServidor("");
+                setAccionPendiente({ tipo: "suspender", suspender: false });
+              }}
               className="flex items-center justify-center gap-1.5 rounded-xl border border-brand/40 bg-brand/10 py-2 text-xs font-medium text-brand disabled:opacity-40"
             >
               <CircleCheck className="size-3.5" /> Reactivar
@@ -487,7 +558,10 @@ function ContenidoFicha({
             <button
               type="button"
               disabled={pending}
-              onClick={() => setAccionPendiente({ tipo: "suspender", suspender: true })}
+              onClick={() => {
+                setErrorServidor("");
+                setAccionPendiente({ tipo: "suspender", suspender: true });
+              }}
               className="flex items-center justify-center gap-1.5 rounded-xl border py-2 text-xs font-medium disabled:opacity-40"
             >
               <Ban className="size-3.5" /> Suspender
@@ -497,7 +571,10 @@ function ContenidoFicha({
           <button
             type="button"
             disabled={pending}
-            onClick={() => setAccionPendiente({ tipo: "eliminar" })}
+            onClick={() => {
+              setErrorServidor("");
+              setAccionPendiente({ tipo: "eliminar" });
+            }}
             className="col-span-2 flex items-center justify-center gap-1.5 rounded-xl border border-destructive/40 bg-destructive/10 py-2 text-xs font-medium text-destructive disabled:opacity-40 sm:col-span-1"
           >
             <Trash2 className="size-3.5" /> Eliminar
@@ -509,9 +586,13 @@ function ContenidoFicha({
           <ConfirmInterna
             accion={accionPendiente}
             nombre={nombre}
-            onCancelar={() => setAccionPendiente(null)}
-            onConfirmar={() => ejecutar(accionPendiente)}
+            onCancelar={() => {
+              setAccionPendiente(null);
+              setErrorServidor("");
+            }}
+            onConfirmar={(credencial) => ejecutar(accionPendiente, credencial)}
             pending={pending}
+            errorServidor={errorServidor}
           />
         )}
       </section>
