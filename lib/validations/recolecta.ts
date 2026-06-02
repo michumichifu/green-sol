@@ -24,7 +24,7 @@ export const MONEDA_RECOLECTA: Record<
     enBolivares: true,
   },
   bs_usdt: {
-    label: "Bolívares — promedio (USDC) (pagas en Bs)",
+    label: "Bolívares — USDC/Promedio (pagas en Bs)",
     simbolo: "Bs",
     ancla: "$",
     enBolivares: true,
