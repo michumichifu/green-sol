@@ -30,9 +30,25 @@ export async function cambiarRol(
   usuarioId: string,
   formData: FormData,
 ): Promise<void> {
-  if (!(await esAdmin())) return;
+  const admin = await obtenerUsuario();
+  if (!admin || admin.rol !== "super_admin") return;
+
   const rol = String(formData.get("rol") ?? "") as Rol;
   if (!ROLES.includes(rol)) return;
+
+  // No degradar el propio rol.
+  if (usuarioId === admin.id && rol !== "super_admin") return;
+
+  // No dejar el sistema sin super-admin.
+  const objetivo = await prisma.usuario.findUnique({
+    where: { id: usuarioId },
+    select: { rol: true },
+  });
+  if (objetivo?.rol === "super_admin" && rol !== "super_admin") {
+    const total = await prisma.usuario.count({ where: { rol: "super_admin" } });
+    if (total <= 1) return;
+  }
+
   await prisma.usuario.update({ where: { id: usuarioId }, data: { rol } });
   revalidatePath("/admin");
 }

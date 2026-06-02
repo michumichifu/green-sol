@@ -242,6 +242,10 @@ export async function iniciarSesion(
   const r = await verificarPin(usuario.id, pin);
   if (!r.ok) return { error: r.error };
 
+  if (usuario.baneado) {
+    return { error: "Tu cuenta está suspendida. Contacta a soporte." };
+  }
+
   if (!usuario.correoVerificado) {
     await crearYEnviarOtp(usuario.id, usuario.correo, "verificacion");
     await guardarPendiente(usuario.correo);
