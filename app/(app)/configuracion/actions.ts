@@ -1,24 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { hash } from "@node-rs/argon2";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
-import { verificarContrasena } from "@/lib/auth/password";
+import { hashContrasena, verificarContrasena } from "@/lib/auth/password";
 import { contrasenaSchema } from "@/lib/validations/auth";
 import { notificarYCorreo } from "@/lib/notificaciones";
+import { pinFormatoValido, hashearPin, verificarPin } from "@/lib/auth/pin";
 
 export type EstadoSeguridad = { ok?: boolean; error?: string };
-
-/** Confirma la contraseña del usuario logueado (para acciones de seguridad). */
-async function confirmarClave(
-  usuarioId: string,
-  clave: string,
-): Promise<boolean> {
-  const u = await prisma.usuario.findUnique({ where: { id: usuarioId } });
-  if (!u?.hashContrasena) return false;
-  return verificarContrasena(u.hashContrasena, clave);
-}
 
 export async function definirPin(
   _prev: EstadoSeguridad,
@@ -26,25 +16,46 @@ export async function definirPin(
 ): Promise<EstadoSeguridad> {
   const u = await obtenerUsuario();
   if (!u) return { error: "No autorizado." };
-  const pin = String(formData.get("pin") ?? "").trim();
-  const pin2 = String(formData.get("pin2") ?? "").trim();
-  const clave = String(formData.get("clave") ?? "");
-  if (!/^\d{4,6}$/.test(pin)) {
-    return { error: "El PIN debe tener de 4 a 6 dígitos." };
+
+  const pinActual = String(formData.get("pinActual") ?? "").trim();
+  const pinNuevo = String(formData.get("pin") ?? "").trim();
+  const pinNuevo2 = String(formData.get("pin2") ?? "").trim();
+
+  // Validar el nuevo PIN con la misma función que usa login/registro.
+  if (!/^\d{6}$/.test(pinNuevo)) {
+    return { error: "El PIN debe ser de exactamente 6 dígitos." };
   }
-  if (pin !== pin2) return { error: "Los PIN no coinciden." };
-  if (!(await confirmarClave(u.id, clave))) {
-    return { error: "Clave de la cuenta incorrecta." };
+  if (!pinFormatoValido(pinNuevo)) {
+    return { error: "Elige un PIN menos obvio." };
   }
+  if (pinNuevo !== pinNuevo2) return { error: "Los PIN no coinciden." };
+
+  // Confirmar identidad: si ya tiene PIN → confirmar con PIN actual (credencial).
+  // Caso borde: si aún no tiene PIN pero sí tiene contraseña → confirmar con contraseña.
+  if (u.pinHash) {
+    const r = await verificarPin(u.id, pinActual);
+    if (!r.ok) return { error: r.error };
+  } else if (u.hashContrasena) {
+    const claveActual = String(formData.get("clave") ?? "");
+    if (!(await verificarContrasena(u.hashContrasena, claveActual))) {
+      return { error: "Contraseña incorrecta." };
+    }
+  } else {
+    // Sin PIN ni contraseña: estado inalcanzable por los flujos de la app. Lo
+    // rechazamos explícitamente para que ninguna sesión robada pueda fijar un PIN
+    // sin confirmar identidad (defensa ante seeds/admin futuros).
+    return { error: "No se pudo verificar tu identidad." };
+  }
+
   await prisma.usuario.update({
     where: { id: u.id },
-    data: { pinHash: await hash(pin) },
+    data: { pinHash: await hashearPin(pinNuevo) },
   });
   await notificarYCorreo(u, {
     tipo: "seguridad",
-    titulo: "Agregaste un PIN de seguridad 🔐",
+    titulo: "Cambiaste tu PIN de acceso 🔐",
     cuerpo:
-      "Se añadió un PIN como verificación a tu cuenta. Si no fuiste tú, cambia tu contraseña y contacta a soporte.",
+      "El PIN de acceso a tu cuenta fue actualizado. Si no fuiste tú, contacta a soporte de inmediato.",
     enlace: "/configuracion?tab=seguridad",
   });
   revalidatePath("/configuracion");
@@ -57,10 +68,21 @@ export async function quitarPin(
 ): Promise<EstadoSeguridad> {
   const u = await obtenerUsuario();
   if (!u) return { error: "No autorizado." };
-  const clave = String(formData.get("clave") ?? "");
-  if (!(await confirmarClave(u.id, clave))) {
-    return { error: "Clave de la cuenta incorrecta." };
+
+  // Seguridad anti-lockout: si el PIN es la única credencial, no se puede quitar.
+  if (!u.hashContrasena) {
+    return {
+      error:
+        "No puedes quitar tu PIN: es tu forma de iniciar sesión. Para quitarlo necesitas tener una contraseña configurada.",
+    };
   }
+
+  // El usuario tiene contraseña → confirmar con ella antes de eliminar el PIN.
+  const clave = String(formData.get("clave") ?? "");
+  if (!(await verificarContrasena(u.hashContrasena, clave))) {
+    return { error: "Contraseña incorrecta." };
+  }
+
   await prisma.usuario.update({
     where: { id: u.id },
     data: { pinHash: null },
@@ -123,7 +145,7 @@ export async function cambiarContrasena(
 
   await prisma.usuario.update({
     where: { id: u.id },
-    data: { hashContrasena: await hash(nueva) },
+    data: { hashContrasena: await hashContrasena(nueva) },
   });
   await notificarYCorreo(u, {
     tipo: "seguridad",

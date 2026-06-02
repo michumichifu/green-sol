@@ -4,6 +4,24 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.78] — 2026-06-01 — fix(auth): gestión del PIN en Configuración coherente con el nuevo modelo
+
+### Corregido
+
+- **Bug C-1 (PIN de 4–5 dígitos dejaba sin acceso):** `definirPin` validaba `^\d{4,6}$`; ahora usa `pinFormatoValido` (exactamente 6 dígitos, no trivial). Si no cumple, devuelve "El PIN debe ser de exactamente 6 dígitos." o "Elige un PIN menos obvio.". El label/placeholder en `form-seguridad.tsx` ya no dice "4–6 dígitos".
+- **Bug C-2 (usuarios nuevos sin contraseña no podían cambiar su PIN):** `definirPin` ya no exige `hashContrasena`. La identidad se confirma con el **PIN actual** (usando `verificarPin`, que aplica el bloqueo por intentos). Fallback defensivo: si no tiene PIN pero sí contraseña, se pide la contraseña.
+- **Lockout al quitar PIN:** `quitarPin` ahora bloquea la operación si el usuario no tiene `hashContrasena` (el PIN es su única credencial), devolviendo un error claro. En la UI se oculta el formulario de quitar PIN y se muestra un aviso explicativo con enlace conceptual a la sección "Factor fuerte".
+
+### Cambiado
+
+- **`app/(app)/configuracion/actions.ts`:** `definirPin` recibe `pinActual` (en lugar de `clave`) para confirmar identidad cuando ya hay PIN. Se elimina el helper `confirmarClave` (que devolvía false sin `hashContrasena`). Se usa `hashearPin`/`verificarPin` de `lib/auth/pin` y `hashContrasena` de `lib/auth/password` en lugar de `hash` de argon2 directamente. `quitarPin` verifica `hashContrasena` antes de proceder.
+- **`components/form-seguridad.tsx`:** sección PIN reescrita con `CampoPin` (3 campos: PIN actual, nuevo, confirmar nuevo). El formulario llama a `definirPin` via `useTransition` construyendo `FormData` manualmente (necesario porque `CampoPin` es uncontrolled). Acepta nueva prop `tieneContrasena: boolean`. El formulario de quitar PIN se condiciona a `tieneContrasena`; si es false, muestra aviso `AlertTriangle`.
+- **`app/(app)/configuracion/page.tsx`:** pasa `tieneContrasena={!!usuario.hashContrasena}` a `FormSeguridad`.
+
+### Verificado
+
+- Typecheck limpio (`tsc --noEmit` sin errores). E2E suite 14/14 verde.
+
 ## [0.0.77] — 2026-06-01 — refactor(auth): PIN es la credencial (no 2FA); contraseña = factor fuerte; docs
 
 ### Cambiado

@@ -79,6 +79,7 @@ export default async function ConfiguracionPage({
         <FormSeguridad
           pinActivo={!!usuario!.pinHash}
           otpActivo={usuario!.otpCorreoActivo}
+          tieneContrasena={!!usuario!.hashContrasena}
         />
 
         {/* Comunicaciones */}

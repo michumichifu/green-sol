@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { toast } from "sonner";
 import {
   Fingerprint,
@@ -10,6 +16,7 @@ import {
   Lock,
   CheckCircle2,
   ChevronRight,
+  AlertTriangle,
 } from "lucide-react";
 import {
   definirPin,
@@ -21,6 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CampoPin, type CampoPinHandle } from "@/components/campo-pin";
 
 function useToastSeguridad(
   estado: EstadoSeguridad,
@@ -75,9 +83,11 @@ function TarjetaPronto({
 export function FormSeguridad({
   pinActivo,
   otpActivo,
+  tieneContrasena,
 }: {
   pinActivo: boolean;
   otpActivo: boolean;
+  tieneContrasena: boolean;
 }) {
   const [exp, setExp] = useState<null | "pin" | "password">(null);
   const [otp, setOtp] = useState(otpActivo);
@@ -87,16 +97,37 @@ export function FormSeguridad({
   const [errPwd, setErrPwd] = useState(false);
   const [shakeTick, setShakeTick] = useState(0);
 
-  const [estDef, accDef, pendDef] = useActionState<EstadoSeguridad, FormData>(
-    definirPin,
-    {},
-  );
-  useToastSeguridad(estDef, "PIN configurado", () => setExp(null));
+  // PIN form state (managed manually because CampoPin is uncontrolled)
+  const [pinActualVal, setPinActualVal] = useState("");
+  const [pinNuevoVal, setPinNuevoVal] = useState("");
+  const [pinConfVal, setPinConfVal] = useState("");
+  const pinActualRef = useRef<CampoPinHandle>(null);
+  const pinNuevoRef = useRef<CampoPinHandle>(null);
+  const pinConfRef = useRef<CampoPinHandle>(null);
+  const [isPinPending, startPinTransition] = useTransition();
+
+  // "quitar PIN" form state
+  const [claveQuitar, setClaveQuitar] = useState("");
   const [estQ, accQ, pendQ] = useActionState<EstadoSeguridad, FormData>(
     quitarPin,
     {},
   );
-  useToastSeguridad(estQ, "PIN eliminado", () => setExp(null));
+  useToastSeguridad(estQ, "PIN eliminado", () => {
+    setExp(null);
+    setClaveQuitar("");
+  });
+
+  const [estDef, setEstDef] = useState<EstadoSeguridad>({});
+  useToastSeguridad(estDef, "PIN configurado", () => {
+    setExp(null);
+    pinActualRef.current?.reset();
+    pinNuevoRef.current?.reset();
+    pinConfRef.current?.reset();
+    setPinActualVal("");
+    setPinNuevoVal("");
+    setPinConfVal("");
+  });
+
   const [estPwd, accPwd, pendPwd] = useActionState<EstadoSeguridad, FormData>(
     cambiarContrasena,
     {},
@@ -106,7 +137,6 @@ export function FormSeguridad({
   useEffect(() => {
     if (estPwd === previoPwd.current) return;
     previoPwd.current = estPwd;
-    // En éxito o error se limpian los campos; en error, se marca rojo y vibra.
     setPwdActual("");
     setPwdNueva("");
     setPwdConfirmar("");
@@ -130,6 +160,26 @@ export function FormSeguridad({
         v ? "Código por correo activado" : "Código por correo desactivado",
       );
     }
+  }
+
+  function handleSubmitPin(e: React.FormEvent) {
+    e.preventDefault();
+    startPinTransition(async () => {
+      const fd = new FormData();
+      if (pinActivo) {
+        fd.set("pinActual", pinActualVal);
+      } else if (tieneContrasena) {
+        // No tiene PIN pero sí contraseña: pedir contraseña como fallback
+        const claveInput = (e.target as HTMLFormElement).elements.namedItem(
+          "clave",
+        ) as HTMLInputElement | null;
+        fd.set("clave", claveInput?.value ?? "");
+      }
+      fd.set("pin", pinNuevoVal);
+      fd.set("pin2", pinConfVal);
+      const r = await definirPin({}, fd);
+      setEstDef(r);
+    });
   }
 
   const check = <CheckCircle2 className="size-5 text-brand" />;
@@ -168,56 +218,88 @@ export function FormSeguridad({
         </button>
 
         {exp === "pin" && (
-          <div className="border-t p-4">
-            {pinActivo ? (
-              <form action={accQ} className="space-y-2">
-                <p className="text-xs text-muted-foreground">
-                  Al quitar el PIN no podrás iniciar sesión hasta que definas uno nuevo.
-                </p>
+          <div className="border-t p-4 space-y-4">
+            {/* Cambiar / Definir PIN */}
+            <form onSubmit={handleSubmitPin} className="space-y-3">
+              {/* PIN actual — solo si ya tiene PIN */}
+              {pinActivo && (
                 <div className="space-y-1">
-                  <Label htmlFor="clave-q">Confirma con tu contraseña</Label>
-                  <Input id="clave-q" name="clave" type="password" />
+                  <Label>PIN actual (6 dígitos)</Label>
+                  <CampoPin
+                    ref={pinActualRef}
+                    onChange={setPinActualVal}
+                    testId="cfg-pin-actual"
+                  />
                 </div>
-                <Button type="submit" variant="destructive" disabled={pendQ}>
-                  {pendQ ? "Quitando..." : "Quitar PIN"}
-                </Button>
-              </form>
-            ) : (
-              <form action={accDef} className="space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label htmlFor="pin">Nuevo PIN (4–6 dígitos)</Label>
-                    <Input
-                      id="pin"
-                      name="pin"
-                      inputMode="numeric"
-                      maxLength={6}
-                      type="password"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="pin2">Repetir PIN</Label>
-                    <Input
-                      id="pin2"
-                      name="pin2"
-                      inputMode="numeric"
-                      maxLength={6}
-                      type="password"
-                    />
-                  </div>
-                </div>
+              )}
+              {/* Fallback: sin PIN pero con contraseña */}
+              {!pinActivo && tieneContrasena && (
                 <div className="space-y-1">
                   <Label htmlFor="clave-def">Tu contraseña (para confirmar)</Label>
                   <Input id="clave-def" name="clave" type="password" />
                 </div>
-                <Button
-                  type="submit"
-                  disabled={pendDef}
-                  className="bg-brand text-white hover:bg-brand/90"
-                >
-                  {pendDef ? "Guardando..." : "Guardar PIN"}
-                </Button>
-              </form>
+              )}
+              <div className="space-y-1">
+                <Label>Nuevo PIN (6 dígitos)</Label>
+                <CampoPin
+                  ref={pinNuevoRef}
+                  onChange={setPinNuevoVal}
+                  testId="cfg-pin-nuevo"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Repetir nuevo PIN</Label>
+                <CampoPin
+                  ref={pinConfRef}
+                  onChange={setPinConfVal}
+                  testId="cfg-pin-conf"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={isPinPending}
+                className="bg-brand text-white hover:bg-brand/90"
+              >
+                {isPinPending
+                  ? "Guardando..."
+                  : pinActivo
+                    ? "Cambiar PIN"
+                    : "Guardar PIN"}
+              </Button>
+            </form>
+
+            {/* Quitar PIN — solo si tiene contraseña (para no dejar sin credencial) */}
+            {pinActivo && (
+              <>
+                <hr className="border-border" />
+                {tieneContrasena ? (
+                  <form action={accQ} className="space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      Al quitar el PIN podrás volver a definir uno cuando quieras.
+                    </p>
+                    <div className="space-y-1">
+                      <Label htmlFor="clave-q">Contraseña para confirmar</Label>
+                      <Input
+                        id="clave-q"
+                        name="clave"
+                        type="password"
+                        value={claveQuitar}
+                        onChange={(e) => setClaveQuitar(e.target.value)}
+                      />
+                    </div>
+                    <Button type="submit" variant="destructive" disabled={pendQ}>
+                      {pendQ ? "Quitando..." : "Quitar PIN"}
+                    </Button>
+                  </form>
+                ) : (
+                  <div className="flex items-start gap-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3">
+                    <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                      No puedes quitar tu PIN: es tu única forma de iniciar sesión. Para quitarlo, primero configura una contraseña en la sección "Factor fuerte".
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
