@@ -3,18 +3,20 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
-import { hashContrasena, verificarContrasena } from "@/lib/auth/password";
+import { hashContrasena } from "@/lib/auth/password";
 import { crearYEnviarOtp, validarOtp } from "@/lib/auth/otp";
 import { crearNotificacion } from "@/lib/notificaciones";
 import { crearSesion, cerrarSesion, obtenerUsuario } from "@/lib/auth/session";
 import { debeMostrarOnboarding } from "@/lib/onboarding";
 import { validarRestricciones } from "@/lib/restricciones";
+import { verificarPin } from "@/lib/auth/pin";
 import {
   registroCompletoSchema,
-  loginSchema,
+  loginPinSchema,
   otpSchema,
 } from "@/lib/validations/auth";
 import { paisPorCodigo } from "@/lib/paises";
+import { SENAL_MIGRAR_PIN } from "./constants";
 
 const PENDIENTE = "greensol_pendiente";
 
@@ -136,12 +138,12 @@ export async function iniciarSesion(
   _estado: EstadoAuth,
   formData: FormData,
 ): Promise<EstadoAuth> {
-  const datos = loginSchema.safeParse({
+  const datos = loginPinSchema.safeParse({
     identificador: formData.get("identificador"),
-    contrasena: formData.get("contrasena"),
+    pin: formData.get("pin"),
   });
   if (!datos.success) return { error: datos.error.issues[0].message };
-  const { identificador, contrasena } = datos.data;
+  const { identificador, pin } = datos.data;
 
   const usuario = await prisma.usuario.findFirst({
     where: {
@@ -151,12 +153,12 @@ export async function iniciarSesion(
       ],
     },
   });
-  if (
-    !usuario?.hashContrasena ||
-    !(await verificarContrasena(usuario.hashContrasena, contrasena))
-  ) {
-    return { error: "Correo/usuario o contraseña incorrectos." };
-  }
+  if (!usuario) return { error: "Correo/usuario o PIN incorrectos." };
+
+  if (!usuario.pinHash) return { error: SENAL_MIGRAR_PIN };
+
+  const r = await verificarPin(usuario.id, pin);
+  if (!r.ok) return { error: r.error };
 
   if (!usuario.correoVerificado) {
     await crearYEnviarOtp(usuario.id, usuario.correo, "verificacion");
