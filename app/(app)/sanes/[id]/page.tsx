@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
+import { obtenerTasas } from "@/lib/rates/cache";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import {
   invitarPorCorreo,
@@ -12,9 +13,9 @@ import {
 } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MONEDA_RECOLECTA } from "@/lib/validations/recolecta";
 import { PanelTabs } from "@/components/panel-tabs";
 import { ResumenSan } from "@/components/san/resumen-san";
+import { PagosParticipante } from "@/components/san/pagos-participante";
 
 export default async function DetalleRecolecta({
   params,
@@ -45,11 +46,16 @@ export default async function DetalleRecolecta({
   const esParticipante = r.participantes.some((p) => p.usuarioId === usuario.id);
   if (!esParticipante && r.visibilidad === "privado") notFound();
   const esOrganizador = r.organizadorId === usuario.id;
-  const info = MONEDA_RECOLECTA[r.moneda];
   const invitar = invitarPorCorreo.bind(null, r.id);
   const generar = generarTurnos.bind(null, r.id);
   const reportar = reportarPago.bind(null, r.id);
   const cerrar = cerrarRecolecta.bind(null, r.id);
+
+  const tasas = await obtenerTasas();
+  const participanteActual = r.participantes.find((p) => p.usuarioId === usuario.id);
+  const misAportes = participanteActual
+    ? r.aportes.filter((a) => a.participante.usuarioId === usuario.id)
+    : [];
 
   return (
     <main className="mx-auto max-w-md px-6 py-8">
@@ -61,29 +67,20 @@ export default async function DetalleRecolecta({
           esParticipante={esParticipante}
         />
 
-        {/* Pestaña 1 — Pagos (movido tal cual; Task 6/7 lo rediseñará) */}
+        {/* Pestaña 1 — Pagos */}
         <div className="space-y-6">
-          {esParticipante && (
-            <form action={reportar} className="space-y-2 rounded-xl border p-4">
-              <h2 className="font-semibold">Reportar un pago</h2>
-              <div className="flex gap-2">
-                <Input
-                  name="monto"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="Monto USD"
-                  required
-                />
-                <Input name="referencia" placeholder="Referencia" />
-              </div>
-              <Button type="submit" variant="outline" className="w-full">
-                Reportar pago
-              </Button>
-            </form>
+          {/* Vista del participante (Task 6) */}
+          {esParticipante && !esOrganizador && (
+            <PagosParticipante
+              recolecta={r}
+              tasas={tasas}
+              misAportes={misAportes}
+              reportar={reportar}
+            />
           )}
 
-          {r.aportes.length > 0 && (
+          {/* Vista del organizador (Task 7 la rediseñará; por ahora se conserva tal cual) */}
+          {esOrganizador && r.aportes.length > 0 && (
             <section className="space-y-2">
               <h2 className="font-semibold">Pagos reportados</h2>
               <ul className="space-y-1 text-sm">
