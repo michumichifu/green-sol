@@ -9,6 +9,7 @@ import { crearSesion, cerrarSesion, obtenerUsuario } from "@/lib/auth/session";
 import { debeMostrarOnboarding } from "@/lib/onboarding";
 import { validarRestricciones } from "@/lib/restricciones";
 import { verificarPin, hashearPin, pinFormatoValido } from "@/lib/auth/pin";
+import { verificarContrasena } from "@/lib/auth/password";
 import {
   pinSchema,
   registroDatosSchema,
@@ -253,6 +254,63 @@ export async function iniciarSesion(
 export async function cerrarSesionAction() {
   await cerrarSesion();
   redirect("/login");
+}
+
+/**
+ * Migración de contraseña → PIN.
+ * Para usuarios que tienen `hashContrasena` pero aún no tienen `pinHash`.
+ * Verifica la contraseña actual, guarda el nuevo PIN y abre sesión.
+ * CONSERVA `hashContrasena` (factor fuerte para operaciones cripto).
+ */
+export async function crearPinMigracion(
+  _estado: EstadoAuth,
+  formData: FormData,
+): Promise<EstadoAuth> {
+  const identificador = String(formData.get("identificador") ?? "").trim();
+  const contrasena = String(formData.get("contrasena") ?? "");
+  const pin = String(formData.get("pin") ?? "");
+  const confirmar = String(formData.get("confirmar") ?? "");
+
+  if (!identificador) return { error: "Falta el identificador de cuenta." };
+
+  const usuario = await prisma.usuario.findFirst({
+    where: {
+      OR: [
+        { correo: identificador.toLowerCase() },
+        { nombreUsuario: { equals: identificador, mode: "insensitive" } },
+      ],
+    },
+  });
+  if (!usuario) return { error: "No encontramos esa cuenta. Intenta de nuevo." };
+
+  // Si ya tiene PIN no debe estar aquí
+  if (usuario.pinHash) {
+    redirect("/login");
+  }
+
+  // Verificar contraseña actual
+  if (!usuario.hashContrasena) {
+    return { error: "Esta cuenta no puede completar la migración. Contacta soporte." };
+  }
+  const contrasenaOk = await verificarContrasena(usuario.hashContrasena, contrasena);
+  if (!contrasenaOk) return { error: "Contraseña incorrecta." };
+
+  // Validar PIN
+  const datosParsed = pinSchema.safeParse({ pin, confirmar });
+  if (!datosParsed.success) return { error: datosParsed.error.issues[0].message };
+  if (!pinFormatoValido(pin)) {
+    return { error: "Ese PIN es demasiado sencillo. Elige uno más seguro." };
+  }
+
+  // Guardar pinHash; se conserva hashContrasena
+  const pinHash = await hashearPin(pin);
+  const actualizado = await prisma.usuario.update({
+    where: { id: usuario.id },
+    data: { pinHash, ingresos: { increment: 1 } },
+  });
+
+  await crearSesion(usuario.id);
+  redirect(debeMostrarOnboarding(actualizado) ? "/onboarding" : "/dashboard");
 }
 
 /**

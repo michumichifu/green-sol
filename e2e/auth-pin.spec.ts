@@ -14,6 +14,21 @@ async function sembrarUsuarioConPin(
 }
 
 /**
+ * Siembra un usuario legacy con contraseña conocida y SIN pinHash.
+ * Simula cuentas creadas antes de la migración a PIN.
+ */
+async function sembrarUsuarioLegacy(
+  page: import("@playwright/test").Page,
+  correo: string,
+  contrasena: string,
+) {
+  const res = await page.request.post("/api/test/seed-migrar", {
+    data: { correo, contrasena },
+  });
+  expect(res.ok()).toBeTruthy();
+}
+
+/**
  * Obtiene (y planta) un OTP conocido para el correo dado.
  * El endpoint invalida OTPs anteriores y crea uno con código "246810".
  */
@@ -128,6 +143,78 @@ test("identificador se conserva al volver del paso 2 al paso 1", async ({ page }
 
   // El identificador sigue presente
   await expect(page.getByLabel("Correo o usuario")).toHaveValue(correoTest);
+});
+
+// ─── flujo de migración contraseña → PIN ────────────────────────────────────
+
+test("migración: login sin PIN redirige a /migrar-pin con ?u=identificador", async ({ page }) => {
+  const correo = `e2e_migrar_redir_${Date.now()}@test.local`;
+  const contrasena = "Clave1234!";
+
+  await sembrarUsuarioLegacy(page, correo, contrasena);
+
+  await page.goto("/login");
+  await page.getByLabel("Correo o usuario").fill(correo);
+  await page.getByRole("button", { name: /Siguiente/ }).click();
+
+  // Paso 2: intentar entrar con cualquier PIN
+  await expect(page.getByRole("heading", { name: "Ingresa tu PIN" })).toBeVisible();
+  await rellenarPin(page, "246810");
+
+  // Debe redirigir a /migrar-pin con el identificador en la URL
+  await expect(page).toHaveURL(
+    new RegExp(`/migrar-pin\\?u=${encodeURIComponent(correo)}`),
+    { timeout: 10_000 },
+  );
+  await expect(page.getByRole("heading", { name: "Crea tu PIN" })).toBeVisible();
+});
+
+test("migración: contraseña correcta + PIN nuevo → queda logueado", async ({ page }) => {
+  const correo = `e2e_migrar_ok_${Date.now()}@test.local`;
+  const contrasena = "ClaveSegura99!";
+  const pinNuevo = "357913";
+
+  await sembrarUsuarioLegacy(page, correo, contrasena);
+
+  // Ir a /login → redirigir a /migrar-pin
+  await page.goto("/login");
+  await page.getByLabel("Correo o usuario").fill(correo);
+  await page.getByRole("button", { name: /Siguiente/ }).click();
+  await expect(page.getByRole("heading", { name: "Ingresa tu PIN" })).toBeVisible();
+  await rellenarPin(page, "246810");
+  await expect(page).toHaveURL(/\/migrar-pin/, { timeout: 10_000 });
+
+  // Rellenar formulario de migración
+  await page.getByTestId("migrar-contrasena").fill(contrasena);
+  await rellenarPinPor(page, "migrar-pin", pinNuevo);
+  await rellenarPinPor(page, "migrar-pin-conf", pinNuevo);
+  await page.getByRole("button", { name: /Crear PIN y entrar/ }).click();
+
+  // Debe quedar logueado en dashboard u onboarding
+  await expect(page).toHaveURL(/\/(dashboard|onboarding)$/, { timeout: 12_000 });
+});
+
+test("migración: contraseña incorrecta muestra error", async ({ page }) => {
+  const correo = `e2e_migrar_err_${Date.now()}@test.local`;
+  const contrasena = "ClaveReal77!";
+  const pinNuevo = "468024";
+
+  await sembrarUsuarioLegacy(page, correo, contrasena);
+
+  // Ir directamente a /migrar-pin
+  await page.goto(`/migrar-pin?u=${encodeURIComponent(correo)}`);
+  await expect(page.getByRole("heading", { name: "Crea tu PIN" })).toBeVisible();
+
+  await page.getByTestId("migrar-contrasena").fill("ClaveEquivocada1!");
+  await rellenarPinPor(page, "migrar-pin", pinNuevo);
+  await rellenarPinPor(page, "migrar-pin-conf", pinNuevo);
+  await page.getByRole("button", { name: /Crear PIN y entrar/ }).click();
+
+  await expect(page.getByTestId("migrar-error")).toContainText(/Contraseña incorrecta/, {
+    timeout: 8_000,
+  });
+  // Los campos PIN deben quedar vacíos tras el reset
+  await expect(page.getByTestId("migrar-pin-0")).toHaveValue("");
 });
 
 // ─── flujo de registro completo ─────────────────────────────────────────────
