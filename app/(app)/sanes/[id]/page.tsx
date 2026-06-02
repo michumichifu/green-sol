@@ -12,9 +12,9 @@ import {
 } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CompartirAhorro } from "@/components/compartir-ahorro";
 import { MONEDA_RECOLECTA } from "@/lib/validations/recolecta";
-import { BANCOS_VE } from "@/lib/bancos-venezuela";
+import { PanelTabs } from "@/components/panel-tabs";
+import { ResumenSan } from "@/components/san/resumen-san";
 
 export default async function DetalleRecolecta({
   params,
@@ -46,265 +46,156 @@ export default async function DetalleRecolecta({
   if (!esParticipante && r.visibilidad === "privado") notFound();
   const esOrganizador = r.organizadorId === usuario.id;
   const info = MONEDA_RECOLECTA[r.moneda];
-  const ancla = info?.ancla ?? "$";
   const invitar = invitarPorCorreo.bind(null, r.id);
   const generar = generarTurnos.bind(null, r.id);
   const reportar = reportarPago.bind(null, r.id);
   const cerrar = cerrarRecolecta.bind(null, r.id);
 
   return (
-    <main className="mx-auto max-w-md space-y-6 px-6 py-8">
-      <div>
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">{r.nombre}</h1>
-          <span className="text-xs uppercase text-brand">{r.tipo}</span>
+    <main className="mx-auto max-w-md px-6 py-8">
+      <PanelTabs tabs={["Resumen", "Pagos"]}>
+        {/* Pestaña 0 — Resumen */}
+        <ResumenSan
+          recolecta={r}
+          esOrganizador={esOrganizador}
+          esParticipante={esParticipante}
+        />
+
+        {/* Pestaña 1 — Pagos (movido tal cual; Task 6/7 lo rediseñará) */}
+        <div className="space-y-6">
+          {esParticipante && (
+            <form action={reportar} className="space-y-2 rounded-xl border p-4">
+              <h2 className="font-semibold">Reportar un pago</h2>
+              <div className="flex gap-2">
+                <Input
+                  name="monto"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="Monto USD"
+                  required
+                />
+                <Input name="referencia" placeholder="Referencia" />
+              </div>
+              <Button type="submit" variant="outline" className="w-full">
+                Reportar pago
+              </Button>
+            </form>
+          )}
+
+          {r.aportes.length > 0 && (
+            <section className="space-y-2">
+              <h2 className="font-semibold">Pagos reportados</h2>
+              <ul className="space-y-1 text-sm">
+                {r.aportes.map((a) => {
+                  const confirmar = resolverAporte.bind(null, a.id, true);
+                  const rechazar = resolverAporte.bind(null, a.id, false);
+                  return (
+                    <li
+                      key={a.id}
+                      className="rounded-lg border bg-card px-3 py-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>{a.participante.usuario.correo}</span>
+                        <span>
+                          ${a.monto} · {a.estado}
+                        </span>
+                      </div>
+                      {a.referencia && (
+                        <p className="text-xs text-muted-foreground">
+                          Ref: {a.referencia}
+                        </p>
+                      )}
+                      {esOrganizador && a.estado === "reportado" && (
+                        <div className="mt-1 flex gap-2">
+                          <form action={confirmar}>
+                            <Button type="submit" size="sm" variant="outline">
+                              Confirmar
+                            </Button>
+                          </form>
+                          <form action={rechazar}>
+                            <Button type="submit" size="sm" variant="ghost">
+                              Rechazar
+                            </Button>
+                          </form>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+
+          {r.estado === "cerrada" && esParticipante && (
+            <section className="space-y-2 rounded-xl border p-4">
+              <h2 className="font-semibold">Valorar participantes</h2>
+              <p className="text-xs text-muted-foreground">
+                Califica tu experiencia con cada uno.
+              </p>
+              <ul className="space-y-1 text-sm">
+                {r.participantes
+                  .filter((p) => p.usuarioId !== usuario.id)
+                  .map((p) => {
+                    const arriba = valorar.bind(null, r.id, p.usuarioId, 1);
+                    const abajo = valorar.bind(null, r.id, p.usuarioId, -1);
+                    return (
+                      <li
+                        key={p.id}
+                        className="flex items-center justify-between rounded-lg border bg-card px-3 py-2"
+                      >
+                        <span>{p.usuario.correo}</span>
+                        <div className="flex gap-2">
+                          <form action={arriba}>
+                            <Button type="submit" size="sm" variant="outline">
+                              <ThumbsUp className="size-4" />
+                            </Button>
+                          </form>
+                          <form action={abajo}>
+                            <Button type="submit" size="sm" variant="ghost">
+                              <ThumbsDown className="size-4" />
+                            </Button>
+                          </form>
+                        </div>
+                      </li>
+                    );
+                  })}
+              </ul>
+            </section>
+          )}
+
+          {esOrganizador && (
+            <section className="space-y-3 rounded-xl border p-4">
+              <h2 className="font-semibold">Administrar</h2>
+              <form action={invitar} className="flex gap-2">
+                <Input
+                  name="correo"
+                  type="email"
+                  placeholder="correo a invitar"
+                  required
+                />
+                <Button type="submit" variant="outline">
+                  Invitar
+                </Button>
+              </form>
+              {r.tipo === "san" && r.turnos.length === 0 && (
+                <form action={generar}>
+                  <Button type="submit" className="w-full">
+                    Sortear turnos e iniciar
+                  </Button>
+                </form>
+              )}
+              {r.estado !== "cerrada" && (
+                <form action={cerrar}>
+                  <Button type="submit" variant="ghost" className="w-full">
+                    Cerrar recolecta
+                  </Button>
+                </form>
+              )}
+            </section>
+          )}
         </div>
-        <p className="text-sm text-muted-foreground">
-          {r.tipo === "san"
-            ? `Aporte por turno: ${ancla} ${r.montoAporte ?? "?"}`
-            : `Meta: ${ancla} ${r.meta ?? "?"}`}{" "}
-          · {r.estado} · {r.visibilidad}
-        </p>
-        {r.tipo === "san" && (r.cupoMiembros || r.frecuencia) && (
-          <p className="text-xs text-muted-foreground">
-            {r.cupoMiembros ? `${r.cupoMiembros} personas` : ""}
-            {r.cupoMiembros && r.frecuencia ? " · " : ""}
-            {r.frecuencia ?? ""}
-            {info?.enBolivares ? " · se paga en Bs a la tasa del día" : ""}
-          </p>
-        )}
-        {r.descripcion && <p className="mt-2 text-sm">{r.descripcion}</p>}
-      </div>
-
-      <section className="space-y-2">
-        <h2 className="font-semibold">
-          Participantes ({r.participantes.length})
-        </h2>
-        <ul className="space-y-1 text-sm">
-          {r.participantes.map((p) => (
-            <li
-              key={p.id}
-              className="flex items-center justify-between rounded-lg border bg-card px-3 py-2"
-            >
-              <span>
-                {p.usuario.correo}
-                {p.usuarioId === r.organizadorId && " · organizador"}
-              </span>
-              {p.turno && (
-                <span className="text-xs text-muted-foreground">
-                  turno {p.turno.posicion}
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {esParticipante && r.estado === "abierta" && (
-        <CompartirAhorro codigo={r.id} nombre={r.nombre} />
-      )}
-
-      {esParticipante && r.datosPago && (
-        <section className="space-y-2 rounded-xl border p-4">
-          <h2 className="font-semibold">¿Dónde pagar?</h2>
-          {r.datosPago.tipo === "wallet" ? (
-            <p className="break-all text-sm">
-              <span className="text-muted-foreground">Wallet ({info?.simbolo}): </span>
-              {r.datosPago.wallet}
-            </p>
-          ) : (
-            <ul className="space-y-0.5 text-sm">
-              <li className="font-medium">
-                {r.datosPago.tipo === "transferencia"
-                  ? "Transferencia"
-                  : "Pago móvil"}
-              </li>
-              <li>
-                <span className="text-muted-foreground">Banco: </span>
-                {BANCOS_VE.find((b) => b.codigo === r.datosPago!.banco)?.nombre ??
-                  r.datosPago.banco}
-              </li>
-              {r.datosPago.tipoCuenta && (
-                <li className="capitalize">
-                  <span className="text-muted-foreground">Tipo: </span>
-                  {r.datosPago.tipoCuenta}
-                </li>
-              )}
-              {r.datosPago.numeroCuenta && (
-                <li>
-                  <span className="text-muted-foreground">N° de cuenta: </span>
-                  {r.datosPago.numeroCuenta}
-                </li>
-              )}
-              {r.datosPago.telefono && (
-                <li>
-                  <span className="text-muted-foreground">Teléfono: </span>
-                  {r.datosPago.telefono}
-                </li>
-              )}
-              <li>
-                <span className="text-muted-foreground">Titular: </span>
-                {r.datosPago.titular}
-              </li>
-              <li>
-                <span className="text-muted-foreground">Cédula: </span>
-                {r.datosPago.cedula}
-              </li>
-            </ul>
-          )}
-          {info?.enBolivares && (
-            <p className="text-xs text-muted-foreground">
-              Paga el equivalente en Bs a la tasa del día.
-            </p>
-          )}
-        </section>
-      )}
-
-      {r.tipo === "san" && r.turnos.length > 0 && (
-        <section className="space-y-2">
-          <h2 className="font-semibold">Orden de turnos</h2>
-          <ol className="space-y-1 text-sm">
-            {r.turnos.map((t) => (
-              <li key={t.id} className="rounded-lg border bg-card px-3 py-2">
-                {t.posicion}. {t.participante.usuario.correo}
-                {t.cobrado && " · cobrado"}
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      {esParticipante && (
-        <form action={reportar} className="space-y-2 rounded-xl border p-4">
-          <h2 className="font-semibold">Reportar un pago</h2>
-          <div className="flex gap-2">
-            <Input
-              name="monto"
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="Monto USD"
-              required
-            />
-            <Input name="referencia" placeholder="Referencia" />
-          </div>
-          <Button type="submit" variant="outline" className="w-full">
-            Reportar pago
-          </Button>
-        </form>
-      )}
-
-      {r.aportes.length > 0 && (
-        <section className="space-y-2">
-          <h2 className="font-semibold">Pagos reportados</h2>
-          <ul className="space-y-1 text-sm">
-            {r.aportes.map((a) => {
-              const confirmar = resolverAporte.bind(null, a.id, true);
-              const rechazar = resolverAporte.bind(null, a.id, false);
-              return (
-                <li
-                  key={a.id}
-                  className="rounded-lg border bg-card px-3 py-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <span>{a.participante.usuario.correo}</span>
-                    <span>
-                      ${a.monto} · {a.estado}
-                    </span>
-                  </div>
-                  {a.referencia && (
-                    <p className="text-xs text-muted-foreground">
-                      Ref: {a.referencia}
-                    </p>
-                  )}
-                  {esOrganizador && a.estado === "reportado" && (
-                    <div className="mt-1 flex gap-2">
-                      <form action={confirmar}>
-                        <Button type="submit" size="sm" variant="outline">
-                          Confirmar
-                        </Button>
-                      </form>
-                      <form action={rechazar}>
-                        <Button type="submit" size="sm" variant="ghost">
-                          Rechazar
-                        </Button>
-                      </form>
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
-
-      {r.estado === "cerrada" && esParticipante && (
-        <section className="space-y-2 rounded-xl border p-4">
-          <h2 className="font-semibold">Valorar participantes</h2>
-          <p className="text-xs text-muted-foreground">
-            Califica tu experiencia con cada uno.
-          </p>
-          <ul className="space-y-1 text-sm">
-            {r.participantes
-              .filter((p) => p.usuarioId !== usuario.id)
-              .map((p) => {
-                const arriba = valorar.bind(null, r.id, p.usuarioId, 1);
-                const abajo = valorar.bind(null, r.id, p.usuarioId, -1);
-                return (
-                  <li
-                    key={p.id}
-                    className="flex items-center justify-between rounded-lg border bg-card px-3 py-2"
-                  >
-                    <span>{p.usuario.correo}</span>
-                    <div className="flex gap-2">
-                      <form action={arriba}>
-                        <Button type="submit" size="sm" variant="outline">
-                          <ThumbsUp className="size-4" />
-                        </Button>
-                      </form>
-                      <form action={abajo}>
-                        <Button type="submit" size="sm" variant="ghost">
-                          <ThumbsDown className="size-4" />
-                        </Button>
-                      </form>
-                    </div>
-                  </li>
-                );
-              })}
-          </ul>
-        </section>
-      )}
-
-      {esOrganizador && (
-        <section className="space-y-3 rounded-xl border p-4">
-          <h2 className="font-semibold">Administrar</h2>
-          <form action={invitar} className="flex gap-2">
-            <Input
-              name="correo"
-              type="email"
-              placeholder="correo a invitar"
-              required
-            />
-            <Button type="submit" variant="outline">
-              Invitar
-            </Button>
-          </form>
-          {r.tipo === "san" && r.turnos.length === 0 && (
-            <form action={generar}>
-              <Button type="submit" className="w-full">
-                Sortear turnos e iniciar
-              </Button>
-            </form>
-          )}
-          {r.estado !== "cerrada" && (
-            <form action={cerrar}>
-              <Button type="submit" variant="ghost" className="w-full">
-                Cerrar recolecta
-              </Button>
-            </form>
-          )}
-        </section>
-      )}
+      </PanelTabs>
     </main>
   );
 }
