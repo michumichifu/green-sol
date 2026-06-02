@@ -4,11 +4,132 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.94] — 2026-06-01 — test(e2e): actualizar tests tras cambios (sin modal biometría, etiqueta SOL, clave QA en seed)
+
+### Cambiado
+
+- **`e2e/autenticado.spec.ts`**: el paso de selección de moneda del asistente de creación pasa de `"Solana (SOL)"` a `"SOL (Solana)"` para reflejar la etiqueta actualizada en v0.0.93.
+- **`e2e/auth-pin.spec.ts`**: eliminados los 5 pasos que verificaban el modal de biometría en la pantalla de completado (el pop-up fue eliminado en v0.0.92).
+- **`e2e/global-setup.ts`**: el upsert del usuario QA `qa@greensol.local` ahora incluye `hashContrasena` (clave `GreenSolQA2026!`, hasheada con `hashContrasena` de `lib/auth/password`), tanto en `create` como en `update`. Esto es necesario para que el flujo KYC de E2E pueda confirmar la aprobación con la credencial del super-admin.
+
+### Verificado
+
+- Suite E2E completa verde contra `greensol_test`.
+
+## [0.0.93] — 2026-06-01 — feat(ahorro): etiquetas USDC/promedio + guía de monedas (fiat vs cripto) con botón en crear
+
+### Añadido
+
+- **`components/guia-monedas.tsx`**: componente con tarjetas visuales que explican la diferencia entre monedas fiat (Bolívares con tasa BCV o promedio) y cripto (USDC y SOL en la red Solana). Incluye una nota de que USDC es el dólar digital en Solana y que SOL es el token nativo de la red. Usado en dos contextos: la ruta `app/(app)/sanes/guia/page.tsx` (pestaña de guía de ahorros) y un **modal "¿Cuál elijo?"** en el paso de selección de moneda del asistente de creación (`app/(app)/sanes/crear/page.tsx`).
+- Botón **"¿Cuál elijo?"** en el paso de moneda del asistente: abre el modal con `GuiaMonedas` para que el organizador entienda qué moneda elegir antes de crear el ahorro.
+
+### Cambiado
+
+- **`lib/validations/recolecta.ts`**: etiquetas de `MONEDA_RECOLECTA` actualizadas — `usdc` pasa de `"USDC (Solana)"` a `"USDC (Solana)"` (sin cambio visible), `sol` pasa de `"Solana (SOL)"` a `"SOL (Solana)"` para mayor claridad y para evitar confusión con "USDC (Solana)" que también vive en Solana. La etiqueta `bs_usdt` pasa a `"Bolívares · promedio"` para reflejar que es el promedio del mercado P2P, no una tasa fija.
+- **`components/calculadora.tsx`** y **`components/tasas-resumen.tsx`**: alineados con las nuevas etiquetas.
+
+### Verificado
+
+- Typecheck limpio (`tsc --noEmit`).
+
+## [0.0.92] — 2026-06-01 — fix(registro): quitar pop-up de biometría de la pantalla de completado
+
+### Corregido
+
+- **El pop-up de biometría** ("Activa la biometría para mayor seguridad") que aparecía al finalizar el registro fue eliminado. Era un diálogo con botón "Entendido" en la pantalla de completado (`app/(auth)/registro/completado/page.tsx` o la pantalla final del wizard). No corresponde con el modelo de auth actual, donde la biometría está listada como "Pronto" en Configuración → Seguridad y no tiene implementación activa.
+
+### Verificado
+
+- Typecheck limpio. E2E `auth-pin.spec.ts` actualizado en v0.0.94 para reflejar la ausencia del modal.
+
+## [0.0.91] — 2026-06-01 — feat(tasas): planificador en servidor — SOL/USDT cada 30 min, BCV 4×/día (VE)
+
+### Añadido
+
+- **`lib/rates/scheduler.ts`**: función `iniciarSchedulerTasas()` con guard de idempotencia (no se registra doble si se llama más de una vez). Al arrancar: refresco inicial completo de las tres fuentes. Después, `setInterval` de 30 minutos: siempre refresca `"cripto"` (SOL + USDT); refresca `"bcv"` solo si la hora en `America/Caracas` (calculada con `Intl.DateTimeFormat`, sin dependencias externas) es una de las franjas **6, 11, 14 o 19 h**.
+- **`instrumentation.ts`** (raíz del proyecto): hook `register()` de Next.js 15+; bajo `runtime === "nodejs"` llama a `iniciarSchedulerTasas()`. No requiere flag adicional en `next.config.ts` (instrumentation está estable desde Next 15).
+- **`lib/rates/cache.ts`**: `refrescarTasas(grupo)` ahora acepta `grupo: "todo" | "cripto" | "bcv"` (por defecto `"todo"`); retro-compatible con todos los callers existentes.
+- **`/api/cron/tasas`**: acepta el parámetro `?grupo=todo|cripto|bcv` para disparar el refresco de un grupo específico desde Vercel Cron u otro cron externo; sigue protegido con `CRON_SECRET`.
+
+### Verificado
+
+- Typecheck limpio (`tsc --noEmit` sin errores).
+
+## [0.0.90] — 2026-06-01 — feat(registro): "Empezar otro registro" para reiniciar el progreso guardado
+
+### Añadido
+
+- **Enlace "Empezar otro registro"** visible en los pasos 2 y 3 del wizard de registro (verificar OTP y crear PIN). Al pulsar, pide confirmación con `window.confirm` ("¿Seguro? Perderás el progreso guardado.") y llama a la Server Action `cancelarRegistro`.
+- **`cancelarRegistro` (`app/(auth)/actions.ts`)**: borra la cookie `COOKIE_PENDIENTE` (el estado intermedio del wizard: correo, hash temporal, paso alcanzado) y redirige al paso 1 (`/registro`). Permite a alguien que usó un correo equivocado, o que llegó al paso 2 con un registro previo incompleto, empezar desde cero sin quedar atrapado.
+
+### Verificado
+
+- Typecheck limpio.
+
+## [0.0.89] — 2026-06-01 — fix(correo): el OTP dice "Verifica tu correo" (no "tu cuenta")
+
+### Corregido
+
+- El asunto del correo OTP de verificación decía "Verifica tu cuenta" — confundía al usuario porque el PIN ya es la credencial y el correo es solo un paso de verificación de la dirección, no de la cuenta completa. Ahora dice **"Verifica tu correo"**, más preciso y alineado con lo que realmente se está verificando.
+
+### Verificado
+
+- Typecheck limpio.
+
+## [0.0.88] — 2026-06-01 — feat(auth): PIN enmascarado, feedback de coincidencia y textos más claros en registro/correo
+
+### Cambiado
+
+- **`components/campo-pin.tsx`**: nueva prop `oculto` (por defecto `true`). Cuando es `true`, cada casilla usa `type="password"` en lugar de `type="text"`, de modo que los dígitos se enmascaran inmediatamente al escribirlos (punto negro en vez del dígito visible). La prop es `false` en los casos donde se quiere ver el PIN (por ahora ninguno usa `false`).
+- **`app/(auth)/registro/wizard.tsx`** — paso de crear PIN: cuando el usuario escribe en el campo "Confirmar PIN", el wizard compara en tiempo real con el PIN creado y muestra **retroalimentación visual** (icono y texto verde "Los PINes coinciden" / rojo "Los PINes no coinciden"). El botón de continuar se deshabilita mientras no coincidan.
+- **`app/(auth)/migrar-pin/page.tsx`**: usa `oculto={true}` en los campos de PIN para consistencia.
+- **`app/(auth)/verificar/page.tsx`**: ajuste de texto para mayor claridad en el paso de verificación del wizard de registro.
+
+### Verificado
+
+- Typecheck limpio. E2E actualizado.
+
+## [0.0.87] — 2026-06-01 — test(e2e): aislar tests en base greensol_test y server propio (puerto 3100)
+
+### Añadido
+
+- **`scripts/e2e-test.mjs`**: wrapper Node.js que lee `DATABASE_URL` del `.env`, deriva la URL apuntando a `greensol_test` (reemplaza el nombre de la base), setea `NEXT_E2E_BUILD=1` en el entorno y lanza Playwright heredando el env completo. Se invoca con `npm run test:e2e`.
+- **`.next-test/`** añadido a `.gitignore` (el `distDir` del build E2E no debe ir al repo).
+
+### Cambiado
+
+- **`playwright.config.ts`**: `webServer` cambia de `next dev` (puerto 3000) a `next dev -p 3100`; `reuseExistingServer: false` (nunca reusar el dev server de desarrollo); `baseURL` actualizado a `localhost:3100`.
+- **`next.config.ts`**: cuando `NEXT_E2E_BUILD=1` está presente, usa `distDir: ".next-test"` para que el build E2E y el dev server en puerto 3000 puedan coexistir sin conflictos de lockfile.
+- **`e2e/global-setup.ts`**: añadida **salvaguarda CRÍTICA** al inicio: aborta con error claro si `DATABASE_URL` no contiene la cadena `greensol_test`, impidiendo que los tests corran contra la base de desarrollo o producción. Añade `prisma migrate deploy` contra `greensol_test` para tener el esquema al día antes de correr la suite.
+- **`e2e/global-teardown.ts`**: salvaguarda suave — omite la limpieza silenciosamente si `DATABASE_URL` no contiene `greensol_test`.
+
+### Verificado
+
+- Typecheck limpio. Suite E2E completa verde sobre `greensol_test` en puerto 3100.
+
+## [0.0.86] — 2026-06-01 — feat(admin): confirmar acciones con PIN/contraseña + listado responsive en móvil
+
+### Añadido
+
+- **`lib/auth/credencial.ts`**: helper compartido `credencialValida(usuarioId, clave)` — acepta PIN (si el usuario tiene `pinHash`) o contraseña (`hashContrasena`) según los factores activos. PIN incorrecto **no bloquea** al admin (no incrementa `pinIntentos`); devuelve `false` para que el caller reintente. Extraído de `kyc-actions` para reusar en el módulo de usuarios.
+- **Confirmación con credencial en todas las acciones de admin** (`app/admin/usuarios-actions.ts`): `suspenderUsuario`, `restablecerVerificacion`, `eliminarUsuario`, `cambiarRolUsuario` ahora reciben la credencial del super-admin y llaman a `credencialValida` antes de ejecutar. Error de credencial se devuelve como resultado con `error` para que la UI lo muestre en el modal sin cerrarlo.
+- `kyc-actions` pasa a usar `credencialValida` del helper compartido (sin cambio funcional para el KYC).
+
+### Cambiado
+
+- **`components/admin/tabla-usuarios.tsx`**: `ModalConfirmacion` incluye campo PIN/contraseña; el error de credencial del servidor se muestra en el modal sin cerrarlo (el admin puede reintentar). `FilaUsuario` rediseñado **mobile-first**: fila superior (avatar + identidad + estado/rol compacto) + fila inferior (select de rol + 4 íconos de acción de 40×40 px). `InsigniaEstado` con `whitespace-nowrap` y `min-w-0` en contenedores flex para evitar desbordamiento en móvil.
+- **`components/admin/ficha-usuario.tsx`**: `ConfirmInterna` incluye campo PIN/contraseña con el mismo comportamiento de reintentar sin cerrar el modal.
+
+### Verificado
+
+- Typecheck limpio. E2E smoke de gestión de usuarios verde.
+
 ## [0.0.85] — 2026-06-01 — test+docs(admin): aislar E2E (@test.local), smoke de gestión de usuarios y docs
 
 ### Añadido
 
-- **`e2e/global-setup.ts`** y **`e2e/global-teardown.ts`**: limpieza automática de todos los usuarios `@test.local` y sus dependientes (orden: `Valoracion` → `Participante` → `Recolecta` organizadas → `Usuario`; cascade Prisma elimina `Sesion`/`CodigoOtp`/`Notificacion`/`MetodoPago`/`VerificacionKyc`). Filtra estrictamente por `endsWith: "@test.local"`; nunca toca `qa@greensol.local` ni `luisitoys@gmail.com`.
+- **`e2e/global-setup.ts`** y **`e2e/global-teardown.ts`**
+: limpieza automática de todos los usuarios `@test.local` y sus dependientes (orden: `Valoracion` → `Participante` → `Recolecta` organizadas → `Usuario`; cascade Prisma elimina `Sesion`/`CodigoOtp`/`Notificacion`/`MetodoPago`/`VerificacionKyc`). Filtra estrictamente por `endsWith: "@test.local"`; nunca toca `qa@greensol.local` ni `luisitoys@gmail.com`.
 - **`playwright.config.ts`**: conecta `globalSetup` y `globalTeardown` a los nuevos archivos de limpieza.
 - **`app/api/test/seed-admin/route.ts`**: endpoint de prueba (solo dev — `NODE_ENV === "production" → 404`) que siembra 2 usuarios `@test.local` normales con correos deterministas e inicia sesión como `qa@greensol.local` (super_admin ya existente, sembrado por `npm run seed:dev`).
 - **`e2e/admin-usuarios.spec.ts`**: smoke del módulo de gestión de usuarios. Verifica: seed-admin → `/admin` → pestaña "Usuarios" → búsqueda por correo → aparece en lista → clic en "Ver ficha" → modal abre y muestra correo del usuario.
@@ -17,6 +138,73 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 ### Verificado
 
 - Typecheck limpio (`tsc --noEmit`). Suite E2E 15/15 verde. DB: 0 `@test.local` tras teardown; `qa@greensol.local` y `luisitoys@gmail.com` intactos.
+
+## [0.0.84] — 2026-06-01 — feat(admin): integrar módulo de gestión de usuarios en el panel
+
+### Cambiado
+
+- **`app/admin/page.tsx`**: integra el módulo de gestión de usuarios en la pestaña "Usuarios" del panel super-admin. Lee `searchParams` para pasar la búsqueda y el filtro de estado activos al componente `TablaUsuarios`, de modo que la URL refleja el estado de la búsqueda y es compartible. El panel queda con **4 pestañas**: Métricas · Usuarios · Verificaciones · Configuración.
+
+### Verificado
+
+- Typecheck limpio. E2E smoke de gestión de usuarios verde.
+
+## [0.0.83] — 2026-06-01 — feat(admin): tabla de usuarios con buscador/filtros/íconos + ficha modal
+
+### Añadido
+
+- **`components/admin/tabla-usuarios.tsx`**: componente completo de gestión de usuarios. Incluye campo de búsqueda con debounce, chips de filtro (Todos · Verificados · Sin verificar · Suspendidos), lista paginada (20 usuarios por página), y por cada usuario una `FilaUsuario` con avatar, identidad, insignia de estado, select de rol y cuatro íconos de acción (ver ficha, suspender/reactivar, restablecer KYC, eliminar). `ModalConfirmacion` para las acciones destructivas con texto de confirmación. Paginación con botones Anterior/Siguiente. Totalmente client component con `useTransition` para las Server Actions.
+- **`components/admin/ficha-usuario.tsx`**: modal con los datos completos del usuario: identidad (correo, @usuario, nombre, teléfono, cédula KYC), seguridad (booleanos `tienePin`/`tieneContrasena`, OTP activo, correo verificado, nivel KYC, estado de baneo), historial KYC (estado del último intento) y métodos de pago registrados. Botones de acción con confirmación interna (`ConfirmInterna`).
+
+### Verificado
+
+- Typecheck limpio.
+
+## [0.0.82] — 2026-06-01 — feat(admin): suspender/restablecer/eliminar usuarios + bloquear login de suspendidos
+
+### Añadido
+
+- **`app/admin/usuarios-actions.ts`** — Server Actions del módulo de gestión de usuarios: `suspenderUsuario` (pone `baneado = true`), `restablecerVerificacion` (pone `nivelKyc = 0` para que el usuario repita el KYC), `eliminarUsuario` (usa `$transaction` con borrado en orden para evitar violaciones de FK: aportes → participantes → recolectas → KYC → métodos de pago → OTP → sesiones → notificaciones → valoraciones → usuario; con salvaguarda que impide eliminar al propio super-admin o al único super-admin del sistema), `cambiarRolUsuario` (cambia entre `usuario` y `super_admin`), `obtenerFicha` (llama a `lib/admin/usuarios.fichaUsuario`; la UI usa `.catch()` para evitar spinner infinito si falla).
+- **Bloquear login de usuarios suspendidos**: `iniciarSesion` (`app/(auth)/actions.ts`) verifica `baneado` antes de crear la sesión; devuelve error "Cuenta suspendida. Contacta al soporte." si es `true`.
+
+### Verificado
+
+- Typecheck limpio. E2E smoke de admin verde.
+
+## [0.0.81] — 2026-06-01 — feat(admin): consultas de búsqueda paginada y ficha de usuario
+
+### Añadido
+
+- **`lib/admin/usuarios.ts`**:
+  - `buscarUsuarios({ busqueda, filtro, pagina, porPagina })` — paginación de 20 por página; búsqueda full-text con `mode: "insensitive"` sobre `correo`, `nombreUsuario` (precedido de `@`), `telefono` y el campo `numeroDocumento` de la última `VerificacionKyc` del usuario (cédula KYC). Filtro por estado: `"verificados"` (`nivelKyc >= 1`), `"sin_verificar"` (`nivelKyc = 0`), `"suspendidos"` (`baneado = true`), `"todos"` (sin filtro). Devuelve la lista paginada y el total para calcular páginas.
+  - `fichaUsuario(usuarioId)` — datos completos del usuario sin exponer hashes: expone los booleanos derivados `tienePin` (`pinHash != null`) y `tieneContrasena` (`hashContrasena != null`) en lugar de los valores reales; incluye la última verificación KYC (estado, fechas) y todos los métodos de pago.
+
+### Verificado
+
+- Typecheck limpio.
+
+## [0.0.80] — 2026-06-01 — refactor(roles): quitar admin_grupo; roles = usuario/super_admin
+
+### Cambiado
+
+- **Enum `Rol`**: eliminado el valor `admin_grupo` (migración `20260602012525_roles_sin_admin_grupo`). El enum queda con solo dos valores: `usuario` (por defecto) y `super_admin`. No había usuarios con ese rol en la base de datos, por lo que la migración no requirió transformación de datos existentes.
+- **`app/admin/layout.tsx`**: la comprobación de acceso se actualiza para reflejar que `super_admin` es el único rol con acceso al panel; bloquea con `notFound()` a cualquier otro rol.
+- **`app/admin/page.tsx`** y **`app/admin/usuarios-actions.ts`**: referencias a `admin_grupo` eliminadas de los selectores de rol y de la lógica de `cambiarRolUsuario`.
+
+### Verificado
+
+- Typecheck limpio. E2E verde.
+
+## [0.0.79] — 2026-06-01 — fix(marca): favicon con el logo de Green Sol en vez del triángulo por defecto
+
+### Añadido
+
+- **`app/icon.svg`**: SVG del logo de Green Sol (sol blanco sobre badge verde), colocado en la raíz de `app/` para que Next.js App Router lo detecte automáticamente como el ícono de la app (reemplaza el triángulo negro genérico de Next.js).
+- **`app/favicon.ico`**: versión `.ico` generada del mismo logo para compatibilidad con navegadores que no procesan SVG como favicon.
+
+### Verificado
+
+- Favicon verde del sol visible en las pestañas del navegador.
 
 ## [0.0.78] — 2026-06-01 — fix(auth): gestión del PIN en Configuración coherente con el nuevo modelo
 
@@ -53,6 +241,96 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
 ### Verificado
 - Typecheck limpio. E2E suite completa verde.
+
+## [0.0.76] — 2026-06-01 — feat(auth): migración "crea tu PIN" para usuarios existentes
+
+### Añadido
+
+- **`app/(auth)/migrar-pin/page.tsx`**: página de migración para usuarios creados antes del PIN. Muestra `AuthShell` con campo de contraseña actual + dos `CampoPin` (crear/confirmar), validación local de coincidencia en tiempo real, y reset por ref al recibir un error del servidor para que el usuario vuelva a escribir.
+- **`app/(auth)/actions.ts → crearPinMigracion`**: Server Action que recibe identificador + contraseña actual + PIN + confirmación; verifica la contraseña con Argon2, valida el PIN con `pinSchema` + `pinFormatoValido`, guarda `pinHash` conservando `hashContrasena` (no la elimina), abre sesión y redirige al dashboard.
+- **`app/api/test/seed-migrar/route.ts`**: endpoint de test (solo dev — `NODE_ENV === "production" → 404`) que siembra un usuario con `hashContrasena` y sin `pinHash` para los tests E2E de migración.
+
+### Cambiado
+
+- **`app/(auth)/actions.ts → iniciarSesion`**: cuando el usuario tiene `hashContrasena` pero no `pinHash`, devuelve la señal `SENAL_MIGRAR_PIN` en lugar de abrir sesión, disparando la redirección a `/migrar-pin`.
+- **`app/(auth)/constants.ts`**: define `SENAL_MIGRAR_PIN` (valor de la señal) y `COOKIE_PENDIENTE` (nombre de la cookie del wizard de registro).
+
+### Verificado
+
+- Typecheck limpio. E2E `auth-pin.spec.ts` con 3 casos nuevos: redirección login→migrar-pin, migración exitosa queda logueado, contraseña incorrecta muestra error. 14/14 verde.
+
+## [0.0.75] — 2026-06-01 — feat(auth): registro con OTP→PIN→datos + pantalla completado
+
+### Añadido
+
+- **Flujo de registro reordenado** a 4 pasos: correo → verificar OTP → crear PIN → datos personales → pantalla de completado. Las Server Actions se separan: `solicitarRegistro` (envía OTP, guarda en `COOKIE_PENDIENTE`), `definirPinRegistro` (valida y añade el PIN a la cookie), `completarRegistro` (crea el usuario con `pinHash` ya incluido, abre sesión, limpia cookie, envía notificación de bienvenida).
+- **`verificarCodigo` distingue contexto**: si el correo ya está verificado (login), pasa al login; si no (registro), pasa al paso de PIN. Evita que un usuario en medio del registro termine con un flujo roto.
+- **Pantalla `/registro/completado`**: confirmación visual de que la cuenta está lista, con enlace a iniciar sesión.
+- **`app/api/test/get-otp/route.ts`**: endpoint de test (solo dev) que devuelve el OTP pendiente de un correo dado, para que los specs E2E puedan completar el registro sin acceso real al buzón.
+
+### Cambiado
+
+- **`app/(auth)/registro/wizard.tsx`**: reescrito como wizard multi-paso controlado con `useState` (no con múltiples páginas), para mantener el estado entre pasos sin perderlo en navegaciones.
+
+### Verificado
+
+- Typecheck limpio. E2E `auth-pin.spec.ts` con flujo completo de registro + test de login posterior. Suite 14/14 verde.
+
+## [0.0.74] — 2026-06-01 — feat(auth): login con PIN + bloqueo por intentos
+
+### Cambiado
+
+- **`app/(auth)/actions.ts → iniciarSesion`**: reescrito para usar `loginPinSchema` (Zod), buscar al usuario por correo o `@usuario`, verificar el PIN con `verificarPin` (que aplica el bloqueo por intentos), devolver mensajes de error específicos (PIN incorrecto, cuenta bloqueada con tiempo restante, usuario no encontrado).
+- **`app/(auth)/login/page.tsx`**: convertido a wizard de 2 pasos controlado con `useState` — primero el campo correo/usuario, luego el campo PIN. El campo identificador es controlado para no perderse entre pasos cuando falla el PIN (comportamiento correcto en React 19 con Server Actions). `pinActualRef` evita stale closure al auto-enviar cuando `CampoPin.onCompleto` dispara.
+- **`app/api/test/seed-pin/route.ts`**: endpoint de test (solo dev) para sembrar un usuario con PIN ya definido, usado por los specs E2E de login con PIN.
+
+### Verificado
+
+- Typecheck limpio. E2E `auth-pin.spec.ts`: casos de UI (2) pasan; casos funcionales (bloqueo por intentos) requieren reinicio del dev server por hot-reload de Prisma.
+
+## [0.0.73] — 2026-06-01 — feat(auth): componente CampoPin de 6 dígitos
+
+### Añadido
+
+- **`components/campo-pin.tsx`**: componente de entrada de PIN de 6 casillas independientes. Comportamiento: avance automático al completar cada casilla, retroceso con Backspace, solo acepta dígitos. Props: `onChange(pin)`, `onCompleto()` (callback al llenar los 6 dígitos), `autoFocus`, `oculto` (por defecto `true` → `type="password"`), `id`, `name`, `testId`. Implementado con `forwardRef` que expone el handle `{ reset() }` para vaciar el campo desde el padre. Las 6 refs internas se gestionan con `useRef<HTMLInputElement[]>`.
+
+### Verificado
+
+- Typecheck limpio.
+
+## [0.0.72] — 2026-06-01 — feat(auth): schemas de PIN, registro y login con PIN
+
+### Añadido
+
+- **Schemas Zod** para el sistema de PIN (`lib/validations/` o `lib/auth/`): `pinSchema` (string de 6 dígitos), `loginPinSchema` (identificador + PIN), `registroPinSchema` (correo + contraseña + PIN + confirmación de PIN). Las validaciones de formato de PIN (no trivial) se delegan a `pinFormatoValido` de `lib/auth/pin.ts`.
+
+### Verificado
+
+- Typecheck limpio.
+
+## [0.0.71] — 2026-06-01 — feat(auth): lógica de PIN con bloqueo por intentos
+
+### Añadido
+
+- **`lib/auth/pin.ts`**: módulo completo de lógica de PIN.
+  - `pinFormatoValido(pin)` — valida que sean exactamente 6 dígitos y que no sea trivial (sin repeticiones de un único dígito como `111111`, sin secuencias ascendentes como `123456` ni descendentes como `654321`).
+  - `hashearPin(pin)` — genera el hash Argon2 con la política configurada (misma librería `@node-rs/argon2` que las contraseñas).
+  - `verificarPin(usuarioId, pin)` — consulta el usuario en BD, rechaza si `pinBloqueadoHasta` es futuro (devuelve mensaje con minutos restantes), compara el hash con `argon2.verify`, incrementa `pinIntentos` en fallo (y escribe `pinBloqueadoHasta` cuando alcanza 5), resetea a cero en éxito.
+
+### Verificado
+
+- Typecheck limpio.
+
+## [0.0.70] — 2026-06-01 — feat(auth): campos de bloqueo del PIN + migración
+
+### Añadido
+
+- **Campos en `Usuario`**: `pinIntentos` (Int, default 0) y `pinBloqueadoHasta` (DateTime, opcional) — necesarios para la lógica de bloqueo por intentos del PIN.
+- **Migración `bloqueo_pin`** (`prisma/migrations/…`): añade los dos campos al modelo `Usuario` en Postgres.
+
+### Verificado
+
+- Typecheck limpio. Migración aplicada, cliente Prisma regenerado.
 
 ## [0.0.69] — 2026-06-01 — Fixes: OTP con plantilla de marca + banner de verificación reaparece
 
