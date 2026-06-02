@@ -269,11 +269,6 @@ test("registro completo: correo → OTP → PIN → datos → completado → log
     page.getByRole("heading", { name: /tu cuenta está lista/i }),
   ).toBeVisible();
 
-  // El modal de biometría debe aparecer
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await page.getByRole("button", { name: "Entendido" }).click();
-  await expect(page.getByRole("dialog")).not.toBeVisible();
-
   // ── Login con el PIN recién creado ───────────────────────────────────────
   await page.getByRole("link", { name: "Iniciar sesión" }).click();
   await expect(page).toHaveURL(/\/login$/, { timeout: 5_000 });

@@ -27,8 +27,8 @@ test("flujo autenticado: dashboard con tasas y crear un san", async ({
   await page.getByRole("button", { name: /Siguiente/ }).click();
   // Paso 3: visibilidad (privado por defecto)
   await page.getByRole("button", { name: /Siguiente/ }).click();
-  // Paso 4: moneda (Solana; el texto exacto evita chocar con "USDC (Solana)")
-  await page.getByText("Solana (SOL)").click();
+  // Paso 4: moneda (Solana; "SOL (Solana)" no choca con "USDC (Solana)")
+  await page.getByText("SOL (Solana)").click();
   await page.getByRole("button", { name: /Siguiente/ }).click();
   // Paso 5: detalles del san (participantes → meta por turno → frecuencia)
   await page.getByLabel(/Cuántas personas/).fill("5");

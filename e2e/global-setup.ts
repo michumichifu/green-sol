@@ -6,6 +6,11 @@
  */
 import { execSync } from "node:child_process";
 import { PrismaClient } from "@prisma/client";
+import { hashContrasena } from "../lib/auth/password";
+
+// Contraseña del super-admin QA en la base de test. La usa el smoke de gestión
+// y el flujo KYC (confirmación de aprobación con credencial).
+const QA_CLAVE = "GreenSolQA2026!";
 
 // ─── Salvaguarda CRÍTICA ──────────────────────────────────────────────────────
 const dbUrl = process.env.DATABASE_URL ?? "";
@@ -52,7 +57,9 @@ export default async function globalSetup() {
   // 2. Limpiar residuos de runs anteriores
   await limpiarTestLocal(prisma);
 
-  // 3. Sembrar super-admin de QA (smoke test seed-admin lo busca)
+  // 3. Sembrar super-admin de QA (smoke test seed-admin lo busca; el flujo KYC
+  //    confirma la aprobación con su contraseña).
+  const claveHash = await hashContrasena(QA_CLAVE);
   await prisma.usuario.upsert({
     where: { correo: "qa@greensol.local" },
     create: {
@@ -60,10 +67,12 @@ export default async function globalSetup() {
       nombre: "QA Admin",
       rol: "super_admin",
       correoVerificado: true,
+      hashContrasena: claveHash,
     },
     update: {
       rol: "super_admin",
       correoVerificado: true,
+      hashContrasena: claveHash,
     },
   });
 
