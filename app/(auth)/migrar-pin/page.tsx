@@ -3,7 +3,7 @@
 import { useActionState, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Fingerprint } from "lucide-react";
+import { ArrowLeft, Fingerprint, Check, X } from "lucide-react";
 import { crearPinMigracion, type EstadoAuth } from "../actions";
 import {
   AuthShell,
@@ -23,10 +23,12 @@ export default function MigrarPinPage() {
   const pinRef = useRef<CampoPinHandle>(null);
   const pinActualRef = useRef("");
   const [pinLen, setPinLen] = useState(0);
+  const [pinVal, setPinVal] = useState("");
 
   // PIN de confirmación
   const pinConfRef = useRef<CampoPinHandle>(null);
   const pinConfActualRef = useRef("");
+  const [pinConfVal, setPinConfVal] = useState("");
 
   // Error local (coincidencia de PINs)
   const [errorLocal, setErrorLocal] = useState<string | undefined>(undefined);
@@ -38,6 +40,7 @@ export default function MigrarPinPage() {
         setErrorLocal("Los PIN no coinciden.");
         pinConfRef.current?.reset();
         pinConfActualRef.current = "";
+        setPinConfVal("");
         return prev;
       }
       const resultado = await crearPinMigracion(prev, fd);
@@ -48,6 +51,8 @@ export default function MigrarPinPage() {
         pinActualRef.current = "";
         pinConfActualRef.current = "";
         setPinLen(0);
+        setPinVal("");
+        setPinConfVal("");
       }
       return resultado ?? {};
     },
@@ -137,6 +142,7 @@ export default function MigrarPinPage() {
               onChange={(v) => {
                 pinActualRef.current = v;
                 setPinLen(v.length);
+                setPinVal(v);
               }}
               testId="migrar-pin"
             />
@@ -151,10 +157,26 @@ export default function MigrarPinPage() {
               ref={pinConfRef}
               onChange={(v) => {
                 pinConfActualRef.current = v;
+                setPinConfVal(v);
               }}
               testId="migrar-pin-conf"
             />
           </div>
+
+          {/* Feedback de coincidencia en vivo */}
+          {pinVal.length === 6 && pinConfVal.length === 6 && (
+            pinVal === pinConfVal ? (
+              <p className="flex items-center justify-center gap-1.5 text-center text-sm text-green-600">
+                <Check className="size-4" />
+                Las claves coinciden
+              </p>
+            ) : (
+              <p className="flex items-center justify-center gap-1.5 text-center text-sm text-destructive">
+                <X className="size-4" />
+                No coinciden
+              </p>
+            )
+          )}
 
           {errorMostrar && (
             <p className="text-center text-sm text-destructive" data-testid="migrar-error">
@@ -165,7 +187,7 @@ export default function MigrarPinPage() {
           <Button
             type="submit"
             className={BOTON_DEGRADADO}
-            disabled={pendiente || pinLen < 6}
+            disabled={pendiente || pinLen < 6 || (pinVal.length === 6 && pinConfVal.length === 6 && pinVal !== pinConfVal)}
           >
             {pendiente ? "Guardando..." : "Crear PIN y entrar"}
           </Button>

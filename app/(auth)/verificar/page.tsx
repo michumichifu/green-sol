@@ -23,7 +23,7 @@ export default function VerificarPage() {
     <AuthShell
       variante="login"
       titulo="Verifica tu correo"
-      subtitulo="Te enviamos un código de 6 dígitos."
+      subtitulo="Ingresa el código de 6 dígitos que enviamos a tu correo."
       header={
         <Link
           href="/login"

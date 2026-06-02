@@ -6,6 +6,7 @@ interface CampoPinProps {
   onChange: (pin: string) => void;
   onCompleto?: () => void;
   autoFocus?: boolean;
+  oculto?: boolean;
   id?: string;
   name?: string;
   testId?: string;
@@ -17,6 +18,7 @@ export const CampoPin = forwardRef<CampoPinHandle, CampoPinProps>(function Campo
   onChange,
   onCompleto,
   autoFocus = false,
+  oculto = true,
   id,
   name,
   testId = "pin",
@@ -139,7 +141,7 @@ export const CampoPin = forwardRef<CampoPinHandle, CampoPinProps>(function Campo
           ref={(el) => {
             refs.current[idx] = el;
           }}
-          type="text"
+          type={oculto ? "password" : "text"}
           inputMode="numeric"
           pattern="\d*"
           maxLength={1}

@@ -246,7 +246,7 @@ test("registro completo: correo → OTP → PIN → datos → completado → log
 
   // ── Paso 2: PIN ─────────────────────────────────────────────────────────
   await expect(page).toHaveURL(/\/registro$/, { timeout: 10_000 });
-  await expect(page.getByRole("heading", { name: "Crea tu PIN" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Crea tu PIN (clave)" })).toBeVisible();
 
   await rellenarPinPor(page, "registro-pin", pin);
   await rellenarPinPor(page, "registro-pin-conf", pin);

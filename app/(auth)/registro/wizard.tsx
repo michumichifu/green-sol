@@ -2,7 +2,7 @@
 
 import { useActionState, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Info, Fingerprint } from "lucide-react";
+import { ArrowLeft, Info, Fingerprint, Check, X } from "lucide-react";
 import {
   solicitarRegistro,
   definirPinRegistro,
@@ -26,7 +26,7 @@ type Paso = 1 | 2 | 3;
 
 const TITULOS: Record<Paso, string> = {
   1: "Crea tu cuenta gratis",
-  2: "Crea tu PIN",
+  2: "Crea tu PIN (clave)",
   3: "Cuéntanos de ti",
 };
 
@@ -51,6 +51,8 @@ export function RegistroWizard({ pasoInicial }: { pasoInicial: Paso }) {
   const pinActualRef = useRef("");
   const pinConfActualRef = useRef("");
   const [pinLen, setPinLen] = useState(0);
+  const [pinVal, setPinVal] = useState("");
+  const [pinConfVal, setPinConfVal] = useState("");
   const [errorPinLocal, setErrorPinLocal] = useState<string | undefined>();
   const formPinRef = useRef<HTMLFormElement>(null);
 
@@ -87,10 +89,12 @@ export function RegistroWizard({ pasoInicial }: { pasoInicial: Paso }) {
   function handlePinChange(v: string) {
     pinActualRef.current = v;
     setPinLen(v.length);
+    setPinVal(v);
   }
 
   function handlePinConfChange(v: string) {
     pinConfActualRef.current = v;
+    setPinConfVal(v);
   }
 
   // ── Paso 3: datos ───────────────────────────────────────────────────────
@@ -192,9 +196,7 @@ export function RegistroWizard({ pasoInicial }: { pasoInicial: Paso }) {
             {/* Descripción educativa */}
             <div className="rounded-xl border border-border/60 bg-muted/30 p-3 text-center text-xs text-muted-foreground">
               <Fingerprint className="mx-auto mb-1.5 size-5 text-brand" />
-              Tu PIN de 6 dígitos reemplaza la contraseña.
-              <br />
-              Úsalo cada vez que entres a tu cuenta.
+              Tu PIN de 6 dígitos. Lo usarás cada vez que entres a tu cuenta.
             </div>
 
             <div className="space-y-3">
@@ -220,6 +222,21 @@ export function RegistroWizard({ pasoInicial }: { pasoInicial: Paso }) {
               />
             </div>
 
+            {/* Feedback de coincidencia en vivo */}
+            {pinVal.length === 6 && pinConfVal.length === 6 && (
+              pinVal === pinConfVal ? (
+                <p className="flex items-center justify-center gap-1.5 text-center text-sm text-green-600">
+                  <Check className="size-4" />
+                  Las claves coinciden
+                </p>
+              ) : (
+                <p className="flex items-center justify-center gap-1.5 text-center text-sm text-destructive">
+                  <X className="size-4" />
+                  No coinciden
+                </p>
+              )
+            )}
+
             {(errorPinLocal ?? estadoPin.error) && (
               <p className="text-center text-sm text-destructive">
                 {errorPinLocal ?? estadoPin.error}
@@ -229,7 +246,7 @@ export function RegistroWizard({ pasoInicial }: { pasoInicial: Paso }) {
             <Button
               type="submit"
               className={BOTON_DEGRADADO}
-              disabled={pendientePin || pinLen < 6}
+              disabled={pendientePin || pinLen < 6 || (pinVal.length === 6 && pinConfVal.length === 6 && pinVal !== pinConfVal)}
             >
               {pendientePin ? "Guardando..." : "Continuar"}
             </Button>
