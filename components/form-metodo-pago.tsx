@@ -19,6 +19,7 @@ import { useIndicador } from "@/components/use-indicador";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CampoPin } from "@/components/campo-pin";
 
 function Campo({
   label,
@@ -114,7 +115,7 @@ export function FormMetodoPago() {
   const datosListos = esCripto
     ? !!metodo && wallet.trim().length > 0
     : !!moneda && !!metodo && nombre.trim().length > 0;
-  const puedeAgregar = datosListos && clave.trim().length > 0;
+  const puedeAgregar = datosListos && /^\d{6}$/.test(clave);
 
   const camposTitular = (
     <>
@@ -466,19 +467,20 @@ export function FormMetodoPago() {
             </>
           )}
 
-          <div className="space-y-1 rounded-lg bg-muted/40 p-2.5">
-            <label className="text-xs font-medium">Confirma con tu clave</label>
-            <Input
-              type="password"
-              name="clave"
-              value={clave}
-              onChange={(e) => setClave(e.target.value)}
-              placeholder="Tu clave de la cuenta"
-              autoComplete="current-password"
-            />
-            <p className="text-[11px] text-muted-foreground">
-              Por seguridad, confirma que eres el titular.
+          <div className="my-3 h-px bg-gradient-to-r from-transparent via-brand/40 to-transparent" />
+          <div className="rounded-xl border border-brand/20 bg-brand/5 p-4 space-y-3">
+            <p className="text-center text-sm font-semibold">Confirma tu clave (PIN)</p>
+            <div className="flex justify-center">
+              <CampoPin
+                onChange={(pin) => setClave(pin)}
+                oculto
+                testId="mp-pin"
+              />
+            </div>
+            <p className="text-center text-[11px] text-muted-foreground">
+              Por seguridad, confirma con tu PIN de 6 dígitos.
             </p>
+            <input type="hidden" name="clave" value={clave} />
           </div>
           <Button
             type="submit"

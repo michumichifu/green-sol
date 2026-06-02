@@ -14,6 +14,7 @@ import { SelectBanco } from "@/components/select-banco";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CampoPin } from "@/components/campo-pin";
 
 export type MetodoCompleto = {
   id: string;
@@ -148,16 +149,23 @@ export function MetodoPagoItem({ m }: { m: MetodoCompleto }) {
         <form action={accionDel} className="mt-3 space-y-2.5 border-t pt-3">
           <input type="hidden" name="id" value={m.id} />
           <p className="text-sm">
-            ¿Eliminar este método? Confirma con tu clave.
+            ¿Eliminar este método? Confirma con tu PIN.
           </p>
-          <Input
-            type="password"
-            name="clave"
-            value={claveDel}
-            onChange={(e) => setClaveDel(e.target.value)}
-            placeholder="Tu clave de la cuenta"
-            autoComplete="current-password"
-          />
+          <div className="my-2 h-px bg-gradient-to-r from-transparent via-brand/40 to-transparent" />
+          <div className="rounded-xl border border-brand/20 bg-brand/5 p-4 space-y-3">
+            <p className="text-center text-sm font-semibold">Confirma tu clave (PIN)</p>
+            <div className="flex justify-center">
+              <CampoPin
+                onChange={(pin) => setClaveDel(pin)}
+                oculto
+                testId="del-pin"
+              />
+            </div>
+            <p className="text-center text-[11px] text-muted-foreground">
+              Por seguridad, confirma con tu PIN de 6 dígitos.
+            </p>
+            <input type="hidden" name="clave" value={claveDel} />
+          </div>
           <div className="flex gap-2">
             <Button
               type="button"
@@ -171,7 +179,7 @@ export function MetodoPagoItem({ m }: { m: MetodoCompleto }) {
               type="submit"
               variant="destructive"
               className="flex-1"
-              disabled={claveDel.trim().length === 0 || pendienteDel}
+              disabled={!/^\d{6}$/.test(claveDel) || pendienteDel}
             >
               {pendienteDel ? "Eliminando..." : "Eliminar"}
             </Button>
@@ -281,15 +289,21 @@ export function MetodoPagoItem({ m }: { m: MetodoCompleto }) {
             <Input value={alias} onChange={(e) => setAlias(e.target.value)} />
           </Campo>
 
-          <Campo label="Confirma con tu clave">
-            <Input
-              type="password"
-              name="clave"
-              value={claveEdit}
-              onChange={(e) => setClaveEdit(e.target.value)}
-              autoComplete="current-password"
-            />
-          </Campo>
+          <div className="my-2 h-px bg-gradient-to-r from-transparent via-brand/40 to-transparent" />
+          <div className="rounded-xl border border-brand/20 bg-brand/5 p-4 space-y-3">
+            <p className="text-center text-sm font-semibold">Confirma tu clave (PIN)</p>
+            <div className="flex justify-center">
+              <CampoPin
+                onChange={(pin) => setClaveEdit(pin)}
+                oculto
+                testId="edit-pin"
+              />
+            </div>
+            <p className="text-center text-[11px] text-muted-foreground">
+              Por seguridad, confirma con tu PIN de 6 dígitos.
+            </p>
+            <input type="hidden" name="clave" value={claveEdit} />
+          </div>
 
           <div className="flex gap-2">
             <Button
@@ -304,7 +318,7 @@ export function MetodoPagoItem({ m }: { m: MetodoCompleto }) {
               type="submit"
               variant="secondary"
               className="flex-1"
-              disabled={claveEdit.trim().length === 0 || pendiente}
+              disabled={!/^\d{6}$/.test(claveEdit) || pendiente}
             >
               {pendiente ? "Guardando..." : "Guardar cambios"}
             </Button>

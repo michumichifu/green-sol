@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { validarRestricciones } from "@/lib/restricciones";
-import { verificarContrasena } from "@/lib/auth/password";
+import { credencialValida } from "@/lib/auth/credencial";
 import { notificarYCorreo } from "@/lib/notificaciones";
 
 function str(v: FormDataEntryValue | null): string | null {
@@ -83,12 +83,8 @@ export async function agregarMetodoPago(
     return { error: "Faltan datos del método." };
 
   const clave = str(formData.get("clave"));
-  if (
-    !usuario.hashContrasena ||
-    !clave ||
-    !(await verificarContrasena(usuario.hashContrasena, clave))
-  ) {
-    return { error: "Clave incorrecta." };
+  if (!clave || !(await credencialValida(usuario.id, clave))) {
+    return { error: "PIN o clave incorrecta." };
   }
 
   await prisma.metodoPago.create({
@@ -117,12 +113,8 @@ export async function editarMetodoPago(
   const id = str(formData.get("id"));
   if (!id) return { error: "Método no encontrado." };
   const clave = str(formData.get("clave"));
-  if (
-    !usuario.hashContrasena ||
-    !clave ||
-    !(await verificarContrasena(usuario.hashContrasena, clave))
-  ) {
-    return { error: "Clave incorrecta." };
+  if (!clave || !(await credencialValida(usuario.id, clave))) {
+    return { error: "PIN o clave incorrecta." };
   }
   const res = await prisma.metodoPago.updateMany({
     where: { id, usuarioId: usuario.id },
@@ -152,12 +144,8 @@ export async function eliminarMetodoPago(
   const id = str(formData.get("id"));
   if (!id) return { error: "Método no encontrado." };
   const clave = str(formData.get("clave"));
-  if (
-    !usuario.hashContrasena ||
-    !clave ||
-    !(await verificarContrasena(usuario.hashContrasena, clave))
-  ) {
-    return { error: "Clave incorrecta." };
+  if (!clave || !(await credencialValida(usuario.id, clave))) {
+    return { error: "PIN o clave incorrecta." };
   }
   const res = await prisma.metodoPago.deleteMany({
     where: { id, usuarioId: usuario.id },
