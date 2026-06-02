@@ -17,22 +17,47 @@ async function guardar(fuente: string, datos: Prisma.InputJsonValue) {
   });
 }
 
-/** Consulta las APIs y actualiza el caché. Pensado para el cron. */
-export async function refrescarTasas() {
+export type GrupoTasas = "todo" | "cripto" | "bcv";
+
+/**
+ * Consulta las APIs y actualiza el caché.
+ * - "todo" (default): BCV + USDT + SOL — comportamiento original, usado por el cron route.
+ * - "cripto": solo USDT + SOL (fluctúan cada 30 min).
+ * - "bcv": solo BCV (cambia pocas veces al día).
+ */
+export async function refrescarTasas(
+  grupo: GrupoTasas = "todo",
+): Promise<Record<string, string>> {
   const resultado: Record<string, string> = {};
-  const tareas = [
-    fetchBcv()
-      .then((d) => guardar("bcv", d))
-      .then(() => (resultado.bcv = "ok"))
-      .catch((e) => (resultado.bcv = `error: ${e.message}`)),
-    fetchUsdt()
-      .then((d) => (d ? guardar("usdt", d).then(() => (resultado.usdt = "ok")) : (resultado.usdt = "sin key")))
-      .catch((e) => (resultado.usdt = `error: ${e.message}`)),
-    fetchSol()
-      .then((d) => guardar("sol", d))
-      .then(() => (resultado.sol = "ok"))
-      .catch((e) => (resultado.sol = `error: ${e.message}`)),
-  ];
+  const tareas: Promise<void>[] = [];
+
+  if (grupo === "todo" || grupo === "bcv") {
+    tareas.push(
+      fetchBcv()
+        .then((d) => guardar("bcv", d))
+        .then(() => void (resultado.bcv = "ok"))
+        .catch((e: Error) => void (resultado.bcv = `error: ${e.message}`)),
+    );
+  }
+
+  if (grupo === "todo" || grupo === "cripto") {
+    tareas.push(
+      fetchUsdt()
+        .then((d) =>
+          d
+            ? guardar("usdt", d).then(() => void (resultado.usdt = "ok"))
+            : void (resultado.usdt = "sin key"),
+        )
+        .catch((e: Error) => void (resultado.usdt = `error: ${e.message}`)),
+    );
+    tareas.push(
+      fetchSol()
+        .then((d) => guardar("sol", d))
+        .then(() => void (resultado.sol = "ok"))
+        .catch((e: Error) => void (resultado.sol = `error: ${e.message}`)),
+    );
+  }
+
   await Promise.allSettled(tareas);
   return resultado;
 }
