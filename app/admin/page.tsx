@@ -9,21 +9,21 @@ import { EVENTOS_NOTIFICACION } from "@/lib/correo/catalogo";
 import { obtenerRestriccionesTexto } from "@/lib/restricciones";
 import { METODO_LABEL } from "@/lib/monedas";
 import {
-  cambiarRol,
   guardarAppConfig,
   guardarRestricciones,
 } from "./actions";
 import { colaVerificaciones } from "@/lib/kyc/consultas";
 import { pasosRequeridos } from "@/lib/kyc/config";
+import { buscarUsuarios } from "@/lib/admin/usuarios";
 import { PanelTabs } from "@/components/panel-tabs";
 import { ColaKyc } from "@/components/kyc/cola-kyc";
 import { FormSmtp } from "@/components/form-smtp";
 import { EditorPlantillas } from "@/components/editor-plantillas";
+import { TablaUsuarios } from "@/components/admin/tabla-usuarios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const ROLES = ["usuario", "super_admin"];
 const METODO_RECOLECTA_LABEL: Record<string, string> = {
   tradicional: "Tradicional",
   cripto: "Cripto",
@@ -78,7 +78,12 @@ function ListaConteo({
   );
 }
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; pagina?: string; filtro?: string }>;
+}) {
+  const sp = await searchParams;
   const ahora = new Date();
   const inicioHoy = new Date(
     ahora.getFullYear(),
@@ -106,7 +111,6 @@ export default async function AdminPage() {
     porMoneda,
     porMetodo,
     porMetodoPago,
-    usuarios,
     smtp,
     app,
   ] = await Promise.all([
@@ -131,10 +135,14 @@ export default async function AdminPage() {
     prisma.recolecta.groupBy({ by: ["moneda"], _count: { _all: true } }),
     prisma.recolecta.groupBy({ by: ["metodo"], _count: { _all: true } }),
     prisma.metodoPago.groupBy({ by: ["metodo"], _count: { _all: true } }),
-    prisma.usuario.findMany({ orderBy: { creadoEn: "desc" }, take: 100 }),
     obtenerConfigSmtp(),
     obtenerConfigApp(),
   ]);
+  const resultado = await buscarUsuarios({
+    q: sp.q,
+    pagina: Number(sp.pagina) || 1,
+    filtro: sp.filtro as "todos" | "verificados" | "sin_verificar" | "suspendidos" | undefined,
+  });
   const restricciones = await obtenerRestriccionesTexto();
   const plantillas = await obtenerPlantillasGuardadas();
   const [cola, pasosKyc] = await Promise.all([
@@ -225,47 +233,14 @@ export default async function AdminPage() {
         </div>
 
         {/* Usuarios */}
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold">
-            Gestión de usuarios ({usuarios.length})
-          </h2>
-          <ul className="space-y-2">
-            {usuarios.map((u) => {
-              const accion = cambiarRol.bind(null, u.id);
-              return (
-                <li key={u.id} className="rounded-xl border bg-card p-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
-                      {u.nombreUsuario ?? u.nombre ?? "—"}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {u.correo}
-                    </p>
-                  </div>
-                  <form
-                    action={accion}
-                    className="mt-2 flex items-center gap-2"
-                  >
-                    <select
-                      name="rol"
-                      defaultValue={u.rol}
-                      className="flex-1 rounded-md border bg-background p-1.5 text-xs"
-                    >
-                      {ROLES.map((r) => (
-                        <option key={r} value={r}>
-                          {r}
-                        </option>
-                      ))}
-                    </select>
-                    <Button type="submit" size="sm" variant="outline">
-                      Guardar
-                    </Button>
-                  </form>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+        <TablaUsuarios
+          usuarios={resultado.usuarios}
+          total={resultado.total}
+          paginas={resultado.paginas}
+          pagina={resultado.pagina}
+          q={sp.q ?? ""}
+          filtro={sp.filtro ?? "todos"}
+        />
 
         {/* Verificaciones (KYC) */}
         <ColaKyc
