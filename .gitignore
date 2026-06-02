@@ -28,3 +28,4 @@ _privado/
 .almacen/
 
 /lib/generated/prisma
+.superpowers/
