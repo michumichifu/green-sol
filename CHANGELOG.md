@@ -4,6 +4,20 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.85] — 2026-06-01 — test+docs(admin): aislar E2E (@test.local), smoke de gestión de usuarios y docs
+
+### Añadido
+
+- **`e2e/global-setup.ts`** y **`e2e/global-teardown.ts`**: limpieza automática de todos los usuarios `@test.local` y sus dependientes (orden: `Valoracion` → `Participante` → `Recolecta` organizadas → `Usuario`; cascade Prisma elimina `Sesion`/`CodigoOtp`/`Notificacion`/`MetodoPago`/`VerificacionKyc`). Filtra estrictamente por `endsWith: "@test.local"`; nunca toca `qa@greensol.local` ni `luisitoys@gmail.com`.
+- **`playwright.config.ts`**: conecta `globalSetup` y `globalTeardown` a los nuevos archivos de limpieza.
+- **`app/api/test/seed-admin/route.ts`**: endpoint de prueba (solo dev — `NODE_ENV === "production" → 404`) que siembra 2 usuarios `@test.local` normales con correos deterministas e inicia sesión como `qa@greensol.local` (super_admin ya existente, sembrado por `npm run seed:dev`).
+- **`e2e/admin-usuarios.spec.ts`**: smoke del módulo de gestión de usuarios. Verifica: seed-admin → `/admin` → pestaña "Usuarios" → búsqueda por correo → aparece en lista → clic en "Ver ficha" → modal abre y muestra correo del usuario.
+- **Docs**: `docs/PRD.md` actualizado a v0.13 — nuevo módulo de gestión de usuarios (buscar/ficha/suspender/restablecer/eliminar), roles a 2 (usuario/super_admin), login bloqueado para suspendidos, panel admin a 4 pestañas. `docs/ARQUITECTURA_TECNICA.md` actualizado a v0.6 — tabla de roles sin `admin_grupo`, módulo `app/admin` + `lib/admin/usuarios.ts` + `components/admin/`, aislamiento E2E (global setup/teardown limpia `@test.local`; QA usa `qa@greensol.local`).
+
+### Verificado
+
+- Typecheck limpio (`tsc --noEmit`). Suite E2E 15/15 verde. DB: 0 `@test.local` tras teardown; `qa@greensol.local` y `luisitoys@gmail.com` intactos.
+
 ## [0.0.78] — 2026-06-01 — fix(auth): gestión del PIN en Configuración coherente con el nuevo modelo
 
 ### Corregido

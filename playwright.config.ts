@@ -7,6 +7,8 @@ export default defineConfig({
   // bajo carga local; un reintento evita falsos negativos por timing.
   retries: 1,
   reporter: "line",
+  globalSetup: "./e2e/global-setup.ts",
+  globalTeardown: "./e2e/global-teardown.ts",
   use: { baseURL: "http://localhost:3000" },
   webServer: {
     command: "npm run dev",

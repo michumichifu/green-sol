@@ -2,7 +2,7 @@
 
 > Proyecto del Solana Vibe Bootcamp (Venezuela). App para **gestionar el ahorro en grupo de forma transparente** (san/bolso/susi por turnos, o pote/vaca por meta) y dividir cuentas, con **reputación de usuarios**. Método tradicional o cripto sobre Solana, sin que la app custodie dinero a la fuerza. **La finalidad es servir de puente al ahorro en cripto** para la comunidad hispana.
 
-- **Versión:** 0.12 (núcleo del MVP **construido y verificado** + **KYC propio completo** + **modelo de auth con PIN como credencial**, app v0.0.77). Estado de desarrollo en [CHANGELOG.md](../CHANGELOG.md); diseño en [superpowers/specs/2026-05-29-green-sol-mvp-design.md](superpowers/specs/2026-05-29-green-sol-mvp-design.md) y [superpowers/specs/2026-05-31-kyc-verificacion-identidad-design.md](superpowers/specs/2026-05-31-kyc-verificacion-identidad-design.md).
+- **Versión:** 0.13 (núcleo del MVP **construido y verificado** + **KYC propio completo** + **modelo de auth con PIN como credencial** + **gestión de usuarios en el panel admin** + **aislamiento E2E**, app v0.0.85). Estado de desarrollo en [CHANGELOG.md](../CHANGELOG.md); diseño en [superpowers/specs/2026-05-29-green-sol-mvp-design.md](superpowers/specs/2026-05-29-green-sol-mvp-design.md) y [superpowers/specs/2026-05-31-kyc-verificacion-identidad-design.md](superpowers/specs/2026-05-31-kyc-verificacion-identidad-design.md).
 - **Fecha:** 2026-06-01
 - **Fase:** 1 — MVP en construcción. **Núcleo tradicional construido** (auth con **PIN como credencial de acceso** + OTP de registro, ahorros san/vaca con **asistente de creación por pasos** —incluido el paso de **método de pago elegido del perfil**—, **unirse por enlace/código**, tasas en vivo, calculadora, navegación de 5 pestañas con header de nivel y avisos, dashboard, pagos, **reputación por puntos y niveles**, **métodos de pago rediseñados**, **verificación por clave** y **avisos en app + correo** en acciones sensibles, **verificación de acciones (OTP por correo)**, **contraseña como factor fuerte para cripto**, **sistema de plantillas con editor visual**, **SMTP real**, perfil/configuración, **panel super-admin**, onboarding), **más el KYC propio completo** (documento + selfie + video de liveness, almacenamiento MinIO, cola de revisión con confirmación por credencial) y una **beta desplegada y en vivo en la VPS-2** (`greensol.creceideas.com`, Docker + nginx + certbot). Verificado con build + tests unitarios + E2E (Playwright). Pendiente: **capa cripto** (DevNet), **mejorar el flujo del san**, factores de seguridad restantes, referidos, calendario de turnos con fechas. Entrega de primera versión: **1 de junio de 2026, 5:30 p.m.**
 - **Nombre:** Green Sol (sol verde). Descartado: Cochino.
@@ -29,7 +29,8 @@ Foto rápida de qué funciona, qué falta y qué se decidió en la última conve
 - **Métodos de pago rediseñados** (modelo `MetodoPago` fiat/cripto): crear (flujo categoría → moneda → método → datos, con monedas futuras deshabilitadas "Pronto"), **editar** y **eliminar**; enfoque MVP = VES + USD (+ cripto USDC/SOL).
 - **Seguridad y avisos:** `lib/seguridad.ts` (`verificarFactores`, hoy con la clave) — agregar/editar/eliminar método de pago **pide confirmar con la clave** y **avisa en app + correo** (`notificarYCorreo`), igual que al **crear un ahorro**.
 - **Reputación:** puntos = estrellitas + niveles (Nuevo → Confiable → Destacado → Estrella → Leyenda) en `lib/reputacion.ts`; valoraciones (manito +/−) al cerrar.
-- **Restricciones** (lista negra de palabras) en nombre/apellido/usuario; **panel super-admin** con 5 pestañas (Métricas reales · Usuarios · Restricciones · SMTP · App).
+- **Restricciones** (lista negra de palabras) en nombre/apellido/usuario; **panel super-admin** con 4 pestañas (Métricas · Usuarios · Verificaciones · Configuración).
+- **Gestión de usuarios en el panel admin:** buscador (correo/@usuario/teléfono/cédula), chips de filtro (Todos/Verificados/Sin verificar/Suspendidos), lista paginada con acciones por fila (restablecer KYC, suspender/reactivar, eliminar, cambiar rol), ficha de usuario en modal con datos completos (identidad, seguridad, KYC, métodos de pago). Login bloqueado para usuarios suspendidos. Roles a 2: `usuario` y `super_admin` (eliminado `admin_grupo`).
 - **Datasets:** `lib/bancos-venezuela.ts` (25 bancos), `lib/monedas.ts` (monedas fiat + futuras + métodos por moneda + cripto).
 - **Páginas** Recompensa (`/recompensa`) y Centro de ayuda (`/ayuda`).
 - **Tasas:** caché global refrescado por cron (`/api/cron/tasas`); toda la app lee del caché.
@@ -317,17 +318,22 @@ A futuro (fase cripto): la **wallet embebida principal** (USDC/SOL) que la app e
 
 **KYC:** no para registrarse, pero **sí para funciones de dinero**, vía proveedor tercero (documento + selfie/video), no manual.
 
-**Roles:** usuario, administrador de grupo, y **super-admin** (sección 15).
+**Roles:** **2 roles activos** — `usuario` (por defecto al registrarse) y `super_admin` (acceso al panel `/admin`). El rol `admin_grupo` fue eliminado del enum en la migración `20260602012525_roles_sin_admin_grupo`. El rol se puede cambiar desde el panel super-admin (tabla de usuarios o ficha). El login de un usuario **baneado** (`baneado = true`) es bloqueado por el sistema.
 
 ## 15. Panel super-admin
 
-Acceso interno separado (`app/admin/page.tsx`, ruta `/admin`), **responsive**, organizado en **5 pestañas** (`components/panel-tabs.tsx`):
+Acceso interno separado (`app/admin/page.tsx`, ruta `/admin`), **responsive**, protegido por `app/admin/layout.tsx` (solo `super_admin`), organizado en **4 pestañas** (`components/panel-tabs.tsx`):
 
 - **Métricas (reales, desde la base de datos):** usuarios **totales**, **verificados** y **nuevos** (hoy, ayer, 7 días, 30 días); recolectas totales, **sanes y vacas activos**, abiertas y cerradas; **aportes confirmados** y monto sumado; y **rankings** por **moneda**, por **método de recolecta** (tradicional/cripto) y por **método de pago**.
-- **Usuarios:** listado (hasta 100, más recientes primero) para ver y gestionar; base para editar/invitar (incluido otro super-admin).
-- **Restricciones:** editar la **lista negra de palabras** de nombre, apellido y nombre de usuario (sección 14).
-- **SMTP:** cargar los datos del **servidor SMTP** (host, puerto, usuario, contraseña, remitente, seguro), de donde salen verificación de cuenta, OTP, reseteo de contraseña y avisos. Claves `SMTP_*`.
-- **App:** configuración general de la aplicación — **nombre, descripción, correo de contacto, URL de logo y URL de favicon**. Claves `APP_*`.
+- **Usuarios — módulo de gestión completo** (`components/admin/tabla-usuarios.tsx` + `components/admin/ficha-usuario.tsx`, lógica en `lib/admin/usuarios.ts`, acciones en `app/admin/usuarios-actions.ts`):
+  - **Buscador** por correo, @usuario, teléfono o número de cédula (campo `id="buscar-usuarios"`, `aria-label="Buscar usuarios"`).
+  - **Chips de filtro** rápido: Todos · Verificados · Sin verificar · Suspendidos.
+  - **Lista paginada** (20 por página) con avatar, correo, @usuario, insignia de estado (Verificado/Sin verificar/Suspendido), chip de rol y selector rápido de rol.
+  - **Acciones por fila** (botones con `aria-label`): **Ver ficha** (Eye), **Restablecer verificación** (RotateCcw), **Suspender/Reactivar** (Ban/CircleCheck), **Eliminar** (Trash2). Todas piden **confirmación** en un modal inline antes de ejecutarse.
+  - **Ficha de usuario en modal** (`role="dialog"`, `aria-labelledby="ficha-titulo"`): identidad completa (nombre, @usuario, correo, país, teléfono verificado, fecha de registro, ingresos), sección Seguridad (tiene PIN/contraseña, OTP activo, bloqueo de PIN), sección KYC con estado e imágenes de documentos, lista de métodos de pago, y las mismas acciones de la fila más un selector de rol detallado.
+  - **Login bloqueado para suspendidos:** `baneado = true` impide el inicio de sesión (verificado en `iniciarSesion`).
+- **Verificaciones (KYC):** cola de verificación en sub-listas Pendientes / Aprobadas / Rechazadas (ver sección KYC).
+- **Configuración** con subpestañas General · SMTP · Plantillas · Restricciones. SMTP con toggle SSL, remitente en dos campos, verificar conexión y enviar prueba; Plantillas con editor visual; Restricciones con listas negras de palabras.
 
 Toda la configuración se persiste en la tabla `ConfiguracionApp` (`clave`/`valor`; ver [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md)). **Notificaciones** (enviar a un usuario o globales) y comprobaciones anti-estafa de documentos quedan dentro del alcance del panel (sección 13), parcial/pendiente.
 
