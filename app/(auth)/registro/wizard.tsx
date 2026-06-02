@@ -7,6 +7,7 @@ import {
   solicitarRegistro,
   definirPinRegistro,
   completarRegistro,
+  cancelarRegistro,
   type EstadoAuth,
 } from "../actions";
 import { PAISES } from "@/lib/paises";
@@ -152,6 +153,27 @@ export function RegistroWizard({ pasoInicial }: { pasoInicial: Paso }) {
       }
     >
       <div className="space-y-5">
+        {/* ── Enlace "Empezar otro registro" (pasos 2 y 3) ── */}
+        {paso > 1 && (
+          <div className="text-center">
+            <form
+              action={cancelarRegistro}
+              onSubmit={(e) => {
+                if (!window.confirm("¿Seguro? Perderás el progreso guardado.")) {
+                  e.preventDefault();
+                }
+              }}
+            >
+              <button
+                type="submit"
+                className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+              >
+                Empezar otro registro
+              </button>
+            </form>
+          </div>
+        )}
+
         {/* ── Paso 1: correo ── */}
         {paso === 1 && (
           <form action={accionCorreo} className="space-y-4">

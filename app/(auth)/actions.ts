@@ -320,6 +320,29 @@ export async function crearPinMigracion(
  * Si `noMostrarMas` es true, lo descarta por completo (no se vuelve a mostrar);
  * si no, solo cuenta un cierre más.
  */
+/**
+ * Cancela el registro en curso: borra al usuario pendiente (si no está completo)
+ * y elimina la cookie PENDIENTE, redirigiendo al paso 1 limpio.
+ */
+export async function cancelarRegistro() {
+  const correo = (await cookies()).get(PENDIENTE)?.value;
+
+  if (correo) {
+    try {
+      const usuario = await prisma.usuario.findUnique({ where: { correo } });
+      // Solo borra si el registro está incompleto (sin nombreUsuario)
+      if (usuario && !usuario.nombreUsuario) {
+        await prisma.usuario.delete({ where: { id: usuario.id } });
+      }
+    } catch {
+      // Si el delete falla por FK inesperada, continuamos limpiando la cookie
+    }
+    (await cookies()).delete(PENDIENTE);
+  }
+
+  redirect("/registro");
+}
+
 export async function cerrarOnboarding(noMostrarMas?: boolean) {
   const usuario = await obtenerUsuario();
   if (usuario) {
