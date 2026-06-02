@@ -196,6 +196,9 @@ function ConfirmInterna({
         </button>
         <button
           type="button"
+          // Mantiene el foco en el input (no cierra el teclado en móvil) para
+          // que el toque de Confirmar no se desplace con el layout.
+          onPointerDown={(e) => e.preventDefault()}
           onClick={handleConfirmar}
           disabled={pending}
           className={cn(
@@ -653,11 +656,15 @@ export function FichaUsuario({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
-      {/* Backdrop */}
+      {/* Backdrop — cierra solo si el toque empieza aquí (evita que un
+          confirmar con el teclado abierto, al subir el layout, caiga sobre el
+          backdrop y cierre la ficha por error). */}
       <div
         className="absolute inset-0"
         aria-hidden="true"
-        onClick={onCerrar}
+        onPointerDown={(e) => {
+          if (e.target === e.currentTarget) onCerrar();
+        }}
       />
 
       {/* Panel */}

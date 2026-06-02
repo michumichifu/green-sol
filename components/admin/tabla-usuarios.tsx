@@ -144,14 +144,19 @@ function ModalConfirmacion({
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
-      onClick={onCancelar}
+      // Cerrar SOLO si el toque empieza en el backdrop. Con `onClick` el cierre
+      // se disparaba al confirmar con el teclado abierto: el dedo baja en el
+      // botón, el teclado se cierra, el layout sube y el dedo sube sobre el
+      // backdrop → el click se resolvía en el backdrop y cerraba el modal.
+      onPointerDown={(e) => {
+        if (e.target === e.currentTarget) onCancelar();
+      }}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-titulo"
         className="w-full max-w-sm rounded-[1.75rem] border border-border/60 bg-card p-6 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-1 flex items-center gap-2">
           <Lock className="size-4 text-brand" />
@@ -202,6 +207,10 @@ function ModalConfirmacion({
           </button>
           <button
             type="button"
+            // Evita que al tocar el botón se quite el foco del input (y se cierre
+            // el teclado en móvil): sin esto, el teclado se cierra, el sheet baja,
+            // el botón se mueve y el toque no aterriza donde debe.
+            onPointerDown={(e) => e.preventDefault()}
             onClick={handleConfirmar}
             disabled={pending}
             className={cn(
