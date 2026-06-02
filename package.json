@@ -10,6 +10,7 @@
     "test": "vitest run",
     "postinstall": "prisma generate",
     "e2e": "playwright test",
+    "test:e2e": "node scripts/e2e-test.mjs",
     "seed:dev": "tsx --env-file=.env prisma/seed-dev.ts"
   },
   "dependencies": {

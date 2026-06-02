@@ -9,11 +9,12 @@ export default defineConfig({
   reporter: "line",
   globalSetup: "./e2e/global-setup.ts",
   globalTeardown: "./e2e/global-teardown.ts",
-  use: { baseURL: "http://localhost:3000" },
+  use: { baseURL: "http://localhost:3100" },
   webServer: {
-    command: "npm run dev",
-    url: "http://localhost:3000",
-    reuseExistingServer: true,
+    // DATABASE_URL ya apunta a greensol_test — heredado del wrapper scripts/e2e-test.mjs
+    command: "next dev -p 3100",
+    url: "http://localhost:3100",
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });
