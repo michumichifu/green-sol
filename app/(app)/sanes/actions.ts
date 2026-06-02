@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
+import { credencialValida } from "@/lib/auth/credencial";
 import { crearRecolectaSchema } from "@/lib/validations/recolecta";
 import {
   crearNotificacion,
@@ -19,6 +20,11 @@ export async function crearRecolecta(
 ): Promise<EstadoRecolecta> {
   const usuario = await obtenerUsuario();
   if (!usuario) redirect("/login");
+
+  const pin = String(formData.get("pin") ?? "");
+  if (!pin || !(await credencialValida(usuario.id, pin))) {
+    return { error: "PIN incorrecto. Confirma tu PIN para crear el ahorro." };
+  }
 
   const datos = crearRecolectaSchema.safeParse({
     tipo: formData.get("tipo"),

@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+const PIN_E2E = "123456";
+
 test("flujo autenticado: dashboard con tasas y crear un san", async ({
   page,
 }) => {
@@ -10,6 +12,12 @@ test("flujo autenticado: dashboard con tasas y crear un san", async ({
     data: { correo },
   });
   expect(res.ok()).toBeTruthy();
+
+  // Asignar un PIN conocido al usuario para que pase la validación al crear.
+  const resPin = await page.request.post("/api/test/seed-pin", {
+    data: { correo, pin: PIN_E2E },
+  });
+  expect(resPin.ok()).toBeTruthy();
 
   // Dashboard carga (hero de bienvenida)
   await page.goto("/dashboard");
@@ -38,7 +46,11 @@ test("flujo autenticado: dashboard con tasas y crear un san", async ({
   // Paso 6: elegir el método de pago del perfil (Wallet E2E)
   await page.getByRole("button", { name: /Wallet E2E/ }).click();
   await page.getByRole("button", { name: /Siguiente/ }).click();
-  // Paso 7: crear
+  // Paso 7: casilla de responsabilidad + PIN + crear
+  await page.getByRole("checkbox").click();
+  for (let i = 0; i < PIN_E2E.length; i++) {
+    await page.getByTestId(`crear-pin-${i}`).fill(PIN_E2E[i]);
+  }
   await page.getByRole("button", { name: /Crear ahorro/ }).click();
   await expect(page.getByRole("heading", { name: "San E2E" })).toBeVisible();
 });

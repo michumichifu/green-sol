@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GuiaMonedas } from "@/components/guia-monedas";
+import { CampoPin } from "@/components/campo-pin";
 
 const TOTAL = 7;
 
@@ -71,6 +72,8 @@ export default function CrearPage() {
   const [dias, setDias] = useState("");
   const [verTip, setVerTip] = useState(false);
   const [verGuiaMonedas, setVerGuiaMonedas] = useState(false);
+  const [aceptaResp, setAceptaResp] = useState(false);
+  const [pinCrear, setPinCrear] = useState("");
   // Método de pago: el organizador elige uno de su perfil
   const [metodos, setMetodos] = useState<MetodoPerfil[]>([]);
   const [cargandoMetodos, setCargandoMetodos] = useState(false);
@@ -637,6 +640,42 @@ export default function CrearPage() {
                   }
                 />
               </dl>
+              {/* Casilla de responsabilidad (mini-contrato) */}
+              <div className="rounded-xl border border-brand/20 bg-brand/5 p-4">
+                <label className="flex cursor-pointer items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={aceptaResp}
+                    onChange={(e) => setAceptaResp(e.target.checked)}
+                    className="mt-0.5 size-4 shrink-0 accent-[hsl(var(--brand))]"
+                  />
+                  <span className="space-y-1.5">
+                    <span className="block text-xs text-muted-foreground">
+                      Soy el organizador y responsable de este ahorro. Me comprometo a cobrar y repartir a tiempo, llevar todo claro, y mantener a mi grupo al día. Asumo el control y la responsabilidad de administrarlo con cuidado.
+                    </span>
+                    <span className="block text-sm font-medium">
+                      Entiendo y acepto mi responsabilidad como organizador.
+                    </span>
+                  </span>
+                </label>
+              </div>
+
+              {/* Confirmación con PIN */}
+              <div className="my-3 h-px bg-gradient-to-r from-transparent via-brand/40 to-transparent" />
+              <div className="rounded-xl border border-brand/20 bg-brand/5 p-4 space-y-3">
+                <p className="text-center text-sm font-semibold">Confirma con tu PIN</p>
+                <div className="flex justify-center">
+                  <CampoPin
+                    onChange={(pin) => setPinCrear(pin)}
+                    oculto
+                    testId="crear-pin"
+                  />
+                </div>
+                <p className="text-center text-[11px] text-muted-foreground">
+                  Para crear el ahorro, confirma con tu PIN de 6 dígitos.
+                </p>
+              </div>
+
               {estado.error && (
                 <p className="text-sm text-destructive">{estado.error}</p>
               )}
@@ -679,7 +718,8 @@ export default function CrearPage() {
                 value={esSan ? cupo : ""}
               />
               <input type="hidden" name="metodoPagoId" value={metodoPagoId} />
-              <Button type="submit" className="w-full" disabled={pendiente}>
+              <input type="hidden" name="pin" value={pinCrear} />
+              <Button type="submit" className="w-full" disabled={pendiente || !aceptaResp || !/^\d{6}$/.test(pinCrear)}>
                 <Check className="size-4" />{" "}
                 {pendiente ? "Creando..." : "Crear ahorro"}
               </Button>
