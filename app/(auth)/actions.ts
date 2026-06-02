@@ -21,6 +21,18 @@ import { SENAL_MIGRAR_PIN, COOKIE_PENDIENTE as PENDIENTE } from "./constants";
 
 export type EstadoAuth = { error?: string };
 
+/** Busca un usuario por correo (case-insensitive) o por nombreUsuario (case-insensitive). */
+async function buscarUsuarioPorIdentificador(identificador: string) {
+  return prisma.usuario.findFirst({
+    where: {
+      OR: [
+        { correo: identificador.toLowerCase() },
+        { nombreUsuario: { equals: identificador, mode: "insensitive" } },
+      ],
+    },
+  });
+}
+
 async function guardarPendiente(correo: string) {
   (await cookies()).set(PENDIENTE, correo, {
     httpOnly: true,
@@ -189,12 +201,12 @@ export async function completarRegistro(
     data: { nombre, apellido, nombreUsuario, pais, monedaPreferida },
   });
 
-  // Notificación de bienvenida (misma que tenía el registro anterior)
+  // Notificación de bienvenida: ya tienes PIN, el siguiente paso es verificar tu identidad (KYC).
   await crearNotificacion(usuario.id, {
     tipo: "verificacion",
-    titulo: "Completa tu verificación 🔐",
+    titulo: "¡Bienvenido a Green Sol! 🎉",
     cuerpo:
-      "Agrega un método de seguridad (PIN o código por correo) para proteger tu cuenta.",
+      "Tu cuenta está lista. Para acceder a todas las funciones, completa tu verificación de identidad.",
     enlace: "/configuracion?tab=verificacion",
   });
 
@@ -222,14 +234,7 @@ export async function iniciarSesion(
   if (!datos.success) return { error: datos.error.issues[0].message };
   const { identificador, pin } = datos.data;
 
-  const usuario = await prisma.usuario.findFirst({
-    where: {
-      OR: [
-        { correo: identificador.toLowerCase() },
-        { nombreUsuario: { equals: identificador, mode: "insensitive" } },
-      ],
-    },
-  });
+  const usuario = await buscarUsuarioPorIdentificador(identificador);
   if (!usuario) return { error: "Correo/usuario o PIN incorrectos." };
 
   if (!usuario.pinHash) return { error: SENAL_MIGRAR_PIN };
@@ -273,14 +278,7 @@ export async function crearPinMigracion(
 
   if (!identificador) return { error: "Falta el identificador de cuenta." };
 
-  const usuario = await prisma.usuario.findFirst({
-    where: {
-      OR: [
-        { correo: identificador.toLowerCase() },
-        { nombreUsuario: { equals: identificador, mode: "insensitive" } },
-      ],
-    },
-  });
+  const usuario = await buscarUsuarioPorIdentificador(identificador);
   if (!usuario) return { error: "No encontramos esa cuenta. Intenta de nuevo." };
 
   // Si ya tiene PIN no debe estar aquí

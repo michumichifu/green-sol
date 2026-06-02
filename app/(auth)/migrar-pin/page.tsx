@@ -95,9 +95,6 @@ export default function MigrarPinPage() {
           }}
           className="space-y-5"
         >
-          {/* Identificador de solo lectura (sin seguridad: la acción verifica la contraseña) */}
-          <input type="hidden" name="identificador" value={identificador} />
-
           {identificador && (
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">

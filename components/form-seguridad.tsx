@@ -132,50 +132,19 @@ export function FormSeguridad({
     }
   }
 
-  const activos = [pinActivo, otp].filter(Boolean).length;
   const check = <CheckCircle2 className="size-5 text-brand" />;
 
   return (
     <section className="space-y-3">
+      {/* ── Acceso ── */}
       <div>
-        <h2 className="text-sm font-semibold">
-          Autenticación de dos factores (2FA)
-        </h2>
+        <h2 className="text-sm font-semibold">Acceso a la cuenta</h2>
         <p className="text-xs text-muted-foreground">
-          Para proteger tu cuenta, te recomendamos activar al menos 2 métodos de
-          2FA.{activos >= 2 ? " ✓ Bien protegida." : ""}
+          Tu PIN de 6 dígitos es la credencial con la que entras a Green Sol.
         </p>
       </div>
 
-      <TarjetaPronto
-        Icono={Fingerprint}
-        nombre="Llave de acceso (biometría)"
-        sub="Huella o Face ID, sin escribir nada."
-        badge="Recomendado"
-      />
-      <TarjetaPronto
-        Icono={ShieldCheck}
-        nombre="App de autenticador"
-        sub="Google Authenticator u otra (TOTP)."
-      />
-
-      {/* Email / OTP — funcional */}
-      <button
-        type="button"
-        onClick={() => toggleOtp(!otp)}
-        className="flex w-full items-center gap-3 rounded-2xl border bg-card p-4 text-left"
-      >
-        <Mail className="size-5 text-brand" />
-        <div className="flex-1">
-          <p className="text-sm font-medium">Código por correo</p>
-          <p className="text-xs text-muted-foreground">
-            Código de un solo uso enviado a tu correo.
-          </p>
-        </div>
-        {otp ? check : <span className="text-xs text-muted-foreground">Activar</span>}
-      </button>
-
-      {/* PIN — funcional */}
+      {/* PIN — credencial de acceso */}
       <div className="rounded-2xl border bg-card">
         <button
           type="button"
@@ -184,9 +153,11 @@ export function FormSeguridad({
         >
           <KeyRound className="size-5 text-brand" />
           <div className="flex-1">
-            <p className="text-sm font-medium">PIN</p>
+            <p className="text-sm font-medium">PIN de acceso</p>
             <p className="text-xs text-muted-foreground">
-              Código corto de 4 a 6 dígitos.
+              {pinActivo
+                ? "Tu PIN actual está activo. Cámbialo si lo necesitas."
+                : "Define tu PIN para poder entrar a la app."}
             </p>
           </div>
           {pinActivo ? (
@@ -200,6 +171,9 @@ export function FormSeguridad({
           <div className="border-t p-4">
             {pinActivo ? (
               <form action={accQ} className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  Al quitar el PIN no podrás iniciar sesión hasta que definas uno nuevo.
+                </p>
                 <div className="space-y-1">
                   <Label htmlFor="clave-q">Confirma con tu contraseña</Label>
                   <Input id="clave-q" name="clave" type="password" />
@@ -212,7 +186,7 @@ export function FormSeguridad({
               <form action={accDef} className="space-y-2">
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label htmlFor="pin">PIN (4–6 dígitos)</Label>
+                    <Label htmlFor="pin">Nuevo PIN (4–6 dígitos)</Label>
                     <Input
                       id="pin"
                       name="pin"
@@ -233,7 +207,7 @@ export function FormSeguridad({
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="clave-def">Tu contraseña</Label>
+                  <Label htmlFor="clave-def">Tu contraseña (para confirmar)</Label>
                   <Input id="clave-def" name="clave" type="password" />
                 </div>
                 <Button
@@ -241,7 +215,7 @@ export function FormSeguridad({
                   disabled={pendDef}
                   className="bg-brand text-white hover:bg-brand/90"
                 >
-                  {pendDef ? "Guardando..." : "Activar PIN"}
+                  {pendDef ? "Guardando..." : "Guardar PIN"}
                 </Button>
               </form>
             )}
@@ -249,7 +223,51 @@ export function FormSeguridad({
         )}
       </div>
 
-      {/* Contraseña — funcional (requiere al menos un método de 2FA) */}
+      {/* ── Verificación de acciones ── */}
+      <div className="pt-1">
+        <h2 className="text-sm font-semibold">Verificación de acciones</h2>
+        <p className="text-xs text-muted-foreground">
+          Métodos extra que pueden pedirse al confirmar acciones sensibles.
+        </p>
+      </div>
+
+      {/* Email / OTP — funcional */}
+      <button
+        type="button"
+        onClick={() => toggleOtp(!otp)}
+        className="flex w-full items-center gap-3 rounded-2xl border bg-card p-4 text-left"
+      >
+        <Mail className="size-5 text-brand" />
+        <div className="flex-1">
+          <p className="text-sm font-medium">Código por correo</p>
+          <p className="text-xs text-muted-foreground">
+            Código de un solo uso enviado a tu correo al confirmar acciones importantes.
+          </p>
+        </div>
+        {otp ? check : <span className="text-xs text-muted-foreground">Activar</span>}
+      </button>
+
+      <TarjetaPronto
+        Icono={Fingerprint}
+        nombre="Llave de acceso (biometría)"
+        sub="Huella o Face ID, sin escribir nada."
+        badge="Recomendado"
+      />
+      <TarjetaPronto
+        Icono={ShieldCheck}
+        nombre="App de autenticador"
+        sub="Google Authenticator u otra (TOTP)."
+      />
+
+      {/* ── Factor fuerte para cripto ── */}
+      <div className="pt-1">
+        <h2 className="text-sm font-semibold">Factor fuerte</h2>
+        <p className="text-xs text-muted-foreground">
+          La contraseña se reserva para operaciones de alto valor (como retiros cripto). No se usa para entrar.
+        </p>
+      </div>
+
+      {/* Contraseña — factor fuerte (se pide la actual para cambiar) */}
       <div className="rounded-2xl border bg-card">
         <button
           type="button"
@@ -260,85 +278,77 @@ export function FormSeguridad({
           <div className="flex-1">
             <p className="text-sm font-medium">Contraseña</p>
             <p className="text-xs text-muted-foreground">
-              Cambia tu contraseña de la cuenta.
+              Factor de seguridad adicional para operaciones cripto.
             </p>
           </div>
           <ChevronRight className="size-4 text-muted-foreground" />
         </button>
         {exp === "password" && (
           <div className="border-t p-4">
-            {activos === 0 ? (
-              <p className="text-xs text-muted-foreground">
-                Para cambiar tu contraseña, primero agrega un método de 2FA (PIN
-                o código por correo) arriba. Es una protección extra de tu
-                cuenta.
-              </p>
-            ) : (
-              <form
-                key={shakeTick}
-                action={accPwd}
-                className={`space-y-2 ${errPwd ? "animate-shake" : ""}`}
+            <form
+              key={shakeTick}
+              action={accPwd}
+              className={`space-y-2 ${errPwd ? "animate-shake" : ""}`}
+            >
+              <div className="space-y-1">
+                <Label htmlFor="pwd-actual">Contraseña actual</Label>
+                <Input
+                  id="pwd-actual"
+                  name="actual"
+                  type="password"
+                  value={pwdActual}
+                  onChange={(e) => {
+                    setPwdActual(e.target.value);
+                    setErrPwd(false);
+                  }}
+                  aria-invalid={errPwd}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="pwd-nueva">Nueva contraseña</Label>
+                <Input
+                  id="pwd-nueva"
+                  name="nueva"
+                  type="password"
+                  value={pwdNueva}
+                  onChange={(e) => {
+                    setPwdNueva(e.target.value);
+                    setErrPwd(false);
+                  }}
+                  aria-invalid={errPwd}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Mínimo 8 caracteres, con una mayúscula, un número y un símbolo.
+                </p>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="pwd-confirmar">
+                  Confirmar nueva contraseña
+                </Label>
+                <Input
+                  id="pwd-confirmar"
+                  name="confirmar"
+                  type="password"
+                  value={pwdConfirmar}
+                  onChange={(e) => {
+                    setPwdConfirmar(e.target.value);
+                    setErrPwd(false);
+                  }}
+                  aria-invalid={errPwd}
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={pendPwd}
+                className={
+                  errPwd
+                    ? "bg-destructive text-white hover:bg-destructive/90"
+                    : "bg-brand text-white hover:bg-brand/90"
+                }
               >
-                <div className="space-y-1">
-                  <Label htmlFor="pwd-actual">Contraseña actual</Label>
-                  <Input
-                    id="pwd-actual"
-                    name="actual"
-                    type="password"
-                    value={pwdActual}
-                    onChange={(e) => {
-                      setPwdActual(e.target.value);
-                      setErrPwd(false);
-                    }}
-                    aria-invalid={errPwd}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="pwd-nueva">Nueva contraseña</Label>
-                  <Input
-                    id="pwd-nueva"
-                    name="nueva"
-                    type="password"
-                    value={pwdNueva}
-                    onChange={(e) => {
-                      setPwdNueva(e.target.value);
-                      setErrPwd(false);
-                    }}
-                    aria-invalid={errPwd}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Mínimo 8, con una mayúscula, un número y un símbolo.
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="pwd-confirmar">
-                    Confirmar nueva contraseña
-                  </Label>
-                  <Input
-                    id="pwd-confirmar"
-                    name="confirmar"
-                    type="password"
-                    value={pwdConfirmar}
-                    onChange={(e) => {
-                      setPwdConfirmar(e.target.value);
-                      setErrPwd(false);
-                    }}
-                    aria-invalid={errPwd}
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  disabled={pendPwd}
-                  className={
-                    errPwd
-                      ? "bg-destructive text-white hover:bg-destructive/90"
-                      : "bg-brand text-white hover:bg-brand/90"
-                  }
-                >
-                  {pendPwd ? "Guardando..." : "Cambiar contraseña"}
-                </Button>
-              </form>
-            )}
+                {pendPwd ? "Guardando..." : "Cambiar contraseña"}
+              </Button>
+            </form>
           </div>
         )}
       </div>

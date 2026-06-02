@@ -47,8 +47,8 @@ export default async function PerfilPage() {
   const rep = await obtenerReputacion(usuario!.id);
   const nivel = nivelPorReputacion(rep);
   const esAdmin = usuario!.rol === "super_admin";
-  const tiene2FA = !!usuario!.pinHash || usuario!.otpCorreoActivo;
-  const verificacionCompleta = tiene2FA && usuario!.nivelKyc >= 1;
+  // El PIN ya se crea en el registro; la verificación pendiente para el usuario es el KYC.
+  const verificacionCompleta = usuario!.nivelKyc >= 1;
 
   const nombreCompleto =
     [usuario!.nombre, usuario!.apellido].filter(Boolean).join(" ") || "Tu perfil";

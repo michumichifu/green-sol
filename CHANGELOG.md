@@ -4,6 +4,24 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.77] — 2026-06-01 — refactor(auth): PIN es la credencial (no 2FA); contraseña = factor fuerte; docs
+
+### Cambiado
+- **Modelo de auth documentado y coherente en la UI:** el PIN de 6 dígitos es la **credencial de acceso** (ya lo era en el código desde tasks previas); la **contraseña** es un factor fuerte reservado para operaciones cripto (no para el login). El **OTP por correo** es verificación de acciones, no credencial de login.
+- **`form-seguridad.tsx`**: la pantalla Seguridad ahora tiene tres secciones claras — "Acceso a la cuenta" (PIN), "Verificación de acciones" (OTP correo + Pronto: biometría, TOTP), "Factor fuerte" (contraseña para cripto). Se elimina el título "Autenticación de dos factores (2FA)" y la lógica que bloqueaba cambiar la contraseña hasta tener 2FA activo.
+- **`seccion-verificacion.tsx`**: el checklist de verificación pasa de **3 pasos** (correo · 2FA · KYC) a **2 pasos** (correo verificado · identidad KYC). El PIN ya se establece en el registro, no es un paso pendiente. Se elimina la prop `tiene2FA`.
+- **`configuracion/page.tsx`** y **`perfil/page.tsx`**: ya no calculan ni pasan `tiene2FA` a `SeccionVerificacion`.
+- **`dashboard/page.tsx`** y **`perfil/page.tsx`**: `verificacionCompleta` ahora solo depende del KYC (`nivelKyc ≥ 1`), no del 2FA. El banner de verificación desaparece al completar la identidad.
+- **`configuracion/actions.ts → cambiarContrasena`**: eliminada la regla del modelo viejo que exigía tener PIN o OTP activo para cambiar la contraseña. Ahora solo se requiere la contraseña actual (coherente con "factor fuerte").
+- **`app/(auth)/actions.ts`**: extraído el helper `buscarUsuarioPorIdentificador` (no exportado) para eliminar el bloque `findFirst` duplicado en `iniciarSesion` y `crearPinMigracion`.
+- **`migrar-pin/page.tsx`**: eliminado el `<input type="hidden" name="identificador">` redundante (el valor ya se inyecta con `fd.set`).
+- **`lib/seguridad.ts`**: documentación actualizada — `verificarFactores` es para acciones sensibles, no para el login.
+- **`app/(auth)/actions.ts → completarRegistro`**: notificación de bienvenida actualizada ("¡Bienvenido! completa tu verificación de identidad") en lugar de pedir agregar un método 2FA que ya existe.
+- **Docs**: `PRD.md` y `PRD.html` actualizados a v0.12/v0.0.77 con el nuevo modelo de auth. `CHANGELOG.md` actualizado.
+
+### Verificado
+- Typecheck limpio. E2E suite completa verde.
+
 ## [0.0.69] — 2026-06-01 — Fixes: OTP con plantilla de marca + banner de verificación reaparece
 
 ### Corregido

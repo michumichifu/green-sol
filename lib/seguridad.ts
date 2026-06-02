@@ -25,13 +25,16 @@ export async function factoresActivos(
 }
 
 /**
- * Verifica los factores de seguridad antes de una acción sensible.
+ * Verifica los factores de seguridad antes de una acción sensible (NO para el login).
+ * El login usa `verificarPin` en `lib/auth/pin.ts`.
+ *
  * - **Clave de la cuenta:** siempre obligatoria.
  * - **PIN:** solo si el usuario lo configuró.
  * - **OTP por correo:** solo si el usuario lo activó (se envía aparte y se valida aquí).
  *
  * El segundo factor solo se exige si el usuario lo tiene activo (público retail).
  * A futuro: TOTP (Google Authenticator) y biometría (WebAuthn) se suman aquí.
+ * Base para el "modal de verificación con jerarquía" (ver PLAN_SEGURIDAD.md).
  */
 export async function verificarFactores(
   usuarioId: string,

@@ -108,14 +108,8 @@ export async function cambiarContrasena(
   const usuario = await prisma.usuario.findUnique({ where: { id: u.id } });
   if (!usuario?.hashContrasena) return { error: "Tu cuenta no tiene clave." };
 
-  // Regla: no se puede cambiar la contraseña sin al menos un 2FA activo.
-  if (!usuario.pinHash && !usuario.otpCorreoActivo) {
-    return {
-      error:
-        "Primero agrega un método de verificación (PIN o código por correo) para poder cambiar tu contraseña.",
-    };
-  }
-
+  // La contraseña es el factor fuerte; cambiarla solo requiere la contraseña actual.
+  // (La regla vieja de exigir un 2FA activo ya no aplica: el PIN es la credencial de acceso.)
   const actual = String(formData.get("actual") ?? "");
   const nueva = String(formData.get("nueva") ?? "");
   const confirmar = String(formData.get("confirmar") ?? "");

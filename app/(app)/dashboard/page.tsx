@@ -33,12 +33,12 @@ export default async function DashboardPage() {
     obtenerReputacion(usuario!.id),
     prisma.usuario.findUnique({
       where: { id: usuario!.id },
-      select: { pinHash: true, otpCorreoActivo: true, nivelKyc: true },
+      select: { nivelKyc: true },
     }),
   ]);
-  const tiene2FA = !!verif?.pinHash || !!verif?.otpCorreoActivo;
-  // El banner se muestra mientras falte 2FA o la verificación de identidad (KYC).
-  const verificacionCompleta = tiene2FA && (verif?.nivelKyc ?? 0) >= 1;
+  // El banner se muestra mientras falte la verificación de identidad (KYC).
+  // El PIN ya se crea en el registro, por lo que no es un paso pendiente aquí.
+  const verificacionCompleta = (verif?.nivelKyc ?? 0) >= 1;
 
   const nombre = usuario?.nombre?.split(" ")[0] ?? "";
   const nivel = nivelPorReputacion(reputacion);

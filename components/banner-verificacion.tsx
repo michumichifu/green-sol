@@ -3,7 +3,7 @@ import { ShieldAlert, ArrowRight } from "lucide-react";
 
 /**
  * Aviso discreto (ámbar) que invita a completar la verificación. Se muestra
- * mientras al usuario le falte algún paso (2FA o verificación de identidad/KYC).
+ * mientras al usuario le falte algún paso de verificación de identidad (KYC).
  */
 export function BannerVerificacion({
   completo,

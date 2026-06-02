@@ -50,26 +50,26 @@ function ItemVerif({
 
 export function SeccionVerificacion({
   correoVerificado,
-  tiene2FA,
   estadoKyc,
   motivoRechazoKyc,
   pasosKyc,
 }: {
   correoVerificado: boolean;
-  tiene2FA: boolean;
   estadoKyc: EstadoKyc | null;
   motivoRechazoKyc: string | null;
   pasosKyc: PasosRequeridos;
 }) {
   const kycHecho = estadoKyc === "aprobada";
-  const hechos = [correoVerificado, tiene2FA, kycHecho].filter(Boolean).length;
+  // El PIN ya se crea durante el registro, así que no es un paso pendiente aquí.
+  // Los dos pasos de verificación son: correo (hecho al registrarse) e identidad (KYC).
+  const hechos = [correoVerificado, kycHecho].filter(Boolean).length;
   return (
     <section className="space-y-3">
       <div>
         <h2 className="text-sm font-semibold">Verificación de la cuenta</h2>
         <p className="text-xs text-muted-foreground">
-          Sigue estos pasos para proteger tu cuenta y desbloquear funciones.{" "}
-          ({hechos}/3)
+          Completa estos pasos para desbloquear todas las funciones.{" "}
+          ({hechos}/2)
         </p>
       </div>
       <ItemVerif
@@ -78,15 +78,8 @@ export function SeccionVerificacion({
         titulo="Correo verificado"
         sub="Confirmado al registrarte."
       />
-      <ItemVerif
-        numero={2}
-        hecho={tiene2FA}
-        titulo="Método de seguridad adicional (2FA)"
-        sub="Agrega al menos un método de seguridad adicional. Ejemplo: un PIN o el código por correo."
-        enlace="/configuracion?tab=seguridad"
-      />
       <ItemKyc
-        numero={3}
+        numero={2}
         estado={estadoKyc}
         motivoRechazo={motivoRechazoKyc}
         pasos={pasosKyc}

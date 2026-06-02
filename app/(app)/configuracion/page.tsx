@@ -52,7 +52,6 @@ export default async function ConfiguracionPage({
         {/* Verificación */}
         <SeccionVerificacion
           correoVerificado={usuario!.correoVerificado}
-          tiene2FA={!!usuario!.pinHash || usuario!.otpCorreoActivo}
           estadoKyc={kyc?.estado ?? null}
           motivoRechazoKyc={kyc?.motivoRechazo ?? null}
           pasosKyc={pasosKyc}
