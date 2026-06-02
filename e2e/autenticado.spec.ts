@@ -53,4 +53,28 @@ test("flujo autenticado: dashboard con tasas y crear un san", async ({
   }
   await page.getByRole("button", { name: /Crear ahorro/ }).click();
   await expect(page.getByRole("heading", { name: "San E2E" })).toBeVisible();
+
+  // === Detalle del san: pestañas Resumen / Pagos ===
+
+  // Las dos pestañas deben estar visibles.
+  const tabResumen = page.getByRole("button", { name: "Resumen" });
+  const tabPagos = page.getByRole("button", { name: "Pagos" });
+  await expect(tabResumen).toBeVisible();
+  await expect(tabPagos).toBeVisible();
+
+  // La pestaña Resumen está activa por defecto; debe mostrarse la sección Participantes.
+  await expect(page.getByText(/Participantes/)).toBeVisible();
+
+  // Click en "Pagos" → como el usuario es el ORGANIZADOR del san recién creado,
+  // se muestran las sub-pestañas "Pendientes" y "Aprobados".
+  await tabPagos.click();
+  await expect(page.getByRole("button", { name: "Pendientes" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Aprobados" })).toBeVisible();
+
+  // La sub-pestaña Pendientes está activa; sin aportes aún → estado vacío.
+  await expect(page.getByText("No hay pagos por revisar.")).toBeVisible();
+
+  // Volver a "Resumen" y verificar que sigue mostrando Participantes.
+  await tabResumen.click();
+  await expect(page.getByText(/Participantes/)).toBeVisible();
 });

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Green Sol — PRD v0.14 · Ahorro en grupo transparente y puente al ahorro en cripto sobre Solana</title>
+<title>Green Sol — PRD v0.15 · Ahorro en grupo transparente y puente al ahorro en cripto sobre Solana</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <link rel="preconnect" href="https://rsms.me/">
@@ -54,7 +54,7 @@
       <div class="font-semibold text-[15px]">Green Sol</div>
       <div class="text-xs" style="color:var(--ink-3)">PRD · ahorro en grupo · puente al ahorro en cripto</div>
     </div>
-    <span class="ml-3 badge badge-brand"><i data-lucide="tag" class="lucide"></i>PRD v0.14 · sesión 2026-06-02 (sobre v0.0.94 · beta en vivo)</span>
+    <span class="ml-3 badge badge-brand"><i data-lucide="tag" class="lucide"></i>PRD v0.15 · sesión 2026-06-02 (sobre v0.0.106 · beta en vivo)</span>
     <span class="badge badge-muted hidden sm:inline-flex"><i data-lucide="calendar" class="lucide"></i>2026-06-02</span>
     <span class="badge badge-ok hidden md:inline-flex"><i data-lucide="hammer" class="lucide"></i>Fase 1 · núcleo construido</span>
     <div class="ml-auto flex items-center gap-3">
@@ -74,6 +74,7 @@
         <a href="#problema" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="alert-triangle" class="lucide"></i>Problema</a>
         <a href="#tipos" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="layers" class="lucide"></i>Los tres tipos</a>
         <a href="#ahorro" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="piggy-bank" class="lucide"></i>Sección Ahorro</a>
+        <a href="#detalle-san" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="layers" class="lucide"></i>Detalle del san</a>
         <a href="#publico" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="globe" class="lucide"></i>Público o privado</a>
         <a href="#metodo" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="arrow-left-right" class="lucide"></i>Tradicional o cripto</a>
         <a href="#moneda" class="block py-1.5 pl-3 flex items-center gap-2"><i data-lucide="badge-dollar-sign" class="lucide"></i>Moneda y tasas</a>
@@ -100,7 +101,7 @@
     <!-- ESTADO DEL PROYECTO -->
     <section id="estado" class="card p-7">
       <h2 class="text-lg font-bold flex items-center gap-2 mb-2"><i data-lucide="list-checks" class="lucide-lg brand-text"></i>Estado del proyecto</h2>
-      <p class="text-sm mb-4" style="color:var(--ink-3)">Foto rápida tras la <b style="color:var(--ink-2)">sesión 2026-06-02</b> (sobre v0.0.70–v0.0.94): <b style="color:var(--ink-2)">auth con PIN rediseñado al estilo Cashea</b>, <b style="color:var(--ink-2)">gestión de usuarios completa</b> en el panel admin, <b style="color:var(--ink-2)">planificador de tasas</b> mejorado, <b style="color:var(--ink-2)">guía de monedas fiat vs cripto</b> y <b style="color:var(--ink-2)">favicon con el logo de Green Sol</b>. El detalle exhaustivo está en <span class="mono">docs/PRD.md §0</span>.</p>
+      <p class="text-sm mb-4" style="color:var(--ink-3)">Foto rápida tras la <b style="color:var(--ink-2)">sesión 2026-06-02</b> (sobre v0.0.70–v0.0.106): <b style="color:var(--ink-2)">auth con PIN rediseñado al estilo Cashea</b>, <b style="color:var(--ink-2)">gestión de usuarios completa</b> en el panel admin, <b style="color:var(--ink-2)">planificador de tasas</b> mejorado, <b style="color:var(--ink-2)">guía de monedas fiat vs cripto</b>, <b style="color:var(--ink-2)">favicon con el logo de Green Sol</b> y <b style="color:var(--ink-2)">detalle del san rediseñado en pestañas Resumen/Pagos</b> con vistas por rol, conversión Bs↔$ y notificaciones completas del san. El detalle exhaustivo está en <span class="mono">docs/PRD.md §0</span>.</p>
       <div class="grid lg:grid-cols-3 gap-3">
 
         <!-- Implementado -->
@@ -114,6 +115,7 @@
             <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Monedas de ahorro actualizadas:</b> "Bolívares — dólar BCV", "Bolívares — promedio (USDC)", "USDC (Solana) · Cripto", "SOL (Solana) · Cripto". "Paralelo" → "promedio".</li>
             <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Guía de monedas fiat vs cripto</b> en <span class="mono">/sanes/guia</span> y modal desde el asistente ("¿Cuál elijo? Ver guía").</li>
             <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Favicon</b> con el logo de Green Sol (antes: triángulo por defecto de Next.js).</li>
+            <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Detalle del san rediseñado (v0.0.99–v0.0.106):</b> pestañas <b style="color:var(--ink)">Resumen</b> (dona de progreso SVG, participantes compactos, ¿dónde pagar?, compartir) y <b style="color:var(--ink)">Pagos</b> — vista organizador (sub-pestañas Pendientes/Aprobados, aprobar/rechazar) y vista participante ("Lo que te toca pagar" en Bs↔$ con tasa/ancla, reportar pago, mi historial). Conversión Bs↔$ en <span class="mono">lib/san/montos.ts</span>. Avisos al organizador al unirse un participante (bugfix: no llegaba nada), al reportar pago y al aprobar/rechazar. Sin cambios de esquema.</li>
             <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i>Onboarding, navegación 5 ítems + header, dashboard, calculadora, sección Ahorro, pagos, métodos de pago, reputación, perfil/config, KYC propio, SMTP real, plantillas con editor visual, panel super-admin, E2E, beta en VPS.</li>
           </ul>
         </div>
@@ -122,8 +124,7 @@
         <div class="sub p-4">
           <div class="flex items-center gap-2 font-semibold mb-3"><span class="badge badge-warn"><i data-lucide="clock" class="lucide"></i>Pendiente</span></div>
           <ul class="text-sm space-y-1.5" style="color:var(--ink-2)">
-            <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Integración cripto:</b> wallet embebida en el registro, billetera en el dashboard, retiros; primero en <b style="color:var(--ink)">DevNet</b>.</li>
-            <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Mejorar el flujo del san</b> de punta a punta.</li>
+            <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Integración cripto:</b> wallet embebida en el registro, billetera en el dashboard, retiros; primero en <b style="color:var(--ink)">DevNet</b>. (El flujo del san fue mejorado — v0.0.99–v0.0.106; el pago cripto real por wallet va en esta fase.)</li>
             <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Referidos:</b> +40 pts a ambos, máx 5, solo cuentas nuevas, club de canje.</li>
             <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Calendario de turnos con fechas</b> (hoy <span class="mono">Turno</span> solo tiene posición/cobrado).</li>
             <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Comprobantes:</b> subir captura, vía MinIO/S3 ya existente.</li>
@@ -216,6 +217,49 @@
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="share-2" class="lucide brand-text"></i>Compartir</div><p class="text-sm" style="color:var(--ink-2)">En el detalle: código, copiar enlace y compartir nativo.</p></div>
         <div class="sub p-4"><div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="map" class="lucide brand-text"></i>Guía visual</div><p class="text-sm" style="color:var(--ink-2)">Tarjetas con infografía por método (San·Susi·Bolso por turnos; Vaca·Pote meta común; Dividir una cuenta) con "cómo aprovecharlo". La misma página aloja la guía de monedas.</p></div>
       </div>
+    </section>
+
+    <!-- DETALLE DEL SAN -->
+    <section id="detalle-san" class="card p-7">
+      <h2 class="text-lg font-bold flex items-center gap-2 mb-2"><i data-lucide="layers" class="lucide-lg brand-text"></i>Detalle del san: pestañas Resumen / Pagos</h2>
+      <p class="text-sm mb-4" style="color:var(--ink-3)"><b style="color:var(--ink-2)">Implementado (v0.0.99–v0.0.106).</b> La página <span class="mono">app/(app)/sanes/[id]/</span> fue rediseñada con dos pestañas visibles para ambos roles.</p>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="sub p-4">
+          <div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="layout-dashboard" class="lucide brand-text"></i>Pestaña Resumen</div>
+          <ul class="text-sm space-y-1" style="color:var(--ink-2)">
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i>Cabecera: nombre del san, estado (abierto/activo/cerrado), chip de rol.</li>
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i><b style="color:var(--ink)">Dona de progreso SVG</b> (arco verde proporcional a pagados/total de la ronda; sin librería nueva) + "Ronda X de Y".</li>
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i><b style="color:var(--ink)">Participantes compactos</b> (una línea: foto o ícono dorado para el organizador sin círculo de fondo; Nombre Apellido @usuario; turno y check si cobró).</li>
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i>¿Dónde pagar? (datos de <span class="mono">DatosPagoRecolecta</span>) e invitar/compartir (<span class="mono">CompartirAhorro</span>).</li>
+          </ul>
+        </div>
+        <div class="sub p-4">
+          <div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="credit-card" class="lucide brand-text"></i>Pestaña Pagos — vista participante</div>
+          <ul class="text-sm space-y-1" style="color:var(--ink-2)">
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i><b style="color:var(--ink)">"Lo que te toca pagar":</b> para sanes en Bs — monto en <b style="color:var(--ink)">Bs</b> grande + "≈ $X · dólar BCV: Bs Y/$" (tasa y ancla explícitas). Para cripto — monto en la cripto + que va por la wallet. Si no hay tasa: monto en $ con nota.</li>
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i><b style="color:var(--ink)">Reportar pago:</b> campo monto (prelleno) + referencia. Sin captura obligatoria.</li>
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i><b style="color:var(--ink)">Mi historial:</b> aportes propios con estado color-coded (ámbar/verde/rojo).</li>
+          </ul>
+        </div>
+        <div class="sub p-4">
+          <div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="user-check" class="lucide brand-text"></i>Pestaña Pagos — vista organizador</div>
+          <ul class="text-sm space-y-1" style="color:var(--ink-2)">
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i>Sub-pestañas <b style="color:var(--ink)">Pendientes</b> y <b style="color:var(--ink)">Aprobados</b>.</li>
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i>Pendientes: aportes <span class="mono">reportado</span> con participante, monto (Bs + "≈ $"), referencia, fecha, botones <b style="color:var(--ink)">Aprobar / Rechazar</b>. Estado vacío: "No hay pagos por revisar."</li>
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i>Aprobados: historial <span class="mono">confirmado</span> (solo lectura). Mini-resumen: "X de Y pagaron esta ronda".</li>
+          </ul>
+        </div>
+        <div class="sub p-4">
+          <div class="flex items-center gap-2 font-semibold mb-1"><i data-lucide="bell" class="lucide brand-text"></i>Notificaciones del san</div>
+          <ul class="text-sm space-y-1" style="color:var(--ink-2)">
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i><b style="color:var(--ink)">Al unirse</b> → organizador recibe aviso in-app + correo con "Nombre Apellido (@usuario)" (<span class="mono">san_nuevo_participante</span> — bugfix, antes no llegaba nada).</li>
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i><b style="color:var(--ink)">Al reportar pago</b> → organizador recibe aviso (<span class="mono">san_pago_reportado</span>).</li>
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i><b style="color:var(--ink)">Al aprobar/rechazar</b> → participante recibe aviso (<span class="mono">san_pago_aprobado</span> / <span class="mono">san_pago_rechazado</span>).</li>
+            <li class="flex gap-1.5"><i data-lucide="check" class="lucide chk" style="width:14px;height:14px"></i>Todos editables desde el editor visual del super-admin.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="text-sm mt-3 flex gap-2" style="color:var(--ink-3)"><i data-lucide="info" class="lucide" style="flex:0 0 auto"></i><span>Conversión Bs↔$ en <span class="mono">lib/san/montos.ts</span> (<span class="mono">aportePersona</span>, <span class="mono">infoMontoParticipante</span>, tipo <span class="mono">InfoMonto</span>). El progreso es por conteo de participantes que pagaron/confirmaron, no por suma de montos. Sin cambios de esquema. Diseño: <span class="mono">docs/superpowers/specs/2026-06-02-detalle-san-pagos-design.md</span>.</span></p>
     </section>
 
     <!-- PRINCIPIO UX -->
@@ -533,7 +577,7 @@
       <h2 class="text-lg font-bold flex items-center gap-2 mb-4"><i data-lucide="route" class="lucide-lg brand-text"></i>Roadmap por fases</h2>
       <div class="space-y-3">
         <div class="flex gap-3"><span class="badge badge-ok" style="flex:0 0 auto">Fase 0</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">Documentación. Completada.</b></p></div>
-        <div class="flex gap-3"><span class="badge badge-brand" style="flex:0 0 auto">Fase 1</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">MVP gancho (tradicional). Núcleo construido y verificado (app v0.0.94).</b> Hecho con build + tests unitarios + E2E (Playwright): bienvenida y <b style="color:var(--ink)">onboarding</b>, registro/login (<b style="color:var(--ink)">PIN 6 dígitos como credencial principal</b> — correo → OTP → PIN → datos; <b style="color:var(--ink)">migración automática</b> de cuentas antiguas; contraseña como factor fuerte para cripto; OTP como verificación de acciones), <b style="color:var(--ink)">navegación de 5 pestañas</b> con header de nivel y avisos, <b style="color:var(--ink)">dashboard</b> con <b style="color:var(--ink)">tasas en vivo</b> (etiquetas "USDC / promedio" y "SOL / USDC"), <b style="color:var(--ink)">calculadora</b> rediseñada (Bs · Dólar BCV · USDT · Solana), sección <b style="color:var(--ink)">Ahorro</b> con <b style="color:var(--ink)">asistente por pasos</b> (etiquetas de moneda completas + botón "¿Cuál elijo? Ver guía" con guía fiat vs cripto, método de pago del perfil) y unirse + compartir + guía, <b style="color:var(--ink)">pagos</b>, turnos, <b style="color:var(--ink)">notificaciones y avisos app + correo</b>, <b style="color:var(--ink)">métodos de pago</b> rediseñados, <b style="color:var(--ink)">reputación por puntos y niveles</b>, <b style="color:var(--ink)">perfil/configuración</b>, <b style="color:var(--ink)">panel super-admin</b> con gestión de usuarios completa (buscador/filtros/fichas/acciones por íconos/paginación/confirmación por credencial/salvaguardas/login bloqueado para suspendidos), <b style="color:var(--ink)">roles a 2</b> (usuario/super_admin), restricciones, SMTP, plantillas con editor visual, <b style="color:var(--ink)">KYC propio completo</b> (MinIO, cola de revisión), <b style="color:var(--ink)">planificador de tasas</b> (SOL/USDC 30 min; BCV 4×/día a las 6/11/14/19 VET), <b style="color:var(--ink)">favicon con el logo de Green Sol</b>, <b style="color:var(--ink)">beta en vivo en la VPS-2</b> (Docker + nginx + certbot) y <b style="color:var(--ink)">E2E aislada</b> (15/15 verde). Entrega de <b style="color:var(--ink)">primera versión: 1 de junio de 2026, 5:30 p.m.</b> Pendiente: <b style="color:var(--ink)">mejorar el flujo del san</b>, referidos, calendario de turnos con fechas y comprobantes de pago.</p></div>
+        <div class="flex gap-3"><span class="badge badge-brand" style="flex:0 0 auto">Fase 1</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">MVP gancho (tradicional). Núcleo construido y verificado (app v0.0.106).</b> Hecho con build + tests unitarios + E2E (Playwright): bienvenida y <b style="color:var(--ink)">onboarding</b>, registro/login (<b style="color:var(--ink)">PIN 6 dígitos como credencial principal</b> — correo → OTP → PIN → datos; <b style="color:var(--ink)">migración automática</b> de cuentas antiguas; contraseña como factor fuerte para cripto; OTP como verificación de acciones), <b style="color:var(--ink)">navegación de 5 pestañas</b> con header de nivel y avisos, <b style="color:var(--ink)">dashboard</b> con <b style="color:var(--ink)">tasas en vivo</b> (etiquetas "USDC / promedio" y "SOL / USDC"), <b style="color:var(--ink)">calculadora</b> rediseñada (Bs · Dólar BCV · USDT · Solana), sección <b style="color:var(--ink)">Ahorro</b> con <b style="color:var(--ink)">asistente por pasos</b> (etiquetas de moneda completas + botón "¿Cuál elijo? Ver guía" con guía fiat vs cripto, método de pago del perfil) y unirse + compartir + guía, <b style="color:var(--ink)">detalle del san rediseñado</b> (pestañas Resumen/Pagos, dona de progreso, participantes compactos, vista del participante con Bs↔$ + tasa/ancla, vista del organizador con Pendientes/Aprobados, notificaciones de unión/pago), <b style="color:var(--ink)">pagos</b>, turnos, <b style="color:var(--ink)">notificaciones y avisos app + correo</b>, <b style="color:var(--ink)">métodos de pago</b> rediseñados, <b style="color:var(--ink)">reputación por puntos y niveles</b>, <b style="color:var(--ink)">perfil/configuración</b>, <b style="color:var(--ink)">panel super-admin</b> con gestión de usuarios completa (buscador/filtros/fichas/acciones por íconos/paginación/confirmación por credencial/salvaguardas/login bloqueado para suspendidos), <b style="color:var(--ink)">roles a 2</b> (usuario/super_admin), restricciones, SMTP, plantillas con editor visual, <b style="color:var(--ink)">KYC propio completo</b> (MinIO, cola de revisión), <b style="color:var(--ink)">planificador de tasas</b> (SOL/USDC 30 min; BCV 4×/día a las 6/11/14/19 VET), <b style="color:var(--ink)">favicon con el logo de Green Sol</b>, <b style="color:var(--ink)">beta en vivo en la VPS-2</b> (Docker + nginx + certbot) y <b style="color:var(--ink)">E2E aislada</b> verde. Entrega de <b style="color:var(--ink)">primera versión: 1 de junio de 2026, 5:30 p.m.</b> Pendiente: referidos, calendario de turnos con fechas, comprobantes de pago y capa cripto (DevNet).</p></div>
         <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 2</span><p class="text-sm" style="color:var(--ink-2)"><b style="color:var(--ink)">Capa cripto (enseguida tras el núcleo, en devnet):</b> wallet embebida <b style="color:var(--ink)">no-custodial</b> + onboarding de respaldo, <b style="color:var(--ink)">login con wallet</b> (Phantom/Solflare), USDC/SOL, depósitos/retiros/transferencias, multifirma o modo espejo, multas por mora. <b style="color:var(--ink)">Alto estándar de seguridad web3</b>; devnet antes de dinero real.</p></div>
         <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 3</span><p class="text-sm" style="color:var(--ink-2)">Confianza y escala: dividir cuentas, <b style="color:var(--ink)">KYC con proveedor externo</b> (automatizar el manual ya existente), gestión de usuarios super-admin completa, <b style="color:var(--ink)">marketplace público</b>, <b style="color:var(--ink)">login con Google y con wallet</b>, CI/CD y VPS dedicado.</p></div>
         <div class="flex gap-3"><span class="badge badge-muted" style="flex:0 0 auto">Fase 4</span><p class="text-sm" style="color:var(--ink-2)">App móvil Android/iOS.</p></div>
@@ -577,7 +621,7 @@
     </section>
 
     <footer class="pt-2 pb-10 text-center text-xs" style="color:var(--ink-3)">
-      Green Sol · Solana Vibe Bootcamp Venezuela · PRD v0.14 · app v0.0.94 · beta en vivo · <span class="mono">2026-06-02</span> · <a href="https://github.com/michumichifu/green-sol" class="brand-text underline">github.com/michumichifu/green-sol</a>
+      Green Sol · Solana Vibe Bootcamp Venezuela · PRD v0.15 · app v0.0.106 · beta en vivo · <span class="mono">2026-06-02</span> · <a href="https://github.com/michumichifu/green-sol" class="brand-text underline">github.com/michumichifu/green-sol</a>
     </footer>
 
   </main>

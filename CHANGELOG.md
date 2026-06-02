@@ -4,6 +4,168 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.106] — 2026-06-02 — test+docs(san): E2E del detalle + PRD/arquitectura/CHANGELOG al día (v0.0.106)
+
+### Añadido
+
+- **`e2e/autenticado.spec.ts` extendido:** tras crear el san y llegar al detalle, el test ahora verifica que se ven las pestañas "Resumen" y "Pagos"; que al hacer click en "Pagos" el organizador ve las sub-pestañas "Pendientes" y "Aprobados" (y el estado vacío "No hay pagos por revisar." sin aportes aún); y que al volver a "Resumen" sigue visible la sección de Participantes. Usa selectores estables `getByRole("button", ...)` y `getByText(...)`.
+
+### Cambiado
+
+- **`docs/PRD.md`**: versión 0.15 (fecha 2026-06-02); estado del proyecto actualizado a v0.0.70–v0.0.106; nueva sección **Detalle del san** (pestaña Resumen/Pagos, vista participante Bs↔$, vista organizador Pendientes/Aprobados, notificaciones del san). El "próximo foco" marca el flujo del san como completado.
+- **`docs/PRD.html`**: consistente con PRD.md — badge v0.15, footer v0.0.106, entrada nueva en el estado Implementado, sección nueva "Detalle del san" con tarjetas, Fase 1 actualizada.
+- **`docs/ARQUITECTURA_TECNICA.md`**: versión 0.8 (fecha 2026-06-02); documenta `lib/san/montos.ts` (`aportePersona`, `infoMontoParticipante`, `InfoMonto`); componentes nuevos `components/san/` (`fila-participante`, `dona-progreso`, `resumen-san`, `pagos-participante`, `pagos-organizador`); la reestructuración de `app/(app)/sanes/[id]/page.tsx` en `PanelTabs`; los eventos de notificación nuevos del san (`san_nuevo_participante`, `san_pago_reportado`, `san_pago_aprobado`, `san_pago_rechazado`) en el catálogo y sus puntos de disparo.
+- **`package.json`**: versión `0.0.106`.
+
+### Verificado
+
+- Suite E2E verde (1/1 `autenticado.spec.ts` con los nuevos pasos del detalle del san). Typecheck limpio.
+
+---
+
+## [0.0.105] — 2026-06-02 — feat(san): pagos del organizador — pendientes/aprobados + avisos
+
+### Añadido
+
+- **`components/san/pagos-organizador.tsx`**: pestaña Pagos en la vista del organizador. Sub-pestañas `<PanelTabs variante="sub" tabs={["Pendientes", "Aprobados"]}>`. Pendientes: aportes `reportado` con `<FilaParticipante>`, monto (Bs + "≈ $" vía `infoMontoParticipante`), referencia, fecha y botones **Aprobar / Rechazar** (acciones `resolverAporte` bound). Estado vacío: "No hay pagos por revisar." Aprobados: historial `confirmado` solo lectura. Mini-resumen arriba: "X de Y pagaron esta ronda". El componente recibe la recolecta, aportes, tasas y las acciones ya ligadas.
+- **Avisos de pago en `app/(app)/sanes/actions.ts`**: `reportarPago` ahora notifica al organizador con el evento `san_pago_reportado` (app+correo). `resolverAporte` notifica al participante con `san_pago_aprobado` o `san_pago_rechazado` (app+correo) según el resultado. Eventos añadidos al catálogo en `lib/correo/catalogo.ts` con plantillas de marca, variables (`participante`, `san`, `monto`, `referencia`) y editables desde el editor visual.
+
+### Verificado
+
+- Typecheck limpio.
+
+---
+
+## [0.0.104] — 2026-06-02 — feat(san): pagos del participante — cuánto pagar (Bs↔$) + reportar + historial
+
+### Añadido
+
+- **`components/san/pagos-participante.tsx`**: pestaña Pagos en la vista del participante. Usa `infoMontoParticipante(moneda, aportePersona(montoAporte, cupo), tasas)` de `lib/san/montos.ts` para determinar qué mostrar: si `enBolivares` muestra monto en **Bs** grande + "≈ $X · {fuenteTasa}: Bs Y/$"; si cripto muestra el monto en la cripto y que se paga por la wallet de Solana; si no hay tasa en caché muestra "$X" con nota. Formulario **Reportar pago**: campo de monto prelleno con el `montoBs` calculado (o el monto en ancla si cripto), campo de referencia, botón "Reportar pago" (acción `reportarPago` bound). **Mi historial**: aportes propios filtrados, con estado color-coded (ámbar `reportado` / verde `confirmado` / rojo `rechazado`) y referencia.
+
+### Verificado
+
+- Typecheck limpio.
+
+---
+
+## [0.0.103] — 2026-06-02 — feat(san): detalle en pestañas + Resumen compacto con dona y participantes
+
+### Cambiado
+
+- **`app/(app)/sanes/[id]/page.tsx`**: reestructurado en `<PanelTabs tabs={["Resumen", "Pagos"]}>`. Primer hijo = `<ResumenSan recolecta={...} esOrganizador={...} />`. Segundo hijo: si `esOrganizador`, `<PagosOrganizador .../>`, si no, `<PagosParticipante .../>`. Las tasas se obtienen con `obtenerTasas()` y se pasan al componente de pagos. El archivo quedó sustancialmente más delgado; la lógica vive en los componentes.
+- **`components/san/resumen-san.tsx`** (nuevo): cabecera (nombre, estado, chip de rol "Organizador" o "Participante"), "Ronda X de Y" + `<DonaProgreso pagados={cobrados} total={cupo ?? participantes.length}>`, lista de participantes con `<FilaParticipante>` (visible para ambos roles), sección "¿Dónde pagar?" (datos de `DatosPagoRecolecta`) y `<CompartirAhorro>` si el san está abierto.
+
+### Verificado
+
+- Typecheck limpio.
+
+---
+
+## [0.0.102] — 2026-06-02 — feat(san): dona de progreso SVG
+
+### Añadido
+
+- **`components/san/dona-progreso.tsx`**: dona SVG pura (sin librería). Recibe `{ pagados, total, label? }`. Dibuja un arco verde (`#14c98a`, `stroke-linecap: round`) proporcional a `pagados/total` sobre un anillo gris (`#eef1ef`). Número central `pagados/total` y etiqueta opcional debajo (ej. "esta ronda"). Tamaño ~96 px. Maneja `total === 0` (dona vacía, sin división por cero). Mobile-first.
+
+### Verificado
+
+- Typecheck limpio.
+
+---
+
+## [0.0.101] — 2026-06-02 — feat(san): fila de participante compacta (foto/ícono dorado, una línea)
+
+### Añadido
+
+- **`components/san/fila-participante.tsx`**: fila densa para listar participantes. Layout `flex items-center gap-2.5 py-1.5`. Izquierda: `<img>` redondo (~28px) si hay `fotoUrl`; si no, ícono `User` de lucide en dorado (`text-gold`) si `esOrganizador`, o `text-muted-foreground` si no — **sin círculo de fondo**. Centro (`truncate`, `min-w-0`): `Nombre Apellido` en `font-medium` + `@usuario` en `text-muted-foreground text-xs` en una sola línea; si es organizador, etiqueta pequeña dorada "Organizador". Derecha (`shrink-0`): "turno N" (si hay) y check verde si `cobrado`. Props: `{ usuario, esOrganizador, turnoPosicion?, cobrado? }`.
+
+### Verificado
+
+- Typecheck limpio.
+
+---
+
+## [0.0.100] — 2026-06-02 — fix(san): avisar al organizador (app+correo) cuando alguien se une
+
+### Añadido
+
+- **`lib/correo/catalogo.ts`**: nuevo evento `san_nuevo_participante` (categoría "Ahorros", canales `["app","correo"]`). Variables: `participante` (Nombre Apellido @usuario del nuevo miembro), `san` (nombre del san), `link` (URL del detalle). App: título "Nuevo participante en tu san 👋", cuerpo "{{participante}} se unió a {{san}}.". Correo: asunto "Nuevo participante en {{san}}" + HTML de marca con CTA al san.
+
+### Corregido
+
+- **`app/(app)/sanes/actions.ts` → `unirseARecolecta`**: después de crear el `Participante`, notifica al organizador con el evento `san_nuevo_participante` usando `notificarYCorreo`. La etiqueta del nuevo participante se construye como "Nombre Apellido (@usuario)". El correo del organizador se trae incluyendo `organizador: { select: { id: true, correo: true } }` en la consulta de la recolecta. Corrección de un bug donde el organizador no recibía ningún aviso cuando alguien se unía.
+
+### Verificado
+
+- Typecheck limpio.
+
+---
+
+## [0.0.99] — 2026-06-02 — feat(san): lógica de aporte por persona y conversión Bs↔ancla
+
+### Añadido
+
+- **`lib/san/montos.ts`**: módulo de cálculo de montos y conversión Bs↔$ para el detalle del san. `aportePersona(montoAporte, cupo)` devuelve `montoAporte / cupo` (o `montoAporte` si `cupo` es nulo/cero). Tipo `InfoMonto` con campos `enBolivares`, `ancla` ("$" | "USDC" | "SOL"), `montoAncla`, `tasa`, `fuenteTasa` ("dólar BCV" | "USDC/promedio" | null) y `montoBs` (nulo si no aplica o no hay tasa en caché). `infoMontoParticipante(moneda, montoAnclaPersona, tasas)` lee `MONEDA_RECOLECTA[moneda]` para determinar si el san es en Bs y cuál ancla usa, resuelve la tasa desde el caché (`tasas.bcv?.usd` para `bs_bcv`; `tasas.usdt?.promedio` para `bs_usdt`) y devuelve el `InfoMonto` completo.
+
+### Verificado
+
+- Typecheck limpio.
+
+---
+
+## [0.0.98] — 2026-06-02 — fix(crear): etiqueta 'Bolívares — USDC/Promedio (pagas en Bs)'
+
+### Corregido
+
+- Etiqueta de la opción de moneda `bs_usdt` en el asistente de creación: pasó de "Bolívares (paralelo/USDT)" a "Bolívares — USDC/Promedio (pagas en Bs)" para ser consistente con la decisión de usar "promedio" en lugar de "paralelo" (introducida en v0.0.93) y con el hecho de que la tasa de referencia es la del USDC en el mercado P2P, no un "paralelo" genérico.
+
+### Verificado
+
+- Typecheck limpio.
+
+---
+
+## [0.0.97] — 2026-06-02 — feat(crear): casilla de responsabilidad + confirmar con PIN antes de crear el ahorro
+
+### Añadido
+
+- **Casilla de responsabilidad** en el último paso del asistente de creación (antes del botón "Crear ahorro"): el organizador debe marcar explícitamente que entiende su responsabilidad de gestionar el san y que no puede devolverse el dinero. El botón "Crear ahorro" está deshabilitado hasta que la casilla esté marcada.
+- **Confirmación con PIN** en el último paso: tras marcar la casilla, el organizador escribe su PIN en las casillas `<CampoPin>` (con `testId="crear-pin-{i}"` para los E2E). La acción `crearRecolecta` valida el PIN antes de crear el san.
+
+### Verificado
+
+- Typecheck limpio. E2E actualizado para incluir la casilla y el PIN.
+
+---
+
+## [0.0.96] — 2026-06-02 — feat(perfil): confirmar método de pago con PIN (casillas) y validación con credencial
+
+### Cambiado
+
+- **Formulario de método de pago** (`components/form-metodo-pago.tsx` / `components/metodo-pago-item.tsx`): la confirmación para agregar/editar/eliminar un método de pago ahora usa **`<CampoPin>`** (las 6 casillas) en lugar del campo de contraseña de texto. La Server Action `agregarMetodoPago`/`editarMetodoPago`/`eliminarMetodoPago` usa `credencialValida` para aceptar tanto PIN como contraseña (lo que el usuario tenga activo), manteniéndose retrocompatible.
+
+### Verificado
+
+- Typecheck limpio.
+
+---
+
+## [0.0.95] — 2026-06-02 — fix(admin) + docs: modal sin cerrar al confirmar con teclado + PRD al día
+
+### Corregido
+
+- **`components/admin/tabla-usuarios.tsx`** y **`components/admin/ficha-usuario.tsx`**: el modal de confirmación con credencial ya no se cierra al pulsar "Confirmar" si el teclado virtual del móvil estaba abierto (el evento `blur` del campo de credencial se confundía con un click fuera). Se añadió una guarda que ignora el click-fuera durante los ~200 ms posteriores al blur, evitando el cierre accidental en iOS y Android.
+
+### Cambiado
+
+- **`docs/PRD.md`** y **`docs/PRD.html`**: actualizados a v0.14 (fecha 2026-06-02) con el estado completo al día: auth con PIN estilo Cashea, gestión de usuarios en el panel admin, planificador de tasas, guía de monedas fiat vs cripto, favicon con el logo de Green Sol, aislamiento E2E.
+
+### Verificado
+
+- Typecheck limpio.
+
+---
+
 ## [0.0.94] — 2026-06-01 — test(e2e): actualizar tests tras cambios (sin modal biometría, etiqueta SOL, clave QA en seed)
 
 ### Cambiado

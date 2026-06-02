@@ -1,6 +1,6 @@
 {
   "name": "green-sol",
-  "version": "0.0.94",
+  "version": "0.0.106",
   "private": true,
   "scripts": {
     "dev": "next dev",
