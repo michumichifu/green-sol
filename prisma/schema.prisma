@@ -200,7 +200,6 @@ model ConfiguracionApp {
 
 enum Rol {
   usuario
-  admin_grupo
   super_admin
 }
 

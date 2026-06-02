@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const ROLES = ["usuario", "admin_grupo", "super_admin"];
+const ROLES = ["usuario", "super_admin"];
 const METODO_RECOLECTA_LABEL: Record<string, string> = {
   tradicional: "Tradicional",
   cripto: "Cripto",

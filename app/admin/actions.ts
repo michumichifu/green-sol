@@ -19,7 +19,7 @@ import {
   type CanalPlantilla,
 } from "@/lib/correo/catalogo";
 
-const ROLES: Rol[] = ["usuario", "admin_grupo", "super_admin"];
+const ROLES: Rol[] = ["usuario", "super_admin"];
 
 async function esAdmin(): Promise<boolean> {
   const u = await obtenerUsuario();
