@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, RefreshCw, Target, Receipt, Sparkles, Plus } from "lucide-react";
+import { GuiaMonedas } from "@/components/guia-monedas";
 
 type Metodo = {
   img: string;
@@ -104,6 +105,12 @@ export default function GuiaPage() {
           );
         })}
       </div>
+
+      {/* Separador */}
+      <hr className="border-border" />
+
+      {/* Guía de monedas */}
+      <GuiaMonedas />
 
       <Link
         href="/sanes/crear"

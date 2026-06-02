@@ -29,11 +29,11 @@ export async function TasasResumen() {
     <div className="grid grid-cols-3 gap-2 text-center text-xs">
       <Tasa label="BCV" valor={t.bcv ? `Bs ${fmt(t.bcv.usd)}` : "—"} sub="USD" />
       <Tasa
-        label="USDT"
+        label="USDC"
         valor={t.usdt ? `Bs ${fmt(t.usdt.promedio)}` : "—"}
         sub="promedio"
       />
-      <Tasa label="SOL" valor={t.sol ? `$${fmt(t.sol.usd)}` : "—"} sub="USD" />
+      <Tasa label="SOL" valor={t.sol ? `$${fmt(t.sol.usd)}` : "—"} sub="USDC" />
     </div>
   );
 }

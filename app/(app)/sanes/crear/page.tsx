@@ -14,6 +14,8 @@ import {
   CalendarClock,
   CreditCard,
   AlertCircle,
+  BookOpen,
+  X,
 } from "lucide-react";
 import { crearRecolecta, type EstadoRecolecta } from "../actions";
 import {
@@ -26,6 +28,7 @@ import { useIndicador } from "@/components/use-indicador";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { GuiaMonedas } from "@/components/guia-monedas";
 
 const TOTAL = 7;
 
@@ -67,6 +70,7 @@ export default function CrearPage() {
   const [frecId, setFrecId] = useState(""); // preset id o "personalizado"
   const [dias, setDias] = useState("");
   const [verTip, setVerTip] = useState(false);
+  const [verGuiaMonedas, setVerGuiaMonedas] = useState(false);
   // Método de pago: el organizador elige uno de su perfil
   const [metodos, setMetodos] = useState<MetodoPerfil[]>([]);
   const [cargandoMetodos, setCargandoMetodos] = useState(false);
@@ -337,12 +341,20 @@ export default function CrearPage() {
                   <div className="absolute left-0 top-7 z-10 w-72 rounded-xl border bg-card p-3 text-xs text-muted-foreground shadow-xl">
                     Es la moneda del plan de ahorro en la que todos aportan
                     juntos. Si eliges <b>Bolívares</b>, el monto se{" "}
-                    <b>fija en dólares</b> (BCV o paralelo) y al pagar se calcula
+                    <b>fija en dólares</b> (BCV o promedio) y al pagar se calcula
                     en Bs a la <b>tasa del día</b>, para que el ahorro no pierda
                     valor.
                   </div>
                 )}
               </div>
+              <button
+                type="button"
+                onClick={() => setVerGuiaMonedas(true)}
+                className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-brand/40 hover:text-brand"
+              >
+                <BookOpen className="size-3.5" />
+                ¿Cuál elijo? Ver guía
+              </button>
               <div className="space-y-2">
                 {MONEDAS_RECOLECTA.map((m) => (
                   <button
@@ -413,7 +425,7 @@ export default function CrearPage() {
                     </div>
                     {info?.enBolivares && (
                       <p className="text-xs text-muted-foreground">
-                        Se fija en dólares ({moneda === "bs_bcv" ? "BCV" : "paralelo"});
+                        Se fija en dólares ({moneda === "bs_bcv" ? "BCV" : "promedio"});
                         al pagar se calcula en Bs a la tasa del día.
                       </p>
                     )}
@@ -508,7 +520,7 @@ export default function CrearPage() {
                   </div>
                   {info?.enBolivares && (
                     <p className="text-xs text-muted-foreground">
-                      Se fija en dólares ({moneda === "bs_bcv" ? "BCV" : "paralelo"});
+                      Se fija en dólares ({moneda === "bs_bcv" ? "BCV" : "promedio"});
                       al aportar se calcula en Bs a la tasa del día.
                     </p>
                   )}
@@ -675,6 +687,45 @@ export default function CrearPage() {
           )}
         </div>
       </div>
+
+      {/* Modal guía de monedas (bottom-sheet en móvil) */}
+      {verGuiaMonedas && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Guía de monedas"
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setVerGuiaMonedas(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setVerGuiaMonedas(false);
+          }}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
+
+          {/* Sheet */}
+          <div className="relative z-10 flex max-h-[90dvh] w-full max-w-md flex-col rounded-t-3xl bg-background shadow-xl">
+            {/* Handle bar */}
+            <div className="flex items-center justify-between px-5 pb-2 pt-4">
+              <div className="h-1 w-10 rounded-full bg-muted mx-auto absolute left-1/2 top-3 -translate-x-1/2" />
+              <span className="sr-only">Guía de monedas</span>
+              <button
+                type="button"
+                onClick={() => setVerGuiaMonedas(false)}
+                aria-label="Cerrar"
+                className="ml-auto rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="overflow-y-auto px-5 pb-8 pt-1">
+              <GuiaMonedas />
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -18,19 +18,19 @@ export const MONEDA_RECOLECTA: Record<
   { label: string; simbolo: string; ancla: string; enBolivares: boolean }
 > = {
   bs_bcv: {
-    label: "Bolívares — dólar BCV",
+    label: "Bolívares — dólar BCV (pagas en Bs)",
     simbolo: "Bs",
     ancla: "$",
     enBolivares: true,
   },
   bs_usdt: {
-    label: "Bolívares — paralelo (USDT)",
+    label: "Bolívares — promedio (USDC) (pagas en Bs)",
     simbolo: "Bs",
     ancla: "$",
     enBolivares: true,
   },
-  usdc: { label: "USDC (Solana)", simbolo: "USDC", ancla: "USDC", enBolivares: false },
-  sol: { label: "Solana (SOL)", simbolo: "SOL", ancla: "SOL", enBolivares: false },
+  usdc: { label: "USDC (Solana) · Cripto", simbolo: "USDC", ancla: "USDC", enBolivares: false },
+  sol: { label: "SOL (Solana) · Cripto", simbolo: "SOL", ancla: "SOL", enBolivares: false },
   // compatibilidad con recolectas viejas
   usdt: { label: "USDT", simbolo: "USDT", ancla: "USDT", enBolivares: false },
   USD: { label: "Dólar", simbolo: "$", ancla: "$", enBolivares: false },

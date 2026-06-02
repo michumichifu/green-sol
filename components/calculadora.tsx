@@ -9,7 +9,7 @@ import { useIndicador } from "@/components/use-indicador";
 const MONEDAS = [
   { id: "bs", nombre: "Bolívares", simbolo: "Bs" },
   { id: "bcv", nombre: "Dólar BCV", simbolo: "$" },
-  { id: "usdt", nombre: "USDT", simbolo: "USDT" },
+  { id: "usdt", nombre: "USDC / promedio", simbolo: "USDC" },
   { id: "sol", nombre: "Solana", simbolo: "SOL" },
 ] as const;
 type Moneda = (typeof MONEDAS)[number]["id"];
@@ -49,11 +49,11 @@ export function Calculadora({ tasas }: { tasas: Tasas }) {
   const cotizacion = (): string => {
     switch (moneda) {
       case "bs":
-        return `BCV: Bs ${fmt(bcv)} · USDT: Bs ${fmt(usdt)}`;
+        return `BCV: Bs ${fmt(bcv)} · USDC: Bs ${fmt(usdt)}`;
       case "bcv":
         return `1 $ BCV = Bs ${fmt(bcv)}`;
       case "usdt":
-        return `1 USDT = Bs ${fmt(usdtBs)}`;
+        return `1 USDC = Bs ${fmt(usdtBs)}`;
       case "sol":
         return `1 SOL = $ ${fmt(sol)}`;
     }
