@@ -14,6 +14,37 @@ async function sembrarUsuarioConPin(
 }
 
 /**
+ * Obtiene (y planta) un OTP conocido para el correo dado.
+ * El endpoint invalida OTPs anteriores y crea uno con código "246810".
+ */
+async function obtenerOtp(
+  page: import("@playwright/test").Page,
+  correo: string,
+): Promise<string> {
+  const res = await page.request.get(
+    `/api/test/get-otp?correo=${encodeURIComponent(correo)}`,
+  );
+  expect(res.ok()).toBeTruthy();
+  const body = await res.json();
+  return body.codigo as string;
+}
+
+/**
+ * Rellena un CampoPin identificado por su testId base (p. ej. "registro-pin").
+ */
+async function rellenarPinPor(
+  page: import("@playwright/test").Page,
+  testIdBase: string,
+  pin: string,
+) {
+  await page.getByTestId(`${testIdBase}-0`).click();
+  for (const digit of pin) {
+    await page.keyboard.press(digit);
+    await page.waitForTimeout(60);
+  }
+}
+
+/**
  * Rellena los 6 dígitos del CampoPin haciendo click en el primer dígito
  * y tipeando el resto. CampoPin mueve el foco al siguiente input tras cada
  * dígito. Como `onCompleto` dispara `requestSubmit` al terminar el 6.º dígito,
@@ -97,4 +128,74 @@ test("identificador se conserva al volver del paso 2 al paso 1", async ({ page }
 
   // El identificador sigue presente
   await expect(page.getByLabel("Correo o usuario")).toHaveValue(correoTest);
+});
+
+// ─── flujo de registro completo ─────────────────────────────────────────────
+
+test("registro completo: correo → OTP → PIN → datos → completado → login", async ({
+  page,
+}) => {
+  const correo = `e2e_reg_${Date.now()}@test.local`;
+  const usuario = `reg${Date.now().toString().slice(-9)}`;
+  const pin = "357913";
+
+  // ── Paso 1: correo ──────────────────────────────────────────────────────
+  await page.goto("/registro");
+  await expect(
+    page.getByRole("heading", { name: "Crea tu cuenta gratis" }),
+  ).toBeVisible();
+  await page.getByLabel("Correo").fill(correo);
+  await page.getByRole("button", { name: "Siguiente" }).click();
+
+  // ── Paso OTP: /verificar ────────────────────────────────────────────────
+  await expect(page).toHaveURL(/\/verificar$/, { timeout: 10_000 });
+  await expect(page.getByText(/código de 6 dígitos/i)).toBeVisible();
+
+  // Planta un OTP conocido y obtiene el código
+  const codigo = await obtenerOtp(page, correo);
+
+  await page.getByLabel("Código").fill(codigo);
+  await page.getByRole("button", { name: "Verificar" }).click();
+
+  // ── Paso 2: PIN ─────────────────────────────────────────────────────────
+  await expect(page).toHaveURL(/\/registro$/, { timeout: 10_000 });
+  await expect(page.getByRole("heading", { name: "Crea tu PIN" })).toBeVisible();
+
+  await rellenarPinPor(page, "registro-pin", pin);
+  await rellenarPinPor(page, "registro-pin-conf", pin);
+  await page.getByRole("button", { name: "Continuar" }).click();
+
+  // ── Paso 3: datos ────────────────────────────────────────────────────────
+  await expect(
+    page.getByRole("heading", { name: "Cuéntanos de ti" }),
+  ).toBeVisible({ timeout: 8_000 });
+
+  await page.getByLabel("Nombre", { exact: true }).fill("Test");
+  await page.getByLabel("Apellido").fill("E2E");
+  await page.getByLabel("Nombre de usuario").fill(usuario);
+  await page.getByLabel("País").selectOption("VE");
+  await page.getByRole("button", { name: "Crear cuenta" }).click();
+
+  // ── Pantalla de completado ───────────────────────────────────────────────
+  await expect(page).toHaveURL(/\/registro\/completado$/, { timeout: 10_000 });
+  await expect(
+    page.getByRole("heading", { name: /tu cuenta está lista/i }),
+  ).toBeVisible();
+
+  // El modal de biometría debe aparecer
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("button", { name: "Entendido" }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+
+  // ── Login con el PIN recién creado ───────────────────────────────────────
+  await page.getByRole("link", { name: "Iniciar sesión" }).click();
+  await expect(page).toHaveURL(/\/login$/, { timeout: 5_000 });
+
+  await page.getByLabel("Correo o usuario").fill(correo);
+  await page.getByRole("button", { name: /Siguiente/ }).click();
+
+  await expect(page.getByRole("heading", { name: "Ingresa tu PIN" })).toBeVisible();
+  await rellenarPinPor(page, "login-pin", pin);
+
+  await expect(page).toHaveURL(/\/(dashboard|onboarding)$/, { timeout: 10_000 });
 });

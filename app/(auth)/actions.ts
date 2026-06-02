@@ -3,22 +3,20 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
-import { hashContrasena } from "@/lib/auth/password";
 import { crearYEnviarOtp, validarOtp } from "@/lib/auth/otp";
 import { crearNotificacion } from "@/lib/notificaciones";
 import { crearSesion, cerrarSesion, obtenerUsuario } from "@/lib/auth/session";
 import { debeMostrarOnboarding } from "@/lib/onboarding";
 import { validarRestricciones } from "@/lib/restricciones";
-import { verificarPin } from "@/lib/auth/pin";
+import { verificarPin, hashearPin, pinFormatoValido } from "@/lib/auth/pin";
 import {
-  registroCompletoSchema,
+  pinSchema,
+  registroDatosSchema,
   loginPinSchema,
   otpSchema,
 } from "@/lib/validations/auth";
 import { paisPorCodigo } from "@/lib/paises";
-import { SENAL_MIGRAR_PIN } from "./constants";
-
-const PENDIENTE = "greensol_pendiente";
+import { SENAL_MIGRAR_PIN, COOKIE_PENDIENTE as PENDIENTE } from "./constants";
 
 export type EstadoAuth = { error?: string };
 
@@ -31,75 +29,44 @@ async function guardarPendiente(correo: string) {
   });
 }
 
-export async function registrarse(
+/**
+ * Paso 1 del nuevo registro: solo el correo.
+ * Crea un usuario pendiente (sin PIN ni datos) y envía OTP.
+ */
+export async function solicitarRegistro(
   _estado: EstadoAuth,
   formData: FormData,
 ): Promise<EstadoAuth> {
-  const datos = registroCompletoSchema.safeParse({
-    correo: formData.get("correo"),
-    contrasena: formData.get("contrasena"),
-    confirmar: formData.get("confirmar"),
-    nombre: formData.get("nombre"),
-    apellido: formData.get("apellido"),
-    nombreUsuario: formData.get("nombreUsuario"),
-    pais: formData.get("pais"),
-  });
-  if (!datos.success) return { error: datos.error.issues[0].message };
-  const { correo, contrasena, nombre, apellido, nombreUsuario, pais } =
-    datos.data;
-  const correoLower = correo.toLowerCase();
-
-  const errorRest = await validarRestricciones({
-    nombre,
-    apellido,
-    nombreUsuario,
-  });
-  if (errorRest) return { error: errorRest };
+  const correoRaw = String(formData.get("correo") ?? "").trim().toLowerCase();
+  if (!correoRaw || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoRaw)) {
+    return { error: "Correo inválido." };
+  }
 
   const existente = await prisma.usuario.findUnique({
-    where: { correo: correoLower },
+    where: { correo: correoRaw },
   });
   if (existente?.correoVerificado) {
-    return { error: "Ese correo ya está registrado." };
-  }
-  // Unicidad del nombre de usuario sin distinguir mayúsculas (se guarda tal cual
-  // se escribió, pero "BeneicoLuis" y "beneicoluis" se consideran el mismo).
-  const userExistente = await prisma.usuario.findFirst({
-    where: { nombreUsuario: { equals: nombreUsuario, mode: "insensitive" } },
-  });
-  if (userExistente && userExistente.correo !== correoLower) {
-    return { error: "Ese nombre de usuario ya está en uso." };
+    return { error: "Ese correo ya tiene cuenta. Inicia sesión." };
   }
 
-  const hash = await hashContrasena(contrasena);
-  const monedaPreferida = paisPorCodigo(pais)?.moneda ?? "USD";
-  const data = {
-    hashContrasena: hash,
-    nombre,
-    apellido,
-    nombreUsuario,
-    pais,
-    monedaPreferida,
-  };
+  // Crea o reutiliza el usuario pendiente (solo correo, sin PIN ni datos)
   const usuario = existente
-    ? await prisma.usuario.update({ where: { correo: correoLower }, data })
-    : await prisma.usuario.create({ data: { correo: correoLower, ...data } });
+    ? await prisma.usuario.update({
+        where: { correo: correoRaw },
+        data: { correoVerificado: false },
+      })
+    : await prisma.usuario.create({ data: { correo: correoRaw } });
 
-  if (!existente) {
-    await crearNotificacion(usuario.id, {
-      tipo: "verificacion",
-      titulo: "Completa tu verificación 🔐",
-      cuerpo:
-        "Agrega un método de seguridad (PIN o código por correo) para proteger tu cuenta.",
-      enlace: "/configuracion?tab=verificacion",
-    });
-  }
-
-  await crearYEnviarOtp(usuario.id, correoLower, "verificacion");
-  await guardarPendiente(correoLower);
+  await crearYEnviarOtp(usuario.id, correoRaw, "verificacion");
+  await guardarPendiente(correoRaw);
   redirect("/verificar");
 }
 
+/**
+ * Valida el OTP.
+ * - Si el usuario NO tiene PIN (registro en curso): redirige a /registro (paso PIN).
+ * - Si el usuario SÍ tiene PIN (era un login con correo no verificado): va al dashboard.
+ */
 export async function verificar(
   _estado: EstadoAuth,
   formData: FormData,
@@ -109,7 +76,7 @@ export async function verificar(
 
   const correo = (await cookies()).get(PENDIENTE)?.value;
   if (!correo) {
-    return { error: "La verificación expiró. Vuelve a iniciar el registro." };
+    return { error: "La verificación expiró. Vuelve a iniciar el proceso." };
   }
   const usuario = await prisma.usuario.findUnique({ where: { correo } });
   if (!usuario) return { error: "Usuario no encontrado." };
@@ -119,12 +86,121 @@ export async function verificar(
 
   await prisma.usuario.update({
     where: { id: usuario.id },
-    data: { correoVerificado: true, ingresos: { increment: 1 } },
+    data: { correoVerificado: true },
   });
+
+  // Distingue registro en curso (incompleto) vs login (registro completo)
+  // "incompleto" = sin PIN o sin datos de perfil (nombreUsuario)
+  if (!usuario.pinHash || !usuario.nombreUsuario) {
+    // Registro en curso: la cookie PENDIENTE se mantiene para los siguientes pasos
+    // detectarPasoInicial en /registro decidirá el paso correcto (2 o 3)
+    redirect("/registro");
+  }
+
+  // Era un login con correo no verificado: iniciar sesión normalmente
   (await cookies()).delete(PENDIENTE);
+  const actualizado = await prisma.usuario.update({
+    where: { id: usuario.id },
+    data: { ingresos: { increment: 1 } },
+  });
   await crearSesion(usuario.id);
-  // Tras crear la cuenta siempre se muestra el introductorio.
-  redirect("/onboarding");
+  redirect(debeMostrarOnboarding(actualizado) ? "/onboarding" : "/dashboard");
+}
+
+/**
+ * Paso 2 del registro: define el PIN.
+ * Identifica al usuario por la cookie PENDIENTE.
+ */
+export async function definirPinRegistro(
+  _estado: EstadoAuth,
+  formData: FormData,
+): Promise<EstadoAuth> {
+  const datos = pinSchema.safeParse({
+    pin: formData.get("pin"),
+    confirmar: formData.get("confirmar"),
+  });
+  if (!datos.success) return { error: datos.error.issues[0].message };
+  const { pin } = datos.data;
+
+  if (!pinFormatoValido(pin)) {
+    return { error: "Ese PIN es demasiado sencillo. Elige uno más seguro." };
+  }
+
+  const correo = (await cookies()).get(PENDIENTE)?.value;
+  if (!correo) {
+    return { error: "La sesión de registro expiró. Vuelve a empezar." };
+  }
+  const usuario = await prisma.usuario.findUnique({ where: { correo } });
+  if (!usuario) return { error: "Usuario no encontrado." };
+  if (!usuario.correoVerificado) {
+    return { error: "Primero verifica tu correo." };
+  }
+
+  const pinHash = await hashearPin(pin);
+  await prisma.usuario.update({
+    where: { id: usuario.id },
+    data: { pinHash },
+  });
+
+  return {};
+}
+
+/**
+ * Paso 3 del registro: completa los datos del perfil.
+ */
+export async function completarRegistro(
+  _estado: EstadoAuth,
+  formData: FormData,
+): Promise<EstadoAuth> {
+  const datos = registroDatosSchema.safeParse({
+    nombre: formData.get("nombre"),
+    apellido: formData.get("apellido"),
+    nombreUsuario: formData.get("nombreUsuario"),
+    pais: formData.get("pais"),
+  });
+  if (!datos.success) return { error: datos.error.issues[0].message };
+  const { nombre, apellido, nombreUsuario, pais } = datos.data;
+
+  const errorRest = await validarRestricciones({ nombre, apellido, nombreUsuario });
+  if (errorRest) return { error: errorRest };
+
+  const correo = (await cookies()).get(PENDIENTE)?.value;
+  if (!correo) {
+    return { error: "La sesión de registro expiró. Vuelve a empezar." };
+  }
+  const usuario = await prisma.usuario.findUnique({ where: { correo } });
+  if (!usuario) return { error: "Usuario no encontrado." };
+  if (!usuario.correoVerificado || !usuario.pinHash) {
+    return { error: "Completa los pasos anteriores primero." };
+  }
+
+  // Unicidad del nombre de usuario (case-insensitive)
+  const userExistente = await prisma.usuario.findFirst({
+    where: { nombreUsuario: { equals: nombreUsuario, mode: "insensitive" } },
+  });
+  if (userExistente && userExistente.correo !== correo) {
+    return { error: "Ese nombre de usuario ya está en uso." };
+  }
+
+  const monedaPreferida = paisPorCodigo(pais)?.moneda ?? "USD";
+  await prisma.usuario.update({
+    where: { id: usuario.id },
+    data: { nombre, apellido, nombreUsuario, pais, monedaPreferida },
+  });
+
+  // Notificación de bienvenida (misma que tenía el registro anterior)
+  await crearNotificacion(usuario.id, {
+    tipo: "verificacion",
+    titulo: "Completa tu verificación 🔐",
+    cuerpo:
+      "Agrega un método de seguridad (PIN o código por correo) para proteger tu cuenta.",
+    enlace: "/configuracion?tab=verificacion",
+  });
+
+  // Limpia la cookie pendiente
+  (await cookies()).delete(PENDIENTE);
+
+  redirect("/registro/completado");
 }
 
 export async function reenviarCodigo(): Promise<void> {
