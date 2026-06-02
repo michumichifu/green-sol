@@ -312,14 +312,27 @@ export async function reportarPago(
   });
   const recolecta = await prisma.recolecta.findUnique({
     where: { id: recolectaId },
+    include: { organizador: { select: { id: true, correo: true, nombre: true } } },
   });
   if (recolecta) {
-    await crearNotificacion(recolecta.organizadorId, {
-      tipo: "pago_reportado",
-      titulo: "Nuevo pago reportado",
-      cuerpo: `${usuario.correo} reportó $${monto} en "${recolecta.nombre}".`,
-      enlace: `/sanes/${recolectaId}`,
-    });
+    const etiquetaNombre = `${usuario.nombre ?? ""} ${usuario.apellido ?? ""}`.trim();
+    const etiqueta = etiquetaNombre
+      ? etiquetaNombre + (usuario.nombreUsuario ? ` (@${usuario.nombreUsuario})` : "")
+      : usuario.nombreUsuario
+        ? `@${usuario.nombreUsuario}`
+        : usuario.correo;
+    await notificarEvento(
+      { id: recolecta.organizador.id, correo: recolecta.organizador.correo },
+      "san_pago_reportado",
+      {
+        organizador: recolecta.organizador.nombre ?? recolecta.organizador.correo,
+        usuario: etiqueta,
+        monto: `$${monto}`,
+        nombreSan: recolecta.nombre,
+        link: `/sanes/${recolectaId}`,
+      },
+      { tipo: "pago_reportado", enlace: `/sanes/${recolectaId}` },
+    );
   }
   revalidatePath(`/sanes/${recolectaId}`);
 }
@@ -332,7 +345,10 @@ export async function resolverAporte(
   if (!usuario) return;
   const aporte = await prisma.aporte.findUnique({
     where: { id: aporteId },
-    include: { recolecta: true, participante: true },
+    include: {
+      recolecta: true,
+      participante: { include: { usuario: { select: { id: true, correo: true, nombre: true, apellido: true, nombreUsuario: true } } } },
+    },
   });
   if (!aporte || aporte.recolecta.organizadorId !== usuario.id) return;
 
@@ -340,12 +356,26 @@ export async function resolverAporte(
     where: { id: aporteId },
     data: { estado: confirmar ? "confirmado" : "rechazado" },
   });
-  await crearNotificacion(aporte.participante.usuarioId, {
-    tipo: "pago_resuelto",
-    titulo: confirmar ? "Tu pago fue confirmado" : "Tu pago fue rechazado",
-    cuerpo: `En "${aporte.recolecta.nombre}".`,
-    enlace: `/sanes/${aporte.recolectaId}`,
-  });
+
+  const participanteUsuario = aporte.participante.usuario;
+  const etiquetaNombre = `${participanteUsuario.nombre ?? ""} ${participanteUsuario.apellido ?? ""}`.trim();
+  const etiquetaParticipante = etiquetaNombre
+    ? etiquetaNombre + (participanteUsuario.nombreUsuario ? ` (@${participanteUsuario.nombreUsuario})` : "")
+    : participanteUsuario.nombreUsuario
+      ? `@${participanteUsuario.nombreUsuario}`
+      : participanteUsuario.correo;
+
+  await notificarEvento(
+    { id: participanteUsuario.id, correo: participanteUsuario.correo },
+    confirmar ? "san_pago_aprobado" : "san_pago_rechazado",
+    {
+      usuario: etiquetaParticipante,
+      monto: `$${aporte.monto}`,
+      nombreSan: aporte.recolecta.nombre,
+      link: `/sanes/${aporte.recolectaId}`,
+    },
+    { tipo: "pago_resuelto", enlace: `/sanes/${aporte.recolectaId}` },
+  );
   revalidatePath(`/sanes/${aporte.recolectaId}`);
 }
 

@@ -242,6 +242,115 @@ export const EVENTOS_NOTIFICACION: EventoNotificacion[] = [
     },
   },
   {
+    clave: "san_pago_reportado",
+    nombre: "Pago reportado (organizador)",
+    descripcion: "Al participante reportar un pago; avisa al organizador para que lo revise.",
+    categoria: "Ahorros",
+    canales: ["app", "correo"],
+    variables: {
+      organizador: "Nombre del organizador",
+      usuario: "Quién pagó",
+      monto: "Monto reportado",
+      nombreSan: "Nombre del san",
+      link: "Enlace al san",
+    },
+    datosMuestra: {
+      organizador: "María",
+      usuario: "Pedro",
+      monto: "$50",
+      nombreSan: "San de los amigos",
+      link: LINK_DEMO,
+    },
+    app: {
+      titulo: "💰 Nuevo pago por revisar",
+      cuerpo:
+        "{{usuario}} reportó un pago de {{monto}} en «{{nombreSan}}». Revísalo cuando puedas.",
+    },
+    correo: {
+      asunto: "Nuevo pago por revisar en «{{nombreSan}}»",
+      html: correoBase({
+        titulo: "Tienes un pago por revisar 💰",
+        preheader: "Un participante reportó un pago en tu san",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'>Hola {{organizador}}, <strong>{{usuario}}</strong> reportó un pago de <strong>{{monto}}</strong> en el san <strong>«{{nombreSan}}»</strong>.</p>" +
+          "<p style='margin:0;'>Entra para aprobarlo o rechazarlo.</p>",
+        ctaTexto: "Revisar pago",
+        ctaUrl: "{{link}}",
+      }),
+    },
+  },
+  {
+    clave: "san_pago_aprobado",
+    nombre: "Pago aprobado (participante)",
+    descripcion: "Al organizador aprobar un aporte; avisa al participante.",
+    categoria: "Ahorros",
+    canales: ["app", "correo"],
+    variables: {
+      usuario: "Nombre del participante",
+      monto: "Monto aprobado",
+      nombreSan: "Nombre del san",
+      link: "Enlace al san",
+    },
+    datosMuestra: {
+      usuario: "Pedro",
+      monto: "$50",
+      nombreSan: "San de los amigos",
+      link: LINK_DEMO,
+    },
+    app: {
+      titulo: "✅ ¡Tu pago fue aprobado!",
+      cuerpo: "Tu pago de {{monto}} en «{{nombreSan}}» fue confirmado por el organizador.",
+    },
+    correo: {
+      asunto: "Tu pago en «{{nombreSan}}» fue aprobado ✅",
+      html: correoBase({
+        titulo: "¡Pago aprobado! ✅",
+        preheader: "El organizador confirmó tu pago",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'>Hola {{usuario}}, el organizador <strong>aprobó</strong> tu pago de <strong>{{monto}}</strong> en el san <strong>«{{nombreSan}}»</strong>.</p>" +
+          "<p style='margin:0;'>¡Sigue así!</p>",
+        ctaTexto: "Ver el san",
+        ctaUrl: "{{link}}",
+      }),
+    },
+  },
+  {
+    clave: "san_pago_rechazado",
+    nombre: "Pago rechazado (participante)",
+    descripcion: "Al organizador rechazar un aporte; avisa al participante.",
+    categoria: "Ahorros",
+    canales: ["app", "correo"],
+    variables: {
+      usuario: "Nombre del participante",
+      monto: "Monto rechazado",
+      nombreSan: "Nombre del san",
+      link: "Enlace al san",
+    },
+    datosMuestra: {
+      usuario: "Pedro",
+      monto: "$50",
+      nombreSan: "San de los amigos",
+      link: LINK_DEMO,
+    },
+    app: {
+      titulo: "❌ Tu pago fue rechazado",
+      cuerpo:
+        "El organizador rechazó tu pago de {{monto}} en «{{nombreSan}}». Contáctalo para resolverlo.",
+    },
+    correo: {
+      asunto: "Tu pago en «{{nombreSan}}» fue rechazado",
+      html: correoBase({
+        titulo: "Tu pago fue rechazado ❌",
+        preheader: "El organizador rechazó tu pago",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'>Hola {{usuario}}, el organizador <strong>rechazó</strong> tu pago de <strong>{{monto}}</strong> en el san <strong>«{{nombreSan}}»</strong>.</p>" +
+          "<p style='margin:0;'>Comunícate con el organizador para resolverlo.</p>",
+        ctaTexto: "Ver el san",
+        ctaUrl: "{{link}}",
+      }),
+    },
+  },
+  {
     clave: "kyc_recibida",
     nombre: "Verificación recibida",
     descripcion: "Al enviar el usuario su verificación de identidad (KYC).",

@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { PanelTabs } from "@/components/panel-tabs";
 import { ResumenSan } from "@/components/san/resumen-san";
 import { PagosParticipante } from "@/components/san/pagos-participante";
+import { PagosOrganizador } from "@/components/san/pagos-organizador";
 
 export default async function DetalleRecolecta({
   params,
@@ -79,49 +80,14 @@ export default async function DetalleRecolecta({
             />
           )}
 
-          {/* Vista del organizador (Task 7 la rediseñará; por ahora se conserva tal cual) */}
-          {esOrganizador && r.aportes.length > 0 && (
-            <section className="space-y-2">
-              <h2 className="font-semibold">Pagos reportados</h2>
-              <ul className="space-y-1 text-sm">
-                {r.aportes.map((a) => {
-                  const confirmar = resolverAporte.bind(null, a.id, true);
-                  const rechazar = resolverAporte.bind(null, a.id, false);
-                  return (
-                    <li
-                      key={a.id}
-                      className="rounded-lg border bg-card px-3 py-2"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>{a.participante.usuario.correo}</span>
-                        <span>
-                          ${a.monto} · {a.estado}
-                        </span>
-                      </div>
-                      {a.referencia && (
-                        <p className="text-xs text-muted-foreground">
-                          Ref: {a.referencia}
-                        </p>
-                      )}
-                      {esOrganizador && a.estado === "reportado" && (
-                        <div className="mt-1 flex gap-2">
-                          <form action={confirmar}>
-                            <Button type="submit" size="sm" variant="outline">
-                              Confirmar
-                            </Button>
-                          </form>
-                          <form action={rechazar}>
-                            <Button type="submit" size="sm" variant="ghost">
-                              Rechazar
-                            </Button>
-                          </form>
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
+          {/* Vista del organizador: revisión de pagos (Task 7) */}
+          {esOrganizador && (
+            <PagosOrganizador
+              recolecta={r}
+              tasas={tasas}
+              aportes={r.aportes}
+              resolver={resolverAporte}
+            />
           )}
 
           {r.estado === "cerrada" && esParticipante && (
