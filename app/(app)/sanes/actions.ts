@@ -8,6 +8,7 @@ import { credencialValida } from "@/lib/auth/credencial";
 import { crearRecolectaSchema } from "@/lib/validations/recolecta";
 import {
   crearNotificacion,
+  notificarEvento,
   notificarVarios,
   notificarYCorreo,
 } from "@/lib/notificaciones";
@@ -174,7 +175,10 @@ export async function unirseARecolecta(
   const usuario = await obtenerUsuario();
   if (!usuario) return { error: "Inicia sesión." };
   const id = limpiarCodigo(codigo);
-  const r = await prisma.recolecta.findUnique({ where: { id } });
+  const r = await prisma.recolecta.findUnique({
+    where: { id },
+    include: { organizador: { select: { id: true, correo: true, nombre: true } } },
+  });
   if (!r) return { error: "No encontramos ese ahorro." };
   if (r.organizadorId === usuario.id) redirect(`/sanes/${r.id}`);
   if (r.estado !== "abierta") {
@@ -184,14 +188,28 @@ export async function unirseARecolecta(
     await prisma.participante.create({
       data: { recolectaId: r.id, usuarioId: usuario.id },
     });
-    await crearNotificacion(r.organizadorId, {
-      tipo: "union",
-      titulo: "Alguien se unió a tu ahorro",
-      cuerpo: `${usuario.nombre ?? usuario.correo} se unió a "${r.nombre}".`,
-      enlace: `/sanes/${r.id}`,
-    });
   } catch {
     // ya estaba unido
+  }
+  // Notificar al organizador (app + correo) solo si quien se une no es él mismo.
+  if (r.organizadorId !== usuario.id) {
+    const etiquetaNombre = `${usuario.nombre ?? ""} ${usuario.apellido ?? ""}`.trim();
+    const etiqueta = etiquetaNombre
+      ? etiquetaNombre + (usuario.nombreUsuario ? ` (@${usuario.nombreUsuario})` : "")
+      : usuario.nombreUsuario
+        ? `@${usuario.nombreUsuario}`
+        : usuario.correo;
+    await notificarEvento(
+      { id: r.organizador.id, correo: r.organizador.correo },
+      "union_san",
+      {
+        organizador: r.organizador.nombre ?? r.organizador.correo,
+        usuario: etiqueta,
+        nombreSan: r.nombre,
+        link: `/sanes/${r.id}`,
+      },
+      { tipo: "union", enlace: `/sanes/${r.id}` },
+    );
   }
   redirect(`/sanes/${r.id}`);
 }
