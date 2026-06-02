@@ -64,12 +64,12 @@ export const EVENTOS_NOTIFICACION: EventoNotificacion[] = [
     datosMuestra: { codigo: "428913" },
     app: { titulo: "Código de verificación", cuerpo: "(No se envía in-app)." },
     correo: {
-      asunto: "Tu código de verificación: {{codigo}}",
+      asunto: "Verifica tu correo: {{codigo}}",
       html: correoBase({
-        titulo: "Verifica tu cuenta",
-        preheader: "Tu código de verificación de Green Sol",
+        titulo: "Verifica tu correo",
+        preheader: "Tu código para verificar tu correo en Green Sol",
         cuerpoHtml:
-          "<p style='margin:0 0 16px;'>Usa este código para continuar. Vence en unos minutos.</p>" +
+          "<p style='margin:0 0 16px;'>Verifica tu correo con este código. Vence en unos minutos.</p>" +
           "<div style='text-align:center;font-size:32px;font-weight:800;letter-spacing:0.28em;color:#0E9F6E;background:#EAF7F1;border-radius:12px;padding:18px;'>{{codigo}}</div>" +
           "<p style='margin:16px 0 0;font-size:13px;color:#8A958F;'>Si no fuiste tú, ignora este correo.</p>",
       }),
