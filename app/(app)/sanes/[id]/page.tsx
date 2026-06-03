@@ -6,6 +6,9 @@ import { ThumbsUp, ThumbsDown } from "lucide-react";
 import {
   invitarPorCorreo,
   generarTurnos,
+  generarInvitacion,
+  revocarInvitacion,
+  listarInvitacionesActivas,
   reportarPago,
   resolverAporte,
   resolverSolicitud,
@@ -81,6 +84,16 @@ export default async function DetalleRecolecta({
     : [];
   const hayPendientes = solicitudes.length > 0;
 
+  // Invitaciones temporales activas (las gestiona el organizador desde el Resumen).
+  const invitaciones = esOrganizador
+    ? (await listarInvitacionesActivas(r.id)).map((inv) => ({
+        id: inv.id,
+        codigo: inv.codigo,
+        expiraEn: inv.expiraEn.toISOString(),
+      }))
+    : [];
+  const generarInv = generarInvitacion.bind(null, r.id);
+
   return (
     <main className="mx-auto max-w-md px-6 py-8">
       <PanelTabs
@@ -92,6 +105,9 @@ export default async function DetalleRecolecta({
           recolecta={r}
           esOrganizador={esOrganizador}
           esParticipante={esParticipante}
+          invitaciones={invitaciones}
+          generar={generarInv}
+          revocar={revocarInvitacion}
         />
 
         {/* Pestaña 1 — Miembros */}

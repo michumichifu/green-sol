@@ -1,5 +1,6 @@
 import { DonaProgreso } from "./dona-progreso";
 import { CompartirAhorro } from "@/components/compartir-ahorro";
+import { Invitar, type InvitacionVista } from "./invitar";
 import { MONEDA_RECOLECTA } from "@/lib/validations/recolecta";
 
 // Tipos inline derivados de lo que devuelve la query de prisma en el page
@@ -52,6 +53,9 @@ interface ResumenSanProps {
   recolecta: Recolecta;
   esOrganizador: boolean;
   esParticipante: boolean;
+  invitaciones?: InvitacionVista[];
+  generar?: (dias: number) => Promise<{ codigo?: string; enlace?: string; error?: string }>;
+  revocar?: (id: string) => Promise<void>;
 }
 
 const COLORES_ESTADO: Record<string, string> = {
@@ -70,6 +74,9 @@ export function ResumenSan({
   recolecta: r,
   esOrganizador,
   esParticipante,
+  invitaciones,
+  generar,
+  revocar,
 }: ResumenSanProps) {
   const info = MONEDA_RECOLECTA[r.moneda];
   const ancla = info?.ancla ?? "$";
@@ -142,10 +149,17 @@ export function ResumenSan({
         </div>
       )}
 
-      {/* Invitar — solo si está abierta y es participante */}
-      {esParticipante && r.estado === "abierta" && (
-        <CompartirAhorro codigo={r.id} nombre={r.nombre} />
-      )}
+      {/* Invitar — el organizador genera enlaces temporales; el participante comparte el san */}
+      {r.estado === "abierta" &&
+        (esOrganizador && invitaciones && generar && revocar ? (
+          <Invitar
+            invitaciones={invitaciones}
+            generar={generar}
+            revocar={revocar}
+          />
+        ) : esParticipante ? (
+          <CompartirAhorro codigo={r.id} nombre={r.nombre} />
+        ) : null)}
     </div>
   );
 }
