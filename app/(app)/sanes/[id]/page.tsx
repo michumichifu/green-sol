@@ -12,7 +12,6 @@ import {
   reportarPago,
   resolverAporte,
   resolverSolicitud,
-  cerrarRecolecta,
   valorar,
 } from "../actions";
 import { Button } from "@/components/ui/button";
@@ -20,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { PanelTabs } from "@/components/panel-tabs";
 import { ResumenSan } from "@/components/san/resumen-san";
 import { Miembros } from "@/components/san/miembros";
+import { CerrarSan } from "@/components/san/cerrar-san";
 import { MetodoPagoTarjeta } from "@/components/san/metodo-pago-tarjeta";
 import { PagosParticipante } from "@/components/san/pagos-participante";
 import { PagosOrganizador } from "@/components/san/pagos-organizador";
@@ -56,7 +56,6 @@ export default async function DetalleRecolecta({
   const invitar = invitarPorCorreo.bind(null, r.id);
   const generar = generarTurnos.bind(null, r.id);
   const reportar = reportarPago.bind(null, r.id);
-  const cerrar = cerrarRecolecta.bind(null, r.id);
 
   const tasas = await obtenerTasas();
   const participanteActual = r.participantes.find((p) => p.usuarioId === usuario.id);
@@ -111,14 +110,42 @@ export default async function DetalleRecolecta({
         />
 
         {/* Pestaña 1 — Miembros */}
-        <Miembros
-          participantes={r.participantes}
-          aportes={r.aportes}
-          organizadorId={r.organizadorId}
-          esOrganizador={esOrganizador}
-          solicitudes={solicitudes}
-          resolver={resolverSolicitud}
-        />
+        <div className="space-y-6">
+          <Miembros
+            participantes={r.participantes}
+            aportes={r.aportes}
+            organizadorId={r.organizadorId}
+            esOrganizador={esOrganizador}
+            solicitudes={solicitudes}
+            resolver={resolverSolicitud}
+          />
+
+          {/* Administrar — gestión del organizador (invitar por correo, turnos, cerrar) */}
+          {esOrganizador && (
+            <section className="space-y-3 rounded-xl border p-4">
+              <h2 className="font-semibold">Administrar</h2>
+              <form action={invitar} className="flex gap-2">
+                <Input
+                  name="correo"
+                  type="email"
+                  placeholder="correo a invitar"
+                  required
+                />
+                <Button type="submit" variant="outline">
+                  Invitar
+                </Button>
+              </form>
+              {r.tipo === "san" && r.turnos.length === 0 && (
+                <form action={generar}>
+                  <Button type="submit" className="w-full">
+                    Sortear turnos e iniciar
+                  </Button>
+                </form>
+              )}
+              {r.estado !== "cerrada" && <CerrarSan recolectaId={r.id} />}
+            </section>
+          )}
+        </div>
 
         {/* Pestaña 2 — Pagos */}
         <div className="space-y-6">
@@ -179,37 +206,6 @@ export default async function DetalleRecolecta({
                     );
                   })}
               </ul>
-            </section>
-          )}
-
-          {esOrganizador && (
-            <section className="space-y-3 rounded-xl border p-4">
-              <h2 className="font-semibold">Administrar</h2>
-              <form action={invitar} className="flex gap-2">
-                <Input
-                  name="correo"
-                  type="email"
-                  placeholder="correo a invitar"
-                  required
-                />
-                <Button type="submit" variant="outline">
-                  Invitar
-                </Button>
-              </form>
-              {r.tipo === "san" && r.turnos.length === 0 && (
-                <form action={generar}>
-                  <Button type="submit" className="w-full">
-                    Sortear turnos e iniciar
-                  </Button>
-                </form>
-              )}
-              {r.estado !== "cerrada" && (
-                <form action={cerrar}>
-                  <Button type="submit" variant="ghost" className="w-full">
-                    Cerrar recolecta
-                  </Button>
-                </form>
-              )}
             </section>
           )}
         </div>

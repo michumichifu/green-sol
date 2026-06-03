@@ -600,9 +600,12 @@ export async function resolverAporte(
   revalidatePath(`/sanes/${aporte.recolectaId}`);
 }
 
-export async function cerrarRecolecta(recolectaId: string): Promise<void> {
+export async function cerrarRecolecta(
+  recolectaId: string,
+  pin = "",
+): Promise<{ error?: string }> {
   const usuario = await obtenerUsuario();
-  if (!usuario) return;
+  if (!usuario) return { error: "Inicia sesión." };
   const recolecta = await prisma.recolecta.findUnique({
     where: { id: recolectaId },
     include: { participantes: true },
@@ -612,7 +615,11 @@ export async function cerrarRecolecta(recolectaId: string): Promise<void> {
     recolecta.organizadorId !== usuario.id ||
     recolecta.estado === "cerrada"
   ) {
-    return;
+    return { error: "No se puede cerrar este ahorro." };
+  }
+  // Confirmar con el PIN (acción irreversible).
+  if (!pin || !(await credencialValida(usuario.id, pin))) {
+    return { error: "PIN incorrecto. Confírmalo para cerrar el ahorro." };
   }
   await prisma.recolecta.update({
     where: { id: recolectaId },
@@ -628,6 +635,7 @@ export async function cerrarRecolecta(recolectaId: string): Promise<void> {
     },
   );
   revalidatePath(`/sanes/${recolectaId}`);
+  return {};
 }
 
 export async function valorar(
