@@ -351,6 +351,101 @@ export const EVENTOS_NOTIFICACION: EventoNotificacion[] = [
     },
   },
   {
+    clave: "san_solicitud_union",
+    nombre: "Solicitud de unión (organizador)",
+    descripcion: "Cuando alguien pide unirse a un san privado con el enlace; avisa al organizador para que apruebe o rechace.",
+    categoria: "Ahorros",
+    canales: ["app", "correo"],
+    variables: {
+      solicitante: "Quién solicita (@usuario (Nombre Apellido))",
+      nombreSan: "Nombre del san",
+      link: "Enlace al san",
+    },
+    datosMuestra: {
+      solicitante: "@pedrop (Pedro Pérez)",
+      nombreSan: "San de los amigos",
+      link: LINK_DEMO,
+    },
+    app: {
+      titulo: "👋 Nueva solicitud de unión",
+      cuerpo: "{{solicitante}} solicitó unirse a «{{nombreSan}}». Revísalo en la pestaña Miembros.",
+    },
+    correo: {
+      asunto: "Nueva solicitud para unirse a «{{nombreSan}}»",
+      html: correoBase({
+        titulo: "Alguien quiere unirse 👋",
+        preheader: "Tienes una solicitud por revisar",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'><strong>{{solicitante}}</strong> solicitó unirse a tu san <strong>«{{nombreSan}}»</strong>.</p>" +
+          "<p style='margin:0;'>Entra a la pestaña Miembros para aprobarla o rechazarla.</p>",
+        ctaTexto: "Revisar solicitud",
+        ctaUrl: "{{link}}",
+      }),
+    },
+  },
+  {
+    clave: "san_solicitud_aceptada",
+    nombre: "Solicitud aceptada (participante)",
+    descripcion: "Al organizador aprobar una solicitud de unión; avisa al solicitante.",
+    categoria: "Ahorros",
+    canales: ["app", "correo"],
+    variables: {
+      nombreSan: "Nombre del san",
+      link: "Enlace al san",
+    },
+    datosMuestra: {
+      nombreSan: "San de los amigos",
+      link: LINK_DEMO,
+    },
+    app: {
+      titulo: "🎉 ¡Te aceptaron!",
+      cuerpo: "Ya eres parte de «{{nombreSan}}». Entra para ver los detalles.",
+    },
+    correo: {
+      asunto: "Te aceptaron en «{{nombreSan}}» 🎉",
+      html: correoBase({
+        titulo: "¡Bienvenido al san! 🎉",
+        preheader: "El organizador aprobó tu solicitud",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'>El organizador <strong>aprobó</strong> tu solicitud para unirte a <strong>«{{nombreSan}}»</strong>.</p>" +
+          "<p style='margin:0;'>Ya eres parte del san. Entra para ver los detalles.</p>",
+        ctaTexto: "Ver el san",
+        ctaUrl: "{{link}}",
+      }),
+    },
+  },
+  {
+    clave: "san_solicitud_rechazada",
+    nombre: "Solicitud rechazada (participante)",
+    descripcion: "Al organizador rechazar una solicitud de unión; avisa al solicitante.",
+    categoria: "Ahorros",
+    canales: ["app", "correo"],
+    variables: {
+      nombreSan: "Nombre del san",
+      link: "Enlace al san",
+    },
+    datosMuestra: {
+      nombreSan: "San de los amigos",
+      link: LINK_DEMO,
+    },
+    app: {
+      titulo: "Solicitud no aprobada",
+      cuerpo: "Tu solicitud para unirte a «{{nombreSan}}» no fue aprobada.",
+    },
+    correo: {
+      asunto: "Sobre tu solicitud para «{{nombreSan}}»",
+      html: correoBase({
+        titulo: "Tu solicitud no fue aprobada",
+        preheader: "Sobre tu solicitud de unión",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'>Tu solicitud para unirte a <strong>«{{nombreSan}}»</strong> no fue aprobada por el organizador.</p>" +
+          "<p style='margin:0;'>Si crees que es un error, comunícate con quien organiza el san.</p>",
+        ctaTexto: "Ver mis ahorros",
+        ctaUrl: "{{link}}",
+      }),
+    },
+  },
+  {
     clave: "kyc_recibida",
     nombre: "Verificación recibida",
     descripcion: "Al enviar el usuario su verificación de identidad (KYC).",
