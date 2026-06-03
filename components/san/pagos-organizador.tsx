@@ -113,13 +113,14 @@ export function PagosOrganizador({
       {/* Sub-pestañas */}
       <PanelTabs variante="sub" tabs={["Pendientes", "Aprobados"]}>
         {/* Pendientes */}
-        <div className="space-y-2 pt-1">
+        <div className="pt-1">
           {pendientes.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4 text-center">
               No hay pagos por revisar.
             </p>
           ) : (
-            <ul className="space-y-2">
+            <div className="rounded-xl bg-gradient-to-b from-amber-100 to-transparent p-3 dark:from-amber-950/30">
+              <ul className="space-y-2">
               {pendientes.map((a) => {
                 const aprobar = resolver.bind(null, a.id, true);
                 const rechazar = resolver.bind(null, a.id, false);
@@ -168,7 +169,8 @@ export function PagosOrganizador({
                   </li>
                 );
               })}
-            </ul>
+              </ul>
+            </div>
           )}
         </div>
 
