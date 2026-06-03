@@ -1,7 +1,7 @@
 # Arquitectura técnica — Green Sol
 
-- **Versión:** 0.8 (PIN auth completo, planificador de tasas, guía de monedas, E2E aislados en greensol_test, favicon, detalle del san rediseñado con pestañas/pagos/notificaciones — sobre v0.0.106)
-- **Fecha:** 2026-06-02
+- **Versión:** 0.9 (sobre v0.0.117 — añade invitación temporal con solicitud de unión, portero de verificación KYC + confirmación con PIN al unirse, pestaña Miembros y Pagos simplificada; detalle en `CHANGELOG.md` y `docs/superpowers/specs/2026-06-03-invitacion-miembros-pagos-design.md`)
+- **Fecha:** 2026-06-03
 - **Audiencia:** equipo con experiencia en web tradicional, principiante en web3.
 
 > Explica, primero en lenguaje llano y luego con detalle, en qué se diferencia una app web3 de una web tradicional, y propone un stack concreto para Green Sol alineado con lo que el equipo ya domina.

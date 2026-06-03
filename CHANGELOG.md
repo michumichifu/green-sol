@@ -4,6 +4,35 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.117] — 2026-06-03 — Invitación con solicitud, pestaña Miembros y Pagos simplificada
+
+Lote de tres piezas sobre el detalle del san (spec `docs/superpowers/specs/2026-06-03-invitacion-miembros-pagos-design.md`, plan `docs/superpowers/plans/2026-06-03-invitacion-miembros-pagos.md`).
+
+### Añadido
+
+- **Invitación temporal con solicitud de unión (v0.0.107–0.0.110, 0.0.112, 0.0.116):**
+  - Modelos `Invitacion` (código corto único, `expiraEn`, `revocada`) y `SolicitudUnion` (`pendiente`/`aprobada`/`rechazada`, único por recolecta+usuario) — migración `20260603125650_invitacion_solicitud_union`.
+  - `lib/san/codigo-invitacion.ts`: código de 6 caracteres sin ambiguos (`crypto.randomInt`).
+  - Acciones en `app/(app)/sanes/actions.ts`: `generarInvitacion` (vigencia 1/7/30 días, default 7, con reintento ante colisión), `revocarInvitacion`, `listarInvitacionesActivas`, `infoInvitacion`, `solicitarUnion`, `resolverSolicitud`. La lógica común `procesarUnion` decide: **san público = unión directa; san privado = solicitud** que el organizador aprueba/rechaza. La invitación nominal por correo se mantiene directa.
+  - Ruta `app/i/[codigo]/page.tsx`: landing del enlace de invitación; muestra el san, manda a login (con `next`) si no hay sesión, o a solicitar unirse si la hay.
+  - `components/san/invitar.tsx`: el organizador genera/revoca invitaciones desde el Resumen, con código `GS-XXXXXX` y enlace copiable.
+  - Eventos de notificación `san_solicitud_union` (organizador), `san_solicitud_aceptada` / `san_solicitud_rechazada` (solicitante) en `lib/correo/catalogo.ts`.
+- **Portero de verificación + confirmación con PIN (v0.0.111–0.0.112):** `lib/perfil-verificado.ts` (`perfilVerificado` = `nivelKyc >= 1`, mismo criterio que admin/perfil/dashboard). Antes de unirse/solicitar, si el perfil no está verificado el botón queda bloqueado con un disclaimer a `/configuracion?tab=verificacion`; el servidor también rechaza. Al confirmar la unión se pide el **PIN** (`credencialValida`). `components/san/confirmar-union.tsx` encapsula portero + PIN, usado en la pantalla de unirse y en la landing.
+- **Pestaña Miembros (v0.0.113–0.0.114):** `components/san/miembros.tsx` — solicitudes pendientes (organizador, aprobar/rechazar) y lista de participantes con turno, **estado de pago** (pagó/reportó/pendiente) y fecha del último pago. `PanelTabs` ahora acepta `avisos?: boolean[]` y muestra un puntito en la pestaña Miembros cuando hay solicitudes pendientes.
+- **Pagos simplificada (v0.0.115):** `components/san/metodo-pago-tarjeta.tsx` — el método de pago aparece en una tarjeta visual arriba de la pestaña Pagos (ambos roles). El Resumen quedó compacto (sin "¿dónde pagar?" ni la lista de participantes, ahora en Pagos y Miembros).
+
+### Cambiado
+
+- **Notificaciones — formato de identidad `@usuario (Nombre Apellido)`** (usuario primero) vía `lib/usuario-etiqueta.ts`; se aplicó a los avisos de unión y de pagos (antes "Nombre Apellido (@usuario)"). En la fila de participante se mantiene el orden inverso (nombre primero).
+- **`unirseARecolecta`** ya no une directo en sanes privados: deriva a solicitud.
+- Detalle del san reestructurado a **tres pestañas Resumen · Miembros · Pagos**.
+
+### Verificado
+
+- Typecheck limpio por fase. Suite E2E verde (15/15); `autenticado.spec.ts` cubre las 3 pestañas y la generación de invitación (código `GS-`). **Pendiente de E2E automatizado:** el flujo completo solicitud→aprobación con segundo usuario verificado + PIN (requiere setup de KYC/PIN; se verifica manualmente por ahora).
+
+---
+
 ## [0.0.106] — 2026-06-02 — test+docs(san): E2E del detalle + PRD/arquitectura/CHANGELOG al día (v0.0.106)
 
 ### Añadido
