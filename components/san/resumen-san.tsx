@@ -1,8 +1,6 @@
-import { FilaParticipante } from "./fila-participante";
 import { DonaProgreso } from "./dona-progreso";
 import { CompartirAhorro } from "@/components/compartir-ahorro";
 import { MONEDA_RECOLECTA } from "@/lib/validations/recolecta";
-import { BANCOS_VE } from "@/lib/bancos-venezuela";
 
 // Tipos inline derivados de lo que devuelve la query de prisma en el page
 type DatosPago = {
@@ -142,84 +140,6 @@ export function ResumenSan({
             )}
           </div>
         </div>
-      )}
-
-      {/* Participantes */}
-      <section>
-        <h2 className="mb-1 text-sm font-semibold text-muted-foreground">
-          Participantes ({r.participantes.length})
-        </h2>
-        <ul>
-          {r.participantes.map((p) => (
-            <li key={p.id} className="border-b last:border-b-0">
-              <FilaParticipante
-                usuario={p.usuario}
-                esOrganizador={p.usuarioId === r.organizadorId}
-                turnoPosicion={p.turno?.posicion}
-                cobrado={p.turno?.cobrado}
-              />
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* ¿Dónde pagar? */}
-      {esParticipante && r.datosPago && (
-        <section className="space-y-2 rounded-xl border p-4">
-          <h2 className="font-semibold">¿Dónde pagar?</h2>
-          {r.datosPago.tipo === "wallet" ? (
-            <p className="break-all text-sm">
-              <span className="text-muted-foreground">
-                Wallet ({info?.simbolo}):{" "}
-              </span>
-              {r.datosPago.wallet}
-            </p>
-          ) : (
-            <ul className="space-y-0.5 text-sm">
-              <li className="font-medium">
-                {r.datosPago.tipo === "transferencia"
-                  ? "Transferencia"
-                  : "Pago móvil"}
-              </li>
-              <li>
-                <span className="text-muted-foreground">Banco: </span>
-                {BANCOS_VE.find((b) => b.codigo === r.datosPago!.banco)
-                  ?.nombre ?? r.datosPago.banco}
-              </li>
-              {r.datosPago.tipoCuenta && (
-                <li className="capitalize">
-                  <span className="text-muted-foreground">Tipo: </span>
-                  {r.datosPago.tipoCuenta}
-                </li>
-              )}
-              {r.datosPago.numeroCuenta && (
-                <li>
-                  <span className="text-muted-foreground">N° de cuenta: </span>
-                  {r.datosPago.numeroCuenta}
-                </li>
-              )}
-              {r.datosPago.telefono && (
-                <li>
-                  <span className="text-muted-foreground">Teléfono: </span>
-                  {r.datosPago.telefono}
-                </li>
-              )}
-              <li>
-                <span className="text-muted-foreground">Titular: </span>
-                {r.datosPago.titular}
-              </li>
-              <li>
-                <span className="text-muted-foreground">Cédula: </span>
-                {r.datosPago.cedula}
-              </li>
-            </ul>
-          )}
-          {info?.enBolivares && (
-            <p className="text-xs text-muted-foreground">
-              Paga el equivalente en Bs a la tasa del día.
-            </p>
-          )}
-        </section>
       )}
 
       {/* Invitar — solo si está abierta y es participante */}

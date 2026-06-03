@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { PanelTabs } from "@/components/panel-tabs";
 import { ResumenSan } from "@/components/san/resumen-san";
 import { Miembros } from "@/components/san/miembros";
+import { MetodoPagoTarjeta } from "@/components/san/metodo-pago-tarjeta";
 import { PagosParticipante } from "@/components/san/pagos-participante";
 import { PagosOrganizador } from "@/components/san/pagos-organizador";
 
@@ -105,6 +106,9 @@ export default async function DetalleRecolecta({
 
         {/* Pestaña 2 — Pagos */}
         <div className="space-y-6">
+          {/* Método de pago del san, arriba para ambos roles */}
+          <MetodoPagoTarjeta datosPago={r.datosPago} moneda={r.moneda} />
+
           {/* Vista del participante (Task 6) */}
           {esParticipante && !esOrganizador && (
             <PagosParticipante
