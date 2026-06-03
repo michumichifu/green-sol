@@ -43,6 +43,7 @@ model Usuario {
   valoracionesRecibidas Valoracion[] @relation("recibidas")
   verificaciones          VerificacionKyc[] @relation("verificaciones")
   verificacionesRevisadas VerificacionKyc[] @relation("revisor")
+  solicitudes             SolicitudUnion[]
 }
 
 model Sesion {
@@ -93,6 +94,8 @@ model Recolecta {
   aportes       Aporte[]
   valoraciones  Valoracion[]
   datosPago     DatosPagoRecolecta?
+  invitaciones  Invitacion[]
+  solicitudes   SolicitudUnion[]
 }
 
 model DatosPagoRecolecta {
@@ -278,4 +281,37 @@ enum EstadoAporte {
   reportado
   confirmado
   rechazado
+}
+
+enum EstadoSolicitud {
+  pendiente
+  aprobada
+  rechazada
+}
+
+model Invitacion {
+  id          String    @id @default(cuid())
+  recolectaId String
+  recolecta   Recolecta @relation(fields: [recolectaId], references: [id], onDelete: Cascade)
+  codigo      String    @unique
+  creadaPor   String
+  expiraEn    DateTime
+  revocada    Boolean   @default(false)
+  creadaEn    DateTime  @default(now())
+
+  @@index([recolectaId])
+}
+
+model SolicitudUnion {
+  id          String          @id @default(cuid())
+  recolectaId String
+  recolecta   Recolecta       @relation(fields: [recolectaId], references: [id], onDelete: Cascade)
+  usuarioId   String
+  usuario     Usuario         @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  estado      EstadoSolicitud @default(pendiente)
+  creadaEn    DateTime        @default(now())
+  resueltaEn  DateTime?
+
+  @@unique([recolectaId, usuarioId])
+  @@index([recolectaId])
 }
