@@ -8,6 +8,7 @@ import {
   generarTurnos,
   reportarPago,
   resolverAporte,
+  resolverSolicitud,
   cerrarRecolecta,
   valorar,
 } from "../actions";
@@ -15,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PanelTabs } from "@/components/panel-tabs";
 import { ResumenSan } from "@/components/san/resumen-san";
+import { Miembros } from "@/components/san/miembros";
 import { PagosParticipante } from "@/components/san/pagos-participante";
 import { PagosOrganizador } from "@/components/san/pagos-organizador";
 
@@ -58,9 +60,32 @@ export default async function DetalleRecolecta({
     ? r.aportes.filter((a) => a.participante.usuarioId === usuario.id)
     : [];
 
+  // Solicitudes de unión pendientes (solo relevantes para el organizador).
+  const solicitudes = esOrganizador
+    ? await prisma.solicitudUnion.findMany({
+        where: { recolectaId: r.id, estado: "pendiente" },
+        include: {
+          usuario: {
+            select: {
+              nombre: true,
+              apellido: true,
+              nombreUsuario: true,
+              fotoUrl: true,
+              correo: true,
+            },
+          },
+        },
+        orderBy: { creadaEn: "asc" },
+      })
+    : [];
+  const hayPendientes = solicitudes.length > 0;
+
   return (
     <main className="mx-auto max-w-md px-6 py-8">
-      <PanelTabs tabs={["Resumen", "Pagos"]}>
+      <PanelTabs
+        tabs={["Resumen", "Miembros", "Pagos"]}
+        avisos={[false, hayPendientes, false]}
+      >
         {/* Pestaña 0 — Resumen */}
         <ResumenSan
           recolecta={r}
@@ -68,7 +93,17 @@ export default async function DetalleRecolecta({
           esParticipante={esParticipante}
         />
 
-        {/* Pestaña 1 — Pagos */}
+        {/* Pestaña 1 — Miembros */}
+        <Miembros
+          participantes={r.participantes}
+          aportes={r.aportes}
+          organizadorId={r.organizadorId}
+          esOrganizador={esOrganizador}
+          solicitudes={solicitudes}
+          resolver={resolverSolicitud}
+        />
+
+        {/* Pestaña 2 — Pagos */}
         <div className="space-y-6">
           {/* Vista del participante (Task 6) */}
           {esParticipante && !esOrganizador && (
