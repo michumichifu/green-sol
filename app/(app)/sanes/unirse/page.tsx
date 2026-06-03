@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { UnirseAhorro } from "@/components/unirse-ahorro";
+import { obtenerUsuario } from "@/lib/auth/session";
+import { perfilVerificado } from "@/lib/perfil-verificado";
 
 export default async function UnirsePage({
   searchParams,
@@ -8,6 +10,8 @@ export default async function UnirsePage({
   searchParams: Promise<{ codigo?: string }>;
 }) {
   const { codigo } = await searchParams;
+  const usuario = await obtenerUsuario();
+  const verificado = usuario ? perfilVerificado(usuario) : false;
 
   return (
     <main className="mx-auto max-w-md space-y-4 px-5 py-5">
@@ -23,7 +27,7 @@ export default async function UnirsePage({
           Pega el enlace o el código que te compartieron y únete.
         </p>
       </div>
-      <UnirseAhorro codigoInicial={codigo ?? ""} />
+      <UnirseAhorro codigoInicial={codigo ?? ""} verificado={verificado} />
     </main>
   );
 }

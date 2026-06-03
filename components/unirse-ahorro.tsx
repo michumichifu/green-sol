@@ -1,19 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Users, PiggyBank, LogIn } from "lucide-react";
+import { Search, Users, PiggyBank } from "lucide-react";
 import {
   buscarRecolecta,
-  unirseARecolecta,
   type ResultadoBusqueda,
 } from "@/app/(app)/sanes/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmarUnion } from "@/components/san/confirmar-union";
 
-export function UnirseAhorro({ codigoInicial }: { codigoInicial: string }) {
+export function UnirseAhorro({
+  codigoInicial,
+  verificado,
+}: {
+  codigoInicial: string;
+  verificado: boolean;
+}) {
   const [codigo, setCodigo] = useState(codigoInicial);
   const [cargando, setCargando] = useState(false);
-  const [uniendo, setUniendo] = useState(false);
   const [error, setError] = useState("");
   const [encontrada, setEncontrada] =
     useState<ResultadoBusqueda["recolecta"]>(undefined);
@@ -27,17 +32,6 @@ export function UnirseAhorro({ codigoInicial }: { codigoInicial: string }) {
     if (res.ok && res.recolecta) setEncontrada(res.recolecta);
     else setError(res.error ?? "No se pudo buscar.");
     setCargando(false);
-  }
-
-  async function unirme() {
-    setUniendo(true);
-    setError("");
-    const res = await unirseARecolecta(codigo);
-    // Si tiene éxito, la acción redirige; solo llegamos aquí si hubo error.
-    if (res?.error) {
-      setError(res.error);
-      setUniendo(false);
-    }
   }
 
   // Si llegó con ?codigo=, busca automáticamente.
@@ -111,15 +105,16 @@ export function UnirseAhorro({ codigoInicial }: { codigoInicial: string }) {
               Este ahorro ya no admite nuevos miembros.
             </p>
           ) : (
-            <Button
-              type="button"
-              className="w-full"
-              onClick={unirme}
-              disabled={uniendo}
-            >
-              <LogIn className="size-4" />{" "}
-              {uniendo ? "Uniéndote..." : "Unirme a este ahorro"}
-            </Button>
+            <ConfirmarUnion
+              codigo={codigo}
+              verificado={verificado}
+              modo="unir"
+              etiquetaBoton={
+                encontrada.visibilidad === "privado"
+                  ? "Solicitar unirse"
+                  : "Unirme a este ahorro"
+              }
+            />
           )}
         </div>
       )}
