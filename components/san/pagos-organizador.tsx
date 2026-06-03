@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { PanelTabs } from "@/components/panel-tabs";
 import { FilaParticipante } from "@/components/san/fila-participante";
 import { DonaProgreso } from "@/components/san/dona-progreso";
+import { ConfirmarResolucionPago } from "@/components/san/confirmar-resolucion-pago";
 import { Button } from "@/components/ui/button";
 import { infoMontoParticipante, aportePersona } from "@/lib/san/montos";
 import type { Tasas } from "@/lib/rates/cache";
@@ -38,7 +40,15 @@ interface PagosOrganizadorProps {
   recolecta: Recolecta;
   tasas: Tasas;
   aportes: Aporte[];
-  resolver: (aporteId: string, aprobar: boolean) => void;
+  resolver: (
+    aporteId: string,
+    aprobar: boolean,
+    pin: string,
+  ) => Promise<{ error?: string }>;
+}
+
+function nombreCompleto(u: UsuarioBasico) {
+  return [u.nombre, u.apellido].filter(Boolean).join(" ") || u.correo;
 }
 
 function fmt(n: number) {
@@ -59,6 +69,11 @@ export function PagosOrganizador({
   aportes,
   resolver,
 }: PagosOrganizadorProps) {
+  const [confirmando, setConfirmando] = useState<{
+    aporte: Aporte;
+    aprobar: boolean;
+  } | null>(null);
+
   const pendientes = aportes.filter((a) => a.estado === "reportado");
   const aprobados = aportes.filter((a) => a.estado === "confirmado");
   const rechazados = aportes.filter((a) => a.estado === "rechazado");
@@ -121,54 +136,48 @@ export function PagosOrganizador({
           ) : (
             <div className="rounded-xl bg-gradient-to-b from-amber-100 to-transparent p-3 dark:from-amber-950/30">
               <ul className="space-y-2">
-              {pendientes.map((a) => {
-                const aprobar = resolver.bind(null, a.id, true);
-                const rechazar = resolver.bind(null, a.id, false);
-                return (
-                  <li
-                    key={a.id}
-                    className="rounded-lg border bg-card px-3 py-2 text-sm"
-                  >
-                    <FilaParticipante
-                      usuario={a.participante.usuario}
-                      esOrganizador={false}
-                    />
-                    <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                      <span className="font-medium text-foreground">
-                        {etiquetaMonto(a.monto)}
-                      </span>
-                      <span>{fmtFecha(a.creadoEn)}</span>
-                    </div>
-                    {a.referencia && (
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        Ref: {a.referencia}
-                      </p>
-                    )}
-                    <div className="mt-2 flex gap-2">
-                      <form action={aprobar} className="flex-1">
-                        <Button
-                          type="submit"
-                          size="sm"
-                          className="w-full"
-                          variant="outline"
-                        >
-                          Aprobar
-                        </Button>
-                      </form>
-                      <form action={rechazar} className="flex-1">
-                        <Button
-                          type="submit"
-                          size="sm"
-                          className="w-full"
-                          variant="ghost"
-                        >
-                          Rechazar
-                        </Button>
-                      </form>
-                    </div>
-                  </li>
-                );
-              })}
+              {pendientes.map((a) => (
+                <li
+                  key={a.id}
+                  className="rounded-lg border bg-card px-3 py-2 text-sm"
+                >
+                  <FilaParticipante
+                    usuario={a.participante.usuario}
+                    esOrganizador={false}
+                  />
+                  <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">
+                      {etiquetaMonto(a.monto)}
+                    </span>
+                    <span>{fmtFecha(a.creadoEn)}</span>
+                  </div>
+                  {a.referencia && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Ref: {a.referencia}
+                    </p>
+                  )}
+                  <div className="mt-2 flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="flex-1"
+                      variant="outline"
+                      onClick={() => setConfirmando({ aporte: a, aprobar: true })}
+                    >
+                      Aprobar
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="flex-1"
+                      variant="ghost"
+                      onClick={() => setConfirmando({ aporte: a, aprobar: false })}
+                    >
+                      Rechazar
+                    </Button>
+                  </div>
+                </li>
+              ))}
               </ul>
             </div>
           )}
@@ -237,6 +246,20 @@ export function PagosOrganizador({
           )}
         </div>
       </PanelTabs>
+
+      {confirmando && (
+        <ConfirmarResolucionPago
+          aprobar={confirmando.aprobar}
+          nombre={nombreCompleto(confirmando.aporte.participante.usuario)}
+          usuario={confirmando.aporte.participante.usuario.nombreUsuario}
+          montoTxt={etiquetaMonto(confirmando.aporte.monto)}
+          referencia={confirmando.aporte.referencia}
+          onConfirmar={(pin) =>
+            resolver(confirmando.aporte.id, confirmando.aprobar, pin)
+          }
+          onCerrar={() => setConfirmando(null)}
+        />
+      )}
     </div>
   );
 }

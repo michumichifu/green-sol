@@ -567,9 +567,10 @@ export async function reportarPago(
 export async function resolverAporte(
   aporteId: string,
   confirmar: boolean,
-): Promise<void> {
+  pin = "",
+): Promise<{ error?: string }> {
   const usuario = await obtenerUsuario();
-  if (!usuario) return;
+  if (!usuario) return { error: "Inicia sesión." };
   const aporte = await prisma.aporte.findUnique({
     where: { id: aporteId },
     include: {
@@ -577,7 +578,13 @@ export async function resolverAporte(
       participante: { include: { usuario: { select: { id: true, correo: true, nombre: true, apellido: true, nombreUsuario: true } } } },
     },
   });
-  if (!aporte || aporte.recolecta.organizadorId !== usuario.id) return;
+  if (!aporte || aporte.recolecta.organizadorId !== usuario.id) {
+    return { error: "No autorizado." };
+  }
+  // Confirmar la acción con el PIN (declaración de recepción de fondos al aprobar).
+  if (!pin || !(await credencialValida(usuario.id, pin))) {
+    return { error: "PIN incorrecto. Confírmalo para continuar." };
+  }
 
   await prisma.aporte.update({
     where: { id: aporteId },
@@ -598,6 +605,7 @@ export async function resolverAporte(
     { tipo: "pago_resuelto", enlace: `/sanes/${aporte.recolectaId}` },
   );
   revalidatePath(`/sanes/${aporte.recolectaId}`);
+  return {};
 }
 
 export async function cerrarRecolecta(
