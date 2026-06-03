@@ -12,6 +12,8 @@ import {
   notificarVarios,
   notificarYCorreo,
 } from "@/lib/notificaciones";
+import { etiquetaUsuario } from "@/lib/usuario-etiqueta";
+import { nuevoCodigo } from "@/lib/san/codigo-invitacion";
 
 export type EstadoRecolecta = { error?: string };
 
@@ -168,22 +170,72 @@ export async function buscarRecolecta(
   };
 }
 
-/** Une al usuario a un ahorro por código/enlace y lo lleva al detalle. */
-export async function unirseARecolecta(
-  codigo: string,
-): Promise<{ error?: string }> {
-  const usuario = await obtenerUsuario();
-  if (!usuario) return { error: "Inicia sesión." };
-  const id = limpiarCodigo(codigo);
-  const r = await prisma.recolecta.findUnique({
-    where: { id },
-    include: { organizador: { select: { id: true, correo: true, nombre: true } } },
-  });
-  if (!r) return { error: "No encontramos ese ahorro." };
+type ResultadoUnion = { error?: string; ok?: string };
+
+type UsuarioUnion = {
+  id: string;
+  correo: string;
+  nombre: string | null;
+  apellido: string | null;
+  nombreUsuario: string | null;
+};
+
+type RecolectaUnion = {
+  id: string;
+  nombre: string;
+  estado: string;
+  visibilidad: string;
+  organizadorId: string;
+  organizador: { id: string; correo: string; nombre: string | null };
+};
+
+/**
+ * Lógica común al unirse a un ahorro: el organizador y los ya miembros van al
+ * detalle; un san **público** une directo (y avisa al organizador); un san
+ * **privado** genera una **solicitud** que el organizador debe aprobar.
+ */
+async function procesarUnion(
+  r: RecolectaUnion,
+  usuario: UsuarioUnion,
+): Promise<ResultadoUnion> {
   if (r.organizadorId === usuario.id) redirect(`/sanes/${r.id}`);
+
+  const yaMiembro = await prisma.participante.findUnique({
+    where: { recolectaId_usuarioId: { recolectaId: r.id, usuarioId: usuario.id } },
+  });
+  if (yaMiembro) redirect(`/sanes/${r.id}`);
+
   if (r.estado !== "abierta") {
     return { error: "Este ahorro ya no admite nuevos miembros." };
   }
+
+  if (r.visibilidad === "privado") {
+    const pendiente = await prisma.solicitudUnion.findUnique({
+      where: { recolectaId_usuarioId: { recolectaId: r.id, usuarioId: usuario.id } },
+    });
+    if (pendiente?.estado === "pendiente") {
+      return { ok: "Ya tienes una solicitud pendiente. El organizador la revisará." };
+    }
+    await prisma.solicitudUnion.upsert({
+      where: { recolectaId_usuarioId: { recolectaId: r.id, usuarioId: usuario.id } },
+      create: { recolectaId: r.id, usuarioId: usuario.id, estado: "pendiente" },
+      update: { estado: "pendiente", resueltaEn: null },
+    });
+    await notificarEvento(
+      { id: r.organizador.id, correo: r.organizador.correo },
+      "san_solicitud_union",
+      {
+        solicitante: etiquetaUsuario(usuario),
+        nombreSan: r.nombre,
+        link: `/sanes/${r.id}`,
+      },
+      { tipo: "solicitud_union", enlace: `/sanes/${r.id}` },
+    );
+    revalidatePath(`/sanes/${r.id}`);
+    return { ok: "Solicitud enviada. El organizador la revisará." };
+  }
+
+  // San público: unión directa.
   try {
     await prisma.participante.create({
       data: { recolectaId: r.id, usuarioId: usuario.id },
@@ -191,27 +243,167 @@ export async function unirseARecolecta(
   } catch {
     // ya estaba unido
   }
-  // Notificar al organizador (app + correo) solo si quien se une no es él mismo.
-  if (r.organizadorId !== usuario.id) {
-    const etiquetaNombre = `${usuario.nombre ?? ""} ${usuario.apellido ?? ""}`.trim();
-    const etiqueta = etiquetaNombre
-      ? etiquetaNombre + (usuario.nombreUsuario ? ` (@${usuario.nombreUsuario})` : "")
-      : usuario.nombreUsuario
-        ? `@${usuario.nombreUsuario}`
-        : usuario.correo;
-    await notificarEvento(
-      { id: r.organizador.id, correo: r.organizador.correo },
-      "union_san",
-      {
-        organizador: r.organizador.nombre ?? r.organizador.correo,
-        usuario: etiqueta,
-        nombreSan: r.nombre,
-        link: `/sanes/${r.id}`,
-      },
-      { tipo: "union", enlace: `/sanes/${r.id}` },
-    );
-  }
+  await notificarEvento(
+    { id: r.organizador.id, correo: r.organizador.correo },
+    "union_san",
+    {
+      organizador: r.organizador.nombre ?? r.organizador.correo,
+      usuario: etiquetaUsuario(usuario),
+      nombreSan: r.nombre,
+      link: `/sanes/${r.id}`,
+    },
+    { tipo: "union", enlace: `/sanes/${r.id}` },
+  );
   redirect(`/sanes/${r.id}`);
+}
+
+const SELECT_UNION = {
+  id: true,
+  nombre: true,
+  estado: true,
+  visibilidad: true,
+  organizadorId: true,
+  organizador: { select: { id: true, correo: true, nombre: true } },
+} as const;
+
+/** Une al usuario a un ahorro por código/enlace (id del san). Privado → solicitud. */
+export async function unirseARecolecta(codigo: string): Promise<ResultadoUnion> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return { error: "Inicia sesión." };
+  const id = limpiarCodigo(codigo);
+  const r = await prisma.recolecta.findUnique({
+    where: { id },
+    select: SELECT_UNION,
+  });
+  if (!r) return { error: "No encontramos ese ahorro." };
+  return procesarUnion(r, usuario);
+}
+
+/** Genera una invitación temporal con código corto. Vigencia 1/7/30 días (default 7). */
+export async function generarInvitacion(
+  recolectaId: string,
+  diasVigencia: number,
+): Promise<{ codigo?: string; enlace?: string; error?: string }> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return { error: "Inicia sesión." };
+  const r = await prisma.recolecta.findUnique({ where: { id: recolectaId } });
+  if (!r || r.organizadorId !== usuario.id) return { error: "No autorizado." };
+  if (r.estado !== "abierta") {
+    return { error: "Este ahorro ya no admite nuevos miembros." };
+  }
+
+  const dias = [1, 7, 30].includes(diasVigencia) ? diasVigencia : 7;
+  const expiraEn = new Date(Date.now() + dias * 24 * 60 * 60 * 1000);
+
+  // Reintenta ante colisión del índice @unique de `codigo`.
+  for (let intento = 0; intento < 5; intento++) {
+    const codigo = nuevoCodigo();
+    try {
+      await prisma.invitacion.create({
+        data: { recolectaId, codigo, creadaPor: usuario.id, expiraEn },
+      });
+      revalidatePath(`/sanes/${recolectaId}`);
+      return { codigo, enlace: `/i/${codigo}` };
+    } catch {
+      // colisión de código: reintenta
+    }
+  }
+  return { error: "No se pudo generar la invitación, inténtalo de nuevo." };
+}
+
+/** Revoca una invitación (solo el organizador del san dueño). */
+export async function revocarInvitacion(invitacionId: string): Promise<void> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return;
+  const inv = await prisma.invitacion.findUnique({
+    where: { id: invitacionId },
+    include: { recolecta: { select: { id: true, organizadorId: true } } },
+  });
+  if (!inv || inv.recolecta.organizadorId !== usuario.id) return;
+  await prisma.invitacion.update({
+    where: { id: invitacionId },
+    data: { revocada: true },
+  });
+  revalidatePath(`/sanes/${inv.recolecta.id}`);
+}
+
+/** Invitaciones vigentes (no revocadas, no vencidas) de un san. */
+export async function listarInvitacionesActivas(recolectaId: string) {
+  return prisma.invitacion.findMany({
+    where: { recolectaId, revocada: false, expiraEn: { gt: new Date() } },
+    orderBy: { creadaEn: "desc" },
+  });
+}
+
+/** Resuelve un código de invitación a la recolecta si la invitación es válida. */
+async function invitacionValida(codigo: string) {
+  const inv = await prisma.invitacion.findUnique({
+    where: { codigo: codigo.trim() },
+    include: { recolecta: { select: SELECT_UNION } },
+  });
+  if (!inv || inv.revocada || inv.expiraEn <= new Date()) return null;
+  return inv;
+}
+
+/** Datos del san detrás de un código de invitación, para la landing /i/[codigo]. */
+export async function infoInvitacion(codigo: string): Promise<{
+  ok?: boolean;
+  error?: string;
+  san?: { nombre: string; estado: string };
+}> {
+  const inv = await invitacionValida(codigo);
+  if (!inv) return { error: "Este enlace de invitación ya no es válido." };
+  return { ok: true, san: { nombre: inv.recolecta.nombre, estado: inv.recolecta.estado } };
+}
+
+/** El usuario con sesión solicita unirse usando un código de invitación. */
+export async function solicitarUnion(codigo: string): Promise<ResultadoUnion> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return { error: "Inicia sesión." };
+  const inv = await invitacionValida(codigo);
+  if (!inv) return { error: "Este enlace de invitación ya no es válido." };
+  return procesarUnion(inv.recolecta, usuario);
+}
+
+/** El organizador aprueba o rechaza una solicitud de unión. */
+export async function resolverSolicitud(
+  solicitudId: string,
+  aprobar: boolean,
+): Promise<void> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return;
+  const sol = await prisma.solicitudUnion.findUnique({
+    where: { id: solicitudId },
+    include: {
+      recolecta: { select: { id: true, nombre: true, organizadorId: true } },
+      usuario: { select: { id: true, correo: true } },
+    },
+  });
+  if (!sol || sol.recolecta.organizadorId !== usuario.id) return;
+  if (sol.estado !== "pendiente") return;
+
+  await prisma.solicitudUnion.update({
+    where: { id: solicitudId },
+    data: { estado: aprobar ? "aprobada" : "rechazada", resueltaEn: new Date() },
+  });
+
+  if (aprobar) {
+    try {
+      await prisma.participante.create({
+        data: { recolectaId: sol.recolecta.id, usuarioId: sol.usuarioId },
+      });
+    } catch {
+      // ya era miembro
+    }
+  }
+
+  await notificarEvento(
+    { id: sol.usuario.id, correo: sol.usuario.correo },
+    aprobar ? "san_solicitud_aceptada" : "san_solicitud_rechazada",
+    { nombreSan: sol.recolecta.nombre, link: `/sanes/${sol.recolecta.id}` },
+    { tipo: "solicitud_resuelta", enlace: `/sanes/${sol.recolecta.id}` },
+  );
+  revalidatePath(`/sanes/${sol.recolecta.id}`);
 }
 
 export async function invitarPorCorreo(
@@ -315,18 +507,12 @@ export async function reportarPago(
     include: { organizador: { select: { id: true, correo: true, nombre: true } } },
   });
   if (recolecta) {
-    const etiquetaNombre = `${usuario.nombre ?? ""} ${usuario.apellido ?? ""}`.trim();
-    const etiqueta = etiquetaNombre
-      ? etiquetaNombre + (usuario.nombreUsuario ? ` (@${usuario.nombreUsuario})` : "")
-      : usuario.nombreUsuario
-        ? `@${usuario.nombreUsuario}`
-        : usuario.correo;
     await notificarEvento(
       { id: recolecta.organizador.id, correo: recolecta.organizador.correo },
       "san_pago_reportado",
       {
         organizador: recolecta.organizador.nombre ?? recolecta.organizador.correo,
-        usuario: etiqueta,
+        usuario: etiquetaUsuario(usuario),
         monto: `$${monto}`,
         nombreSan: recolecta.nombre,
         link: `/sanes/${recolectaId}`,
@@ -358,18 +544,12 @@ export async function resolverAporte(
   });
 
   const participanteUsuario = aporte.participante.usuario;
-  const etiquetaNombre = `${participanteUsuario.nombre ?? ""} ${participanteUsuario.apellido ?? ""}`.trim();
-  const etiquetaParticipante = etiquetaNombre
-    ? etiquetaNombre + (participanteUsuario.nombreUsuario ? ` (@${participanteUsuario.nombreUsuario})` : "")
-    : participanteUsuario.nombreUsuario
-      ? `@${participanteUsuario.nombreUsuario}`
-      : participanteUsuario.correo;
 
   await notificarEvento(
     { id: participanteUsuario.id, correo: participanteUsuario.correo },
     confirmar ? "san_pago_aprobado" : "san_pago_rechazado",
     {
-      usuario: etiquetaParticipante,
+      usuario: etiquetaUsuario(participanteUsuario),
       monto: `$${aporte.monto}`,
       nombreSan: aporte.recolecta.nombre,
       link: `/sanes/${aporte.recolectaId}`,
