@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Copy, Check, Ticket, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ export type InvitacionVista = { id: string; codigo: string; expiraEn: string };
 
 const OPCIONES_DIAS = [1, 7, 30];
 
-/** Genera, muestra y revoca invitaciones temporales con código corto y enlace. */
+/** Genera, muestra y revoca invitaciones temporales: código corto + enlace directo. */
 export function Invitar({
   invitaciones,
   generar,
@@ -24,6 +24,9 @@ export function Invitar({
   const [generando, setGenerando] = useState(false);
   const [error, setError] = useState("");
   const [copiado, setCopiado] = useState("");
+  const [origin, setOrigin] = useState("");
+
+  useEffect(() => setOrigin(window.location.origin), []);
 
   async function generarInv() {
     setGenerando(true);
@@ -34,15 +37,10 @@ export function Invitar({
     else router.refresh();
   }
 
-  function enlaceAbsoluto(codigo: string) {
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    return `${origin}/i/${codigo}`;
-  }
-
-  async function copiar(codigo: string) {
+  async function copiar(texto: string, marca: string) {
     try {
-      await navigator.clipboard.writeText(enlaceAbsoluto(codigo));
-      setCopiado(codigo);
+      await navigator.clipboard.writeText(texto);
+      setCopiado(marca);
       setTimeout(() => setCopiado(""), 1500);
     } catch {
       // sin portapapeles: el usuario puede copiar a mano
@@ -58,7 +56,8 @@ export function Invitar({
         <div>
           <h2 className="text-sm font-semibold leading-tight">Invitar al san</h2>
           <p className="text-xs text-muted-foreground">
-            Genera un enlace temporal. Quien lo abra debe solicitar unirse.
+            Comparte el código o el enlace. Quien lo abra te enviará una solicitud para
+            unirse, que tú apruebas.
           </p>
         </div>
       </div>
@@ -92,44 +91,81 @@ export function Invitar({
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {invitaciones.length > 0 && (
-        <ul className="space-y-2">
-          {invitaciones.map((inv) => (
-            <li
-              key={inv.id}
-              className="flex items-center gap-2 rounded-lg border px-3 py-2"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="font-mono text-sm font-semibold">GS-{inv.codigo}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  Vence el {new Date(inv.expiraEn).toLocaleDateString("es-VE")}
-                </p>
-              </div>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => copiar(inv.codigo)}
-              >
-                {copiado === inv.codigo ? (
-                  <Check className="size-4 text-brand" />
-                ) : (
-                  <Copy className="size-4" />
-                )}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={async () => {
-                  await revocar(inv.id);
-                  router.refresh();
-                }}
-                aria-label="Revocar"
-              >
-                <X className="size-4" />
-              </Button>
-            </li>
-          ))}
+        <ul className="space-y-3">
+          {invitaciones.map((inv) => {
+            const enlace = origin ? `${origin}/i/${inv.codigo}` : `/i/${inv.codigo}`;
+            return (
+              <li key={inv.id} className="space-y-2 rounded-lg border p-3">
+                {/* Código de invitación */}
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Código de invitación
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="flex-1 font-mono text-sm font-semibold">
+                      GS-{inv.codigo}
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => copiar(`GS-${inv.codigo}`, `${inv.id}-cod`)}
+                    >
+                      {copiado === `${inv.id}-cod` ? (
+                        <Check className="size-4 text-brand" />
+                      ) : (
+                        <Copy className="size-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Cópialo y compártelo; con él pueden buscar el san y solicitar unirse.
+                  </p>
+                </div>
+
+                {/* Enlace directo */}
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Enlace directo</p>
+                  <div className="flex items-center gap-2">
+                    <p className="flex-1 truncate font-mono text-xs">{enlace}</p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => copiar(enlace, `${inv.id}-link`)}
+                    >
+                      {copiado === `${inv.id}-link` ? (
+                        <Check className="size-4 text-brand" />
+                      ) : (
+                        <Copy className="size-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Compártelo por WhatsApp; lleva directo a solicitar unirse.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[11px] text-muted-foreground">
+                    Vence el {new Date(inv.expiraEn).toLocaleDateString("es-VE")}
+                  </span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="gap-1 text-muted-foreground"
+                    onClick={async () => {
+                      await revocar(inv.id);
+                      router.refresh();
+                    }}
+                  >
+                    <X className="size-4" /> Revocar
+                  </Button>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

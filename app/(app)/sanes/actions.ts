@@ -110,11 +110,29 @@ export async function crearRecolecta(
   redirect(`/sanes/${recolecta.id}`);
 }
 
-/** Extrae el id de un código pegado o de un enlace de invitación completo. */
+/** Extrae el último segmento de un código pegado o de un enlace completo. */
 function limpiarCodigo(codigo: string): string {
   return (
     codigo.trim().split("?")[0].split("#")[0].split("/").pop()?.trim() ?? ""
   );
+}
+
+/**
+ * Resuelve lo que el usuario pega (id del san, enlace `/sanes/<id>`, enlace
+ * `/i/<codigo>`, o el código de invitación `GS-XXXXXX`) al id de la recolecta.
+ * Primero prueba como id de san; si no, como código de invitación válido.
+ */
+async function resolverRecolectaId(codigo: string): Promise<string | null> {
+  const limpio = limpiarCodigo(codigo);
+  if (!limpio) return null;
+  const san = await prisma.recolecta.findUnique({
+    where: { id: limpio },
+    select: { id: true },
+  });
+  if (san) return san.id;
+  const cod = limpio.replace(/^GS-/i, "").toUpperCase();
+  const inv = await invitacionValida(cod);
+  return inv ? inv.recolecta.id : null;
 }
 
 export type ResultadoBusqueda = {
@@ -139,8 +157,8 @@ export async function buscarRecolecta(
 ): Promise<ResultadoBusqueda> {
   const usuario = await obtenerUsuario();
   if (!usuario) return { error: "Inicia sesión." };
-  const id = limpiarCodigo(codigo);
-  if (!id) return { error: "Escribe un código o pega el enlace de invitación." };
+  const id = await resolverRecolectaId(codigo);
+  if (!id) return { error: "No encontramos ningún ahorro con ese código." };
 
   const r = await prisma.recolecta.findUnique({
     where: { id },
@@ -289,7 +307,8 @@ export async function unirseARecolecta(
 ): Promise<ResultadoUnion> {
   const usuario = await obtenerUsuario();
   if (!usuario) return { error: "Inicia sesión." };
-  const id = limpiarCodigo(codigo);
+  const id = await resolverRecolectaId(codigo);
+  if (!id) return { error: "No encontramos ese ahorro." };
   const r = await prisma.recolecta.findUnique({
     where: { id },
     select: SELECT_UNION,

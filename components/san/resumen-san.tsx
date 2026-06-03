@@ -96,6 +96,7 @@ export function ResumenSan({
   const colorEstado = COLORES_ESTADO[r.estado] ?? "text-muted-foreground";
   const labelEstado = LABEL_ESTADO[r.estado] ?? r.estado;
   const chipRol = esOrganizador ? "Organizador" : "Participante";
+  const visibilidadLabel = r.visibilidad === "publico" ? "Público" : "Privado";
 
   return (
     <div className="space-y-5">
@@ -114,37 +115,46 @@ export function ResumenSan({
         </div>
         <p className="mt-0.5 text-sm text-muted-foreground">
           {r.tipo === "san"
-            ? `Aporte por turno: ${ancla} ${r.montoAporte ?? "?"}`
-            : `Meta: ${ancla} ${r.meta ?? "?"}`}{" "}
-          · {r.visibilidad}
+            ? `${r.cupoMiembros ?? "?"} personas${r.frecuencia ? ` · ${r.frecuencia}` : ""} · ${visibilidadLabel}`
+            : `Meta común · ${visibilidadLabel}`}
         </p>
-        {r.tipo === "san" && (r.cupoMiembros || r.frecuencia) && (
-          <p className="text-xs text-muted-foreground">
-            {r.cupoMiembros ? `${r.cupoMiembros} personas` : ""}
-            {r.cupoMiembros && r.frecuencia ? " · " : ""}
-            {r.frecuencia ?? ""}
-            {info?.enBolivares ? " · se paga en Bs a la tasa del día" : ""}
-          </p>
-        )}
         {r.descripcion && <p className="mt-1.5 text-sm">{r.descripcion}</p>}
       </div>
+
+      {/* Montos: aporte de cada persona vs lo que recibe quien cobra el turno */}
+      {r.tipo === "san" && (
+        <div className="space-y-1 rounded-xl border p-4">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-sm text-muted-foreground">Aporta cada persona</span>
+            <span className="text-base font-bold">
+              {ancla} {r.montoAporte ?? "?"}
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-sm text-muted-foreground">Recibe quien cobra</span>
+            <span className="text-sm font-semibold">
+              {ancla} {r.meta ?? "?"}
+            </span>
+          </div>
+          {info?.enBolivares && (
+            <p className="pt-1 text-xs text-muted-foreground">
+              Se paga en Bs a la tasa del día (ver pestaña Pagos).
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Progreso + dona */}
       {r.tipo === "san" && (
         <div className="flex items-center gap-4 rounded-xl border p-4">
-          <DonaProgreso pagados={pagados} total={total} label="esta ronda" />
+          <DonaProgreso pagados={pagados} total={total} label="cobrados" />
           <div className="space-y-0.5">
             <p className="text-sm font-semibold">
               Ronda {rondaActual} de {totalRondas}
             </p>
             <p className="text-xs text-muted-foreground">
-              {pagados} {pagados === 1 ? "turno cobrado" : "turnos cobrados"}
+              Ya cobró {pagados} de {total} {total === 1 ? "turno" : "turnos"}
             </p>
-            {r.montoAporte && (
-              <p className="text-xs text-muted-foreground">
-                Aporte: {ancla} {r.montoAporte}
-              </p>
-            )}
           </div>
         </div>
       )}
