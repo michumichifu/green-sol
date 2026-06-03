@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   BadgeCheck,
   ShieldAlert,
+  ScrollText,
   LogOut,
   ChevronRight,
 } from "lucide-react";
@@ -117,6 +118,11 @@ export default async function PerfilPage() {
         />
         <ItemMenu href="/ayuda" icon={LifeBuoy} label="Centro de ayuda" />
         <ItemMenu href="/configuracion" icon={Settings} label="Configuración" />
+        <ItemMenu
+          href="/terminos"
+          icon={ScrollText}
+          label="Términos y condiciones"
+        />
         {esAdmin && (
           <ItemMenu
             href="/admin"
