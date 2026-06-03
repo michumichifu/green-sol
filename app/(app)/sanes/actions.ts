@@ -14,6 +14,7 @@ import {
 } from "@/lib/notificaciones";
 import { etiquetaUsuario } from "@/lib/usuario-etiqueta";
 import { nuevoCodigo } from "@/lib/san/codigo-invitacion";
+import { perfilVerificado } from "@/lib/perfil-verificado";
 
 export type EstadoRecolecta = { error?: string };
 
@@ -170,7 +171,7 @@ export async function buscarRecolecta(
   };
 }
 
-type ResultadoUnion = { error?: string; ok?: string };
+type ResultadoUnion = { error?: string; ok?: string; verificar?: boolean };
 
 type UsuarioUnion = {
   id: string;
@@ -178,6 +179,7 @@ type UsuarioUnion = {
   nombre: string | null;
   apellido: string | null;
   nombreUsuario: string | null;
+  nivelKyc: number;
 };
 
 type RecolectaUnion = {
@@ -197,6 +199,7 @@ type RecolectaUnion = {
 async function procesarUnion(
   r: RecolectaUnion,
   usuario: UsuarioUnion,
+  pin: string,
 ): Promise<ResultadoUnion> {
   if (r.organizadorId === usuario.id) redirect(`/sanes/${r.id}`);
 
@@ -207,6 +210,19 @@ async function procesarUnion(
 
   if (r.estado !== "abierta") {
     return { error: "Este ahorro ya no admite nuevos miembros." };
+  }
+
+  // Portero: el perfil debe estar verificado (KYC nivel ≥ 1) para participar.
+  if (!perfilVerificado(usuario)) {
+    return {
+      error: "Verifica tu perfil para unirte a un ahorro.",
+      verificar: true,
+    };
+  }
+
+  // Confirmar la acción con el PIN.
+  if (!pin || !(await credencialValida(usuario.id, pin))) {
+    return { error: "PIN incorrecto. Confírmalo para unirte." };
   }
 
   if (r.visibilidad === "privado") {
@@ -267,7 +283,10 @@ const SELECT_UNION = {
 } as const;
 
 /** Une al usuario a un ahorro por código/enlace (id del san). Privado → solicitud. */
-export async function unirseARecolecta(codigo: string): Promise<ResultadoUnion> {
+export async function unirseARecolecta(
+  codigo: string,
+  pin = "",
+): Promise<ResultadoUnion> {
   const usuario = await obtenerUsuario();
   if (!usuario) return { error: "Inicia sesión." };
   const id = limpiarCodigo(codigo);
@@ -276,7 +295,7 @@ export async function unirseARecolecta(codigo: string): Promise<ResultadoUnion> 
     select: SELECT_UNION,
   });
   if (!r) return { error: "No encontramos ese ahorro." };
-  return procesarUnion(r, usuario);
+  return procesarUnion(r, usuario, pin);
 }
 
 /** Genera una invitación temporal con código corto. Vigencia 1/7/30 días (default 7). */
@@ -357,12 +376,15 @@ export async function infoInvitacion(codigo: string): Promise<{
 }
 
 /** El usuario con sesión solicita unirse usando un código de invitación. */
-export async function solicitarUnion(codigo: string): Promise<ResultadoUnion> {
+export async function solicitarUnion(
+  codigo: string,
+  pin = "",
+): Promise<ResultadoUnion> {
   const usuario = await obtenerUsuario();
   if (!usuario) return { error: "Inicia sesión." };
   const inv = await invitacionValida(codigo);
   if (!inv) return { error: "Este enlace de invitación ya no es válido." };
-  return procesarUnion(inv.recolecta, usuario);
+  return procesarUnion(inv.recolecta, usuario, pin);
 }
 
 /** El organizador aprueba o rechaza una solicitud de unión. */
