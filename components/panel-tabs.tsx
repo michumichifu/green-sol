@@ -14,11 +14,14 @@ export function PanelTabs({
   children,
   inicial = 0,
   variante = "pill",
+  avisos,
 }: {
   tabs: string[];
   children: ReactNode;
   inicial?: number;
   variante?: "pill" | "sub";
+  /** Un punto de aviso por pestaña (mismo índice que `tabs`). */
+  avisos?: boolean[];
 }) {
   const [activo, setActivo] = useState(inicial);
   // Sincroniza con la pestaña pedida por URL (?tab=) al navegar a la misma página.
@@ -76,7 +79,7 @@ export function PanelTabs({
             type="button"
             onClick={() => setActivo(i)}
             className={cn(
-              "whitespace-nowrap text-sm font-medium transition-colors",
+              "inline-flex items-center justify-center gap-1.5 whitespace-nowrap text-sm font-medium transition-colors",
               esSub
                 ? "-mb-px flex-none border-b-2 border-transparent px-3 py-2"
                 : "relative z-10 flex-none rounded-lg px-3 py-2 sm:flex-1",
@@ -86,6 +89,12 @@ export function PanelTabs({
             )}
           >
             {t}
+            {avisos?.[i] && (
+              <span
+                className="size-2 shrink-0 rounded-full bg-gold"
+                aria-label="Pendiente por revisar"
+              />
+            )}
           </button>
         ))}
       </div>
