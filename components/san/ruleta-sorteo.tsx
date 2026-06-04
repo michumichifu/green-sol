@@ -145,10 +145,10 @@ export function RuletaSorteo({
           </p>
 
           {/* Ruleta */}
-          <div className="relative mx-auto w-[240px]">
+          <div className="relative mx-auto w-full max-w-[360px]">
             {/* Puntero */}
             <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2">
-              <div className="size-0 border-x-8 border-t-[14px] border-x-transparent border-t-foreground" />
+              <div className="size-0 border-x-[10px] border-t-[18px] border-x-transparent border-t-foreground" />
             </div>
             <svg
               viewBox="0 0 240 240"
@@ -176,11 +176,11 @@ export function RuletaSorteo({
                       dominantBaseline="middle"
                       transform={`rotate(${deg} ${tx} ${ty})`}
                     >
-                      <tspan x={tx} dy="-0.2em" fontSize="10" fontWeight="700">
+                      <tspan x={tx} dy="-0.2em" fontSize="13" fontWeight="800">
                         {nombreApellido(p)}
                       </tspan>
                       {p.nombreUsuario && (
-                        <tspan x={tx} dy="1.1em" fontSize="8" fontWeight="500" opacity="0.9">
+                        <tspan x={tx} dy="1.15em" fontSize="10" fontWeight="600" opacity="0.92">
                           @{p.nombreUsuario}
                         </tspan>
                       )}
@@ -193,9 +193,19 @@ export function RuletaSorteo({
           </div>
 
           {orden.length > 0 && (
-            <p className="text-center text-xs text-muted-foreground">
-              Ya salieron: {orden.map((p, i) => `${i + 1}. ${etiqueta(p)}`).join(" · ")}
-            </p>
+            <div className="space-y-1 rounded-xl border bg-muted/30 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Ya salieron
+              </p>
+              <ol className="space-y-1">
+                {orden.map((p, i) => (
+                  <li key={p.id} className="flex items-baseline gap-2 text-sm">
+                    <span className="font-bold text-brand">{i + 1}.</span>
+                    <span className="font-medium">{etiqueta(p)}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           )}
 
           <Button
