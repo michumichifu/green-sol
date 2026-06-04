@@ -97,6 +97,14 @@ export function ResumenSan({
   const labelEstado = LABEL_ESTADO[r.estado] ?? r.estado;
   const chipRol = esOrganizador ? "Organizador" : "Participante";
   const visibilidadLabel = r.visibilidad === "publico" ? "Público" : "Privado";
+  const organizadorU = r.participantes.find(
+    (p) => p.usuarioId === r.organizadorId,
+  )?.usuario;
+  const nombreOrganizador = organizadorU
+    ? [organizadorU.nombre, organizadorU.apellido].filter(Boolean).join(" ") ||
+      organizadorU.nombreUsuario ||
+      "Organizador"
+    : null;
 
   return (
     <div className="space-y-5">
@@ -118,6 +126,12 @@ export function ResumenSan({
             ? `${r.cupoMiembros ?? "?"} personas${r.frecuencia ? ` · ${r.frecuencia}` : ""} · ${visibilidadLabel}`
             : `Meta común · ${visibilidadLabel}`}
         </p>
+        {nombreOrganizador && (
+          <p className="text-xs text-muted-foreground">
+            Organiza: <span className="font-medium text-foreground">{nombreOrganizador}</span>
+            {organizadorU?.nombreUsuario ? ` · @${organizadorU.nombreUsuario}` : ""}
+          </p>
+        )}
         {r.descripcion && <p className="mt-1.5 text-sm">{r.descripcion}</p>}
       </div>
 
@@ -159,8 +173,8 @@ export function ResumenSan({
         </div>
       )}
 
-      {/* Invitar — el organizador genera enlaces temporales; el participante comparte el san */}
-      {r.estado === "abierta" &&
+      {/* Invitar — visible mientras el san no esté cerrado (gestión del organizador) */}
+      {r.estado !== "cerrada" &&
         (esOrganizador && invitaciones && generar && revocar ? (
           <Invitar
             invitaciones={invitaciones}

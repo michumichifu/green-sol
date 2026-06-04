@@ -326,8 +326,8 @@ export async function generarInvitacion(
   if (!usuario) return { error: "Inicia sesión." };
   const r = await prisma.recolecta.findUnique({ where: { id: recolectaId } });
   if (!r || r.organizadorId !== usuario.id) return { error: "No autorizado." };
-  if (r.estado !== "abierta") {
-    return { error: "Este ahorro ya no admite nuevos miembros." };
+  if (r.estado === "cerrada") {
+    return { error: "Este ahorro está cerrado." };
   }
 
   const dias = [1, 7, 30].includes(diasVigencia) ? diasVigencia : 7;
