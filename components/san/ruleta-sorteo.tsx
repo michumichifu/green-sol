@@ -69,13 +69,17 @@ export function RuletaSorteo({
   const base = -Math.PI / 2;
 
   function asignar(ganadorIdx: number) {
-    setRestantes((prev) => {
-      const elegido = prev[ganadorIdx];
-      const quedan = prev.filter((_, i) => i !== ganadorIdx);
-      // Mover el elegido al orden; si queda uno solo, también se asigna (es el último).
-      setOrden((o) => (quedan.length === 1 ? [...o, elegido, quedan[0]] : [...o, elegido]));
-      return quedan.length === 1 ? [] : quedan;
-    });
+    const elegido = restantes[ganadorIdx];
+    const quedan = restantes.filter((_, i) => i !== ganadorIdx);
+    if (quedan.length === 1) {
+      // Si solo queda uno, es el último turno: se asigna automáticamente.
+      const ultimo = quedan[0];
+      setOrden((o) => [...o, elegido, ultimo]);
+      setRestantes([]);
+    } else {
+      setOrden((o) => [...o, elegido]);
+      setRestantes(quedan);
+    }
   }
 
   function girar() {
