@@ -110,25 +110,89 @@ export default function TerminosPage() {
         </p>
       </Seccion>
 
-      <Seccion titulo="4. Reputación, puntos y niveles">
-        <p>
-          Green Sol reconoce el comportamiento responsable y constante con un
-          sistema de puntos y niveles:{" "}
-          <b>Nuevo → Confiable → Destacado → Estrella → Leyenda</b>.
+      <Seccion titulo="4. Niveles y límites">
+        <p className="rounded-lg bg-gold/10 px-2 py-1 text-xs text-gold">
+          Borrador — nombres y cifras de ejemplo (ficticias), por definir.
         </p>
         <p>
-          Se ganan puntos cumpliendo los pagos a tiempo y recibiendo valoraciones
-          positivas del grupo; próximamente también por referidos.
-          [Mecánicas exactas de puntos, penalizaciones por incumplimiento y
-          vigencia — por definir.]
+          Green Sol reconoce el comportamiento responsable con un sistema de
+          niveles. Cada nivel tiene una <b>etiqueta</b> (nombre cotidiano, por
+          definir) y habilita un <b>monto máximo</b> y ciertos beneficios. El
+          avance combina los puntos acumulados y el monto total ahorrado.
         </p>
+        <ul className="space-y-1.5">
+          <li className="rounded-lg border bg-muted/40 p-2">
+            <b>Nivel 1 · [nombre]</b> — monto máx. $100 · 1 san a la vez · acceso
+            básico.
+          </li>
+          <li className="rounded-lg border bg-muted/40 p-2">
+            <b>Nivel 2 · [nombre]</b> — hasta $250 · 2 sanes simultáneos.
+          </li>
+          <li className="rounded-lg border bg-muted/40 p-2">
+            <b>Nivel 3 · [nombre]</b> — hasta $500 · 3 sanes · acceso anticipado a
+            nuevos grupos.
+          </li>
+          <li className="rounded-lg border bg-muted/40 p-2">
+            <b>Nivel 4 · [nombre]</b> — hasta $1.000 · beneficios ampliados ·
+            reconocimiento en el ranking.
+          </li>
+          <li className="rounded-lg border bg-muted/40 p-2">
+            <b>Nivel 5 · [nombre]</b> — sin límite definido · beneficios máximos.
+          </li>
+        </ul>
         <p>
           Los puntos, niveles y beneficios son personales e intransferibles y{" "}
           <b>no representan un instrumento financiero</b>.
         </p>
       </Seccion>
 
-      <Seccion titulo="5. Ahorro en cripto">
+      <Seccion titulo="5. Cómo se ganan puntos">
+        <p className="rounded-lg bg-gold/10 px-2 py-1 text-xs text-gold">
+          Borrador — cifras de ejemplo (ficticias), por definir.
+        </p>
+        <ul className="list-inside list-disc space-y-1">
+          <li>Pagar tu cuota a tiempo: +1 punto por cada $1.</li>
+          <li>Pagar con 5 días o más de anticipación: +2 puntos por cada $1.</li>
+          <li>Completar un san sin fallar ninguna cuota: +50 puntos.</li>
+          <li>Referir a alguien que participe: +40 puntos (máx. 3).</li>
+          <li>Recibir valoraciones positivas de tu grupo: +5 puntos.</li>
+          <li>Activar las notificaciones: +40 puntos.</li>
+        </ul>
+        <p>Los puntos se acreditan entre 1 y 2 días hábiles después de cada acción.</p>
+      </Seccion>
+
+      <Seccion titulo="6. Moras, penalizaciones y vigencia">
+        <p className="rounded-lg bg-gold/10 px-2 py-1 text-xs text-gold">
+          Borrador — cifras de ejemplo (ficticias), por definir.
+        </p>
+        <ul className="list-inside list-disc space-y-1">
+          <li>Pago después de la fecha límite: −2 puntos por cada $1.</li>
+          <li>
+            Mora o cuota vencida: −4 puntos por cada $1, con una prórroga de 7 días
+            antes de una penalización mayor.
+          </li>
+          <li>Tres incumplimientos consecutivos: baja de nivel.</li>
+          <li>En mora, se pausan los beneficios hasta regularizar la situación.</li>
+        </ul>
+        <p>
+          <b>Vigencia:</b> los puntos vencen tras 6 meses sin participar ni iniciar
+          sesión; el nivel alcanzado se conserva.
+        </p>
+      </Seccion>
+
+      <Seccion titulo="7. Comisiones y costos">
+        <p className="rounded-lg bg-gold/10 px-2 py-1 text-xs text-gold">
+          Borrador — modelo de cobro por definir (hoy la app no cobra comisión).
+        </p>
+        <p>
+          El uso de Green Sol podría incluir una comisión de plataforma — por
+          ejemplo, un cargo fijo de $0,50 por cuota o un porcentaje del monto del
+          san — y, cuando aplique, los impuestos correspondientes. El monto y la
+          forma de cobro se mostrarán siempre antes de confirmar cada pago.
+        </p>
+      </Seccion>
+
+      <Seccion titulo="8. Ahorro en cripto">
         <p>
           Green Sol incorporará el ahorro en criptomonedas (Solana) de forma{" "}
           <b>no custodial</b>: ni la plataforma ni el proveedor tienen acceso a la
@@ -137,7 +201,7 @@ export default function TerminosPage() {
         </p>
       </Seccion>
 
-      <Seccion titulo="6. Conducta y suspensión">
+      <Seccion titulo="9. Conducta y suspensión">
         <p>
           Cualquier conducta fraudulenta, suplantación o incumplimiento reiterado
           podrá implicar la suspensión de la cuenta y la pérdida de los beneficios
@@ -145,7 +209,7 @@ export default function TerminosPage() {
         </p>
       </Seccion>
 
-      <Seccion titulo="7. Vigencia y aceptación">
+      <Seccion titulo="10. Vigencia y aceptación">
         <p>
           Estos términos entran en vigencia desde su publicación y sustituyen
           cualquier versión anterior. Al continuar usando Green Sol, el usuario
