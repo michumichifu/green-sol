@@ -6,6 +6,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
 ## [0.1.0] — 2026-06-04 — Adopción de versionado semántico (semver) + documentación al día
 
+### Desplegado
+
+- **Beta en vivo actualizada a v0.1.0** (2026-06-04). Se desplegó a la VPS-2 (`greensol.creceideas.com`) por primera vez desde v0.0.69: `git pull` + rebuild Docker; el `entrypoint.sh` aplicó las migraciones nuevas (`invitacion_solicitud_union`, `aporte_fecha_y_ancla`, `recolecta_motor_rondas`). Verificado: HTTP 200, contenedor nuevo y la ruta `/i/[codigo]` respondiendo. Local, GitHub y VPS al día.
+
 ### Cambiado
 
 - **Versionado semántico (semver).** Se deja el esquema lineal `0.0.x` y se adopta `MAYOR.MENOR.PARCHE`: este hito (detalle del san completo + invitación/solicitud + inicio del san con sorteo + pagos con declaración/PIN) pasa a **0.1.0**. De aquí en adelante: **parches** (0.1.1, 0.1.2…) para arreglos pequeños, **menores** (0.2.0, 0.3.0…) para bloques de funciones nuevas, y **1.0.0** = primera versión estable/pública. Las entradas previas `0.0.1`–`0.0.137` se conservan como historial.
