@@ -31,6 +31,18 @@ Cada ronda tiene una **fecha de corte/vencimiento** = `fechaInicio + (ronda − 
 
 **Aportantes de una ronda** = participantes con turno (si `organizadorParticipa`, incluye al organizador; si no, lo excluye). El **nº de rondas** = nº de turnos.
 
+## Inicio del san y sorteo de turnos (pedido de Luis)
+
+Mientras el san está **abierta**, los miembros entran pero **el san no ha iniciado**: no hay turnos ni rondas. El **Resumen muestra el progreso/pagos bloqueados** con un CTA: solo el organizador ve **"Iniciar san"**.
+
+Al pulsar "Iniciar san" se abre un **pop-up** donde el organizador elige cómo asignar el **orden de turnos**:
+- **Manual (a dedo):** ordena él mismo a los participantes (1.º, 2.º, …).
+- **Aleatorio:** se baraja con una **animación** (estilo ruleta/sorteo) que termina en el orden final.
+
+Confirmado el orden (con PIN), `iniciarSan` crea los `Turno` con esas posiciones, pone `estado=activa`, `rondaActual=1`, `fechaInicio=now`, y **notifica a todos** ("el san empezó; tu turno es el N.º X"). La animación del aleatorio la decide el cliente y envía el orden final al servidor (el organizador es de confianza; es su san).
+
+En **Miembros** se ve el **orden de turnos** y **qué ronda/fecha** le toca cobrar a cada participante (fecha de corte de su turno = `fechaInicio + (posición − 1) × frecuencia`). El que cobra una ronda igual **aporta** las demás (ahorro rotativo).
+
 ## Flujo (estados de una ronda)
 
 1. **Recolección:** los participantes reportan su cuota de la ronda actual; el organizador aprueba con declaración+PIN. Un aporte cuenta para la ronda si `estado=confirmado` y `ronda=rondaActual`.

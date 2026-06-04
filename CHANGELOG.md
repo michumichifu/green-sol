@@ -4,6 +4,44 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.0.137] — 2026-06-04 — Motor de rondas (inicio + sorteo), pagos con declaración/PIN, congelar $, invitar por @usuario, términos y pulidos
+
+Lote grande sobre el detalle del san: el **inicio del san con sorteo de turnos** (tres modos, incluida una **ruleta con animación y sonido**), la **aprobación de pagos con declaración + PIN**, el **congelado del equivalente en $** y la **fecha del pago**, la **invitación por @usuario**, la **página de Términos (maqueta)** y varios pulidos visuales y de seguridad.
+
+### Añadido
+
+- **Inicio del san y sorteo de turnos (motor de rondas, fase 1/3) — v0.0.129–137:**
+  - Migración en `Recolecta`: `organizadorParticipa` (si el organizador aporta y tiene turno, o solo administra), `rondaActual` (ronda en curso) y `fechaInicio` (para las fechas de corte).
+  - Acción `iniciarSan(recolectaId, orden, pin)`: crea los `Turno` en el orden dado, pone el san **activo**, fija `fechaInicio = now`, `rondaActual = 1`, y **avisa a cada participante su turno** (evento nuevo `san_iniciado` en `lib/correo/catalogo.ts`).
+  - Componente `components/san/iniciar-san.tsx`: pop-up para iniciar con **tres modos** de asignación de orden — **Manual (a dedo)** con manija de arrastre (`GripVertical`, reordena en vivo con touch+mouse, el número se actualiza solo) y flechas ↑/↓; **Aleatorio rápido y visual** (baraja al instante, se puede sortear varias veces hasta que guste); y **Ruleta 🎰**. Todos confirman el inicio con **PIN**.
+  - Componente `components/san/ruleta-sorteo.tsx` + `lib/san/sonidos-ruleta.ts`: ruleta SVG **colorida** (8 colores) que gira con **desaceleración** (ease-out), **tic** sincronizado por segmento y **arpegio de ganador** (audio sintético con Web Audio, sin archivos ni librerías). Revela el orden **turno por turno**; el **penúltimo** giro deja el último "por descarte", que se muestra **sobre la ruleta** unos 3 s antes de cerrar. El resultado de la ruleta es **definitivo** (no se rehace) y se confirma con PIN. Los gajos muestran **Nombre Apellido + @usuario**; los resultados usan **@usuario (Nombre Apellido)**.
+  - `components/san/velo-revelable.tsx`: da la **percepción de bloqueo sin bloquear** — difumina la info (montos, invitar) con un velo traslúcido y un **ojo** para revelar/ocultar. Se usa en el Resumen mientras el san no ha iniciado, con la tarjeta "El san aún no ha iniciado" resaltada en **degradado amarillo→naranja** como foco para iniciar.
+  - **Miembros** ahora muestra el **orden de turnos** y la **fecha en que le toca cobrar** a cada participante (`fechaInicio + (posición − 1) × frecuencia`).
+- **Aprobación de pagos con declaración + PIN — v0.0.122:** `components/san/confirmar-resolucion-pago.tsx`, un pop-up enfocado con los datos del pago (participante, monto Bs≈$, referencia), una **declaración de recepción de fondos** (al aprobar) y el **PIN**; el botón se desbloquea con los 6 dígitos. `resolverAporte` exige PIN (`credencialValida`).
+- **Congelar el equivalente en $ + fecha del pago — v0.0.127:** migración en `Aporte` (`montoAncla` = equivalente $/cripto **congelado** con la tasa del momento, y `fechaPago` = fecha real del pago indicada por el usuario). El formulario de reportar pago tiene un campo **"Fecha del pago"** (default hoy, máx hoy). Pagos y Miembros muestran el **$ congelado** (ya no fluctúa con la tasa de hoy) y la **fecha real del pago**, no la de creación del reporte.
+- **Invitar por correo o @usuario — v0.0.131:** acción `invitarUsuario` (resuelve por correo o `@usuario`, con feedback ok/error); componente `components/san/invitar-usuario.tsx`. El bloque "Administrar" de Miembros pasó a llamarse **"Invitar usuario"**.
+- **Página de Términos y Condiciones (maqueta) — v0.0.123, 125:** `app/(app)/terminos/page.tsx`, enlazada desde el menú del Perfil. Incluye el **deslinde de responsabilidad** (modelo **P2P**: Green Sol no custodia los fondos; el organizador recoge y reparte; participación bajo responsabilidad exclusiva), adaptado a Green Sol del modelo legal de Tu-Turno; y un **borrador detallado** del sistema de niveles/puntos (niveles con etiqueta y monto máximo, cómo se ganan puntos, moras/penalizaciones, vigencia y comisiones) con **cifras de ejemplo (ficticias)** marcadas como borrador. Todos los datos legales por definir van entre `[corchetes]`.
+- **Confirmación de cierre de sesión — v0.0.124:** `components/boton-cerrar-sesion.tsx`, pop-up centrado "¿Cerrar sesión?" (sin PIN) que avisa que deberá reingresar con correo/usuario + PIN; evita salidas por clic accidental.
+- **Código de invitación + enlace directo — v0.0.119, 126:** la tarjeta Invitar muestra el **código** (`GS-XXXXXX`) etiquetado y el **enlace directo** copiable por separado; `buscarRecolecta`/`unirseARecolecta` también resuelven el código de invitación, no solo el id del san. La tarjeta Invitar/Compartir es visible mientras el san no esté cerrado (no solo "abierta"). El Resumen muestra **"Organiza: …"** (nombre + @usuario del organizador).
+
+### Cambiado
+
+- **Estatus del san renombrados (visual) — v0.0.130:** "Abierta" → **"Por iniciar"**, "Activa" → **"En curso"**, "Cerrada" → **"Finalizado"**.
+- **"Cerrar recolecta" — v0.0.120, 131:** ahora pide **confirmación con PIN** (`CerrarSan`), es **rojo sólido** (no fondo blanco) y está **separado** de las demás tarjetas para evitar clics por error. El bloque Administrar se movió de **Pagos** a **Miembros**.
+- **Resumen más claro — v0.0.119:** separa la visibilidad del monto; muestra **"Aporta cada persona"** vs **"Recibe quien cobra"**; la dona y el texto de ronda quedan alineados ("Ya cobró X de N turnos").
+- **Pagos pendientes (organizador) — v0.0.121:** degradado **amarillo** de arriba hacia abajo para diferenciar visualmente el contenedor de pendientes.
+
+### Corregido
+
+- **Ruleta duplicaba participantes — v0.0.133:** se llamaba `setOrden` dentro del updater de `setRestantes`; en StrictMode ese efecto corría dos veces y duplicaba cada nombre. Se separaron las actualizaciones de estado.
+
+### Pendiente / documentado
+
+- **Motor de rondas (fases 2 y 3):** recolección de la ronda (sellar `Aporte.ronda`, **fechas de corte y puntualidad** a tiempo/mora/adelantado), entrega del organizador al cobrador y cierre/avance de ronda hasta finalizar. Spec en `docs/superpowers/specs/2026-06-03-motor-rondas-san-design.md`.
+- **Términos definitivos** (texto legal real, razón social, comisiones reales) y **motor de gamificación** (mecánicas de puntos reales).
+
+---
+
 ## [0.0.117] — 2026-06-03 — Invitación con solicitud, pestaña Miembros y Pagos simplificada
 
 Lote de tres piezas sobre el detalle del san (spec `docs/superpowers/specs/2026-06-03-invitacion-miembros-pagos-design.md`, plan `docs/superpowers/plans/2026-06-03-invitacion-miembros-pagos.md`).
