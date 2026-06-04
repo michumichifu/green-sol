@@ -8,7 +8,18 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
+import { obtenerTasas } from "@/lib/rates/cache";
+import { fechaCorte } from "@/lib/san/rondas";
+import { infoMontoParticipante } from "@/lib/san/montos";
+import {
+  CalendarioPagos,
+  type Vencimiento,
+} from "@/components/san/calendario-pagos";
 import { cn } from "@/lib/utils";
+
+function ymd(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 function fmt(n: number) {
   return n.toLocaleString("es-VE", { maximumFractionDigits: 2 });
@@ -39,11 +50,39 @@ export default async function PagosPage() {
   const porConfirmar = aportes.filter((a) => a.estado === "reportado");
   const rechazados = aportes.filter((a) => a.estado === "rechazado");
 
+  // Vencimientos (fechas de corte) de los sanes en curso del usuario, para el calendario.
+  const tasas = await obtenerTasas();
+  const vencimientos: Vencimiento[] = [];
+  for (const p of activas) {
+    const r = p.recolecta;
+    if (r.tipo !== "san" || !r.fechaInicio) continue;
+    const dias =
+      r.frecuenciaDias ??
+      (r.frecuencia === "mensual" ? 30 : r.frecuencia === "quincenal" ? 15 : 7);
+    const nRondas = r.cupoMiembros ?? 1;
+    const info = infoMontoParticipante(r.moneda, r.montoAporte ?? 0, tasas);
+    const cuotaTxt =
+      info.enBolivares && info.montoBs != null
+        ? `Bs ${fmt(info.montoBs)} ≈ $${fmt(info.montoAncla)}`
+        : `${fmt(info.montoAncla)} ${info.ancla}`;
+    for (let ronda = r.rondaActual; ronda <= nRondas; ronda++) {
+      vencimientos.push({
+        fecha: ymd(fechaCorte(r.fechaInicio, ronda, dias)),
+        sanId: p.recolectaId,
+        sanNombre: r.nombre,
+        ronda,
+        cuotaTxt,
+      });
+    }
+  }
+
   const vacio = participaciones.length === 0;
 
   return (
     <main className="mx-auto max-w-md space-y-5 px-5 py-6">
-      <h1 className="text-xl font-bold">Pagos</h1>
+      <h1 className="text-xl font-bold">Cuentas por pagar</h1>
+
+      {vencimientos.length > 0 && <CalendarioPagos vencimientos={vencimientos} />}
 
       {vacio && (
         <div className="rounded-2xl border border-dashed bg-card p-6 text-center">
