@@ -1,8 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Play, Shuffle, Hand, ArrowUp, ArrowDown, X } from "lucide-react";
+import {
+  Play,
+  Shuffle,
+  Hand,
+  ArrowUp,
+  ArrowDown,
+  GripVertical,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CampoPin } from "@/components/campo-pin";
 
@@ -46,6 +54,10 @@ export function IniciarSan({
   const [pin, setPin] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState("");
+  // Drag-and-drop del modo manual.
+  const listaRef = useRef<HTMLUListElement>(null);
+  const dragIndex = useRef<number | null>(null);
+  const [arrastrando, setArrastrando] = useState<number | null>(null);
 
   useEffect(() => {
     if (!abierto) return;
@@ -80,6 +92,38 @@ export function IniciarSan({
     const a = [...orden];
     [a[i], a[j]] = [a[j], a[i]];
     setOrden(a);
+  }
+
+  // Arrastrar para reordenar (touch + mouse): el número se actualiza en vivo.
+  function iniciarArrastre(e: React.PointerEvent, i: number) {
+    dragIndex.current = i;
+    setArrastrando(i);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }
+  function moverArrastre(e: React.PointerEvent) {
+    const desde = dragIndex.current;
+    const cont = listaRef.current;
+    if (desde === null || !cont) return;
+    const n = cont.children.length;
+    if (!n) return;
+    const rect = cont.getBoundingClientRect();
+    const rel = e.clientY - rect.top;
+    let destino = Math.floor(rel / (rect.height / n));
+    destino = Math.max(0, Math.min(n - 1, destino));
+    if (destino !== desde) {
+      setOrden((o) => {
+        const a = [...o];
+        const [m] = a.splice(desde, 1);
+        a.splice(destino, 0, m);
+        return a;
+      });
+      dragIndex.current = destino;
+      setArrastrando(destino);
+    }
+  }
+  function terminarArrastre() {
+    dragIndex.current = null;
+    setArrastrando(null);
   }
 
   async function confirmar() {
@@ -185,14 +229,28 @@ export function IniciarSan({
                   )}
                 </div>
 
-                <ul className="space-y-1.5">
+                <ul ref={listaRef} className="space-y-1.5">
                   {orden.map((p, i) => (
                     <li
                       key={p.id}
                       className={`flex items-center gap-2 rounded-lg border bg-card px-3 py-2 transition-all ${
                         barajando ? "opacity-70" : ""
-                      }`}
+                      } ${arrastrando === i ? "ring-2 ring-brand" : ""}`}
                     >
+                      {modo === "manual" && (
+                        <button
+                          type="button"
+                          aria-label="Arrastrar para reordenar"
+                          onPointerDown={(e) => iniciarArrastre(e, i)}
+                          onPointerMove={moverArrastre}
+                          onPointerUp={terminarArrastre}
+                          onPointerCancel={terminarArrastre}
+                          style={{ touchAction: "none" }}
+                          className="-ml-1 cursor-grab rounded p-0.5 text-muted-foreground hover:bg-muted active:cursor-grabbing"
+                        >
+                          <GripVertical className="size-4" />
+                        </button>
+                      )}
                       <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
                         {i + 1}
                       </span>

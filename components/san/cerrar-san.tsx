@@ -30,8 +30,8 @@ export function CerrarSan({ recolectaId }: { recolectaId: string }) {
     return (
       <Button
         type="button"
-        variant="ghost"
-        className="w-full text-destructive"
+        variant="destructive"
+        className="w-full"
         onClick={() => setConfirmando(true)}
       >
         Cerrar recolecta

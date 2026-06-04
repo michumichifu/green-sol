@@ -449,22 +449,33 @@ export async function resolverSolicitud(
   revalidatePath(`/sanes/${sol.recolecta.id}`);
 }
 
-export async function invitarPorCorreo(
+/** Invita a un usuario por su correo o su nombre de usuario (invitación nominal: entra directo). */
+export async function invitarUsuario(
   recolectaId: string,
   formData: FormData,
-): Promise<void> {
+): Promise<{ error?: string; ok?: string }> {
   const usuario = await obtenerUsuario();
-  if (!usuario) return;
+  if (!usuario) return { error: "Inicia sesión." };
   const recolecta = await prisma.recolecta.findUnique({
     where: { id: recolectaId },
   });
-  if (!recolecta || recolecta.organizadorId !== usuario.id) return;
+  if (!recolecta || recolecta.organizadorId !== usuario.id) {
+    return { error: "No autorizado." };
+  }
 
-  const correo = String(formData.get("correo") ?? "")
-    .trim()
-    .toLowerCase();
-  const invitado = await prisma.usuario.findUnique({ where: { correo } });
-  if (!invitado) return;
+  const ident = String(formData.get("identificador") ?? "").trim();
+  if (!ident) return { error: "Escribe un correo o un @usuario." };
+  const sinArroba = ident.replace(/^@/, "");
+  const invitado = await prisma.usuario.findFirst({
+    where: {
+      OR: [
+        { correo: sinArroba.toLowerCase() },
+        { nombreUsuario: { equals: sinArroba, mode: "insensitive" } },
+      ],
+    },
+  });
+  if (!invitado) return { error: "No encontramos a ese usuario." };
+  if (invitado.id === usuario.id) return { error: "Ya organizas este san." };
 
   try {
     await prisma.participante.create({
@@ -472,13 +483,14 @@ export async function invitarPorCorreo(
     });
     await crearNotificacion(invitado.id, {
       tipo: "invitacion",
-      titulo: "Te uniste a una recolecta",
+      titulo: "Te invitaron a un san",
       cuerpo: `Ahora participas en "${recolecta.nombre}".`,
       enlace: `/sanes/${recolectaId}`,
     });
     revalidatePath(`/sanes/${recolectaId}`);
+    return { ok: "Usuario invitado." };
   } catch {
-    // ya estaba en la recolecta
+    return { ok: "Ese usuario ya está en el san." };
   }
 }
 
