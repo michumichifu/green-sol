@@ -10,6 +10,22 @@ export type Vencimiento = {
   sanNombre: string;
   ronda: number;
   cuotaTxt: string; // ej. "Bs 11.600 ≈ $20" o "$20"
+  estado: "pendiente" | "en_revision" | "pagado";
+};
+
+const ESTADO_BADGE: Record<
+  Vencimiento["estado"],
+  { txt: string; cls: string }
+> = {
+  pendiente: { txt: "Por pagar", cls: "bg-gold/20 text-gold" },
+  en_revision: {
+    txt: "En revisión",
+    cls: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+  },
+  pagado: {
+    txt: "Pagado",
+    cls: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  },
 };
 
 const DIAS_SEMANA = ["D", "L", "M", "M", "J", "V", "S"];
@@ -174,8 +190,13 @@ export function CalendarioPagos({ vencimientos }: { vencimientos: Vencimiento[] 
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium">{v.sanNombre}</span>
                 <span className="block text-xs text-muted-foreground">
-                  Ronda {v.ronda} · te toca {v.cuotaTxt}
+                  Ronda {v.ronda} · {v.cuotaTxt}
                 </span>
+              </span>
+              <span
+                className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${ESTADO_BADGE[v.estado].cls}`}
+              >
+                {ESTADO_BADGE[v.estado].txt}
               </span>
               <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
             </Link>

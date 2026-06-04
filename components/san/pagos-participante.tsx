@@ -12,6 +12,7 @@ type Aporte = {
   id: string;
   monto: number;
   montoAncla: number | null;
+  ronda: number;
   fechaPago: Date | null;
   referencia: string | null;
   estado: "reportado" | "confirmado" | "rechazado";
@@ -30,6 +31,7 @@ interface PagosParticipanteProps {
   tasas: Tasas;
   misAportes: Aporte[];
   reportar: (formData: FormData) => void;
+  rondaActual: number;
 }
 
 function fmt(n: number) {
@@ -62,7 +64,13 @@ export function PagosParticipante({
   tasas,
   misAportes,
   reportar,
+  rondaActual,
 }: PagosParticipanteProps) {
+  // Si ya reporté mi cuota de la ronda en curso (en revisión o aprobada), no muestro
+  // de nuevo el formulario: solo el estado.
+  const yaReporto = misAportes.find(
+    (a) => a.ronda === rondaActual && a.estado !== "rechazado",
+  );
   // montoAporte ya es el aporte por persona ($100 meta ÷ 5 = $20); no se divide otra vez.
   const info = infoMontoParticipante(
     recolecta.moneda,
@@ -155,7 +163,26 @@ export function PagosParticipante({
         )}
       </div>
 
-      {/* Bloque 2: Reportar pago */}
+      {/* Bloque 2: Reportar pago — oculto si ya reporté esta ronda (queda el estado) */}
+      {yaReporto ? (
+        <div className="rounded-xl border bg-card p-4">
+          <p className="text-sm font-medium">Ya reportaste tu cuota de esta ronda</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {yaReporto.estado === "confirmado"
+              ? "El organizador la aprobó."
+              : "El organizador la está revisando."}
+          </p>
+          <span
+            className={`mt-2 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${
+              yaReporto.estado === "confirmado"
+                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+            }`}
+          >
+            {yaReporto.estado === "confirmado" ? "Aprobado" : "En revisión"}
+          </span>
+        </div>
+      ) : (
       <div className="rounded-xl border p-4 space-y-3">
         <h2 className="font-semibold">Reportar pago</h2>
 
@@ -222,6 +249,7 @@ export function PagosParticipante({
           Reportar pago
         </Button>
       </div>
+      )}
 
       {/* Confirmación con declaración jurada (evita reportes por error) */}
       {confirmando && (

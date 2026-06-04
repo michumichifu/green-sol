@@ -233,6 +233,7 @@ export default async function DetalleRecolecta({
               tasas={tasas}
               misAportes={misAportes}
               reportar={reportar}
+              rondaActual={r.rondaActual}
             />
           )}
 

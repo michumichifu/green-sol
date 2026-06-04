@@ -282,9 +282,9 @@ async function procesarUnion(
       {
         solicitante: etiquetaUsuario(usuario),
         nombreSan: r.nombre,
-        link: `/sanes/${r.id}`,
+        link: `/sanes/${r.id}?tab=miembros`,
       },
-      { tipo: "solicitud_union", enlace: `/sanes/${r.id}` },
+      { tipo: "solicitud_union", enlace: `/sanes/${r.id}?tab=miembros` },
     );
     revalidatePath(`/sanes/${r.id}`);
     return { ok: "Solicitud enviada. El organizador la revisará." };
@@ -638,9 +638,9 @@ export async function reportarPago(
         usuario: etiquetaUsuario(usuario),
         monto: `$${monto}`,
         nombreSan: recolecta.nombre,
-        link: `/sanes/${recolectaId}`,
+        link: `/sanes/${recolectaId}?tab=pagos`,
       },
-      { tipo: "pago_reportado", enlace: `/sanes/${recolectaId}` },
+      { tipo: "pago_reportado", enlace: `/sanes/${recolectaId}?tab=pagos` },
     );
   }
   revalidatePath(`/sanes/${recolectaId}`);

@@ -66,12 +66,20 @@ export default async function PagosPage() {
         ? `Bs ${fmt(info.montoBs)} ≈ $${fmt(info.montoAncla)}`
         : `${fmt(info.montoAncla)} ${info.ancla}`;
     for (let ronda = r.rondaActual; ronda <= nRondas; ronda++) {
+      const ap = p.aportes.find(
+        (a) => a.ronda === ronda && a.estado !== "rechazado",
+      );
       vencimientos.push({
         fecha: ymd(fechaCorte(r.fechaInicio, ronda, dias)),
         sanId: p.recolectaId,
         sanNombre: r.nombre,
         ronda,
         cuotaTxt,
+        estado: ap
+          ? ap.estado === "confirmado"
+            ? "pagado"
+            : "en_revision"
+          : "pendiente",
       });
     }
   }
