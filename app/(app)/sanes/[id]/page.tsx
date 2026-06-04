@@ -11,13 +11,17 @@ import {
   reportarPago,
   resolverAporte,
   resolverSolicitud,
+  reportarEntrega,
+  iniciarSiguienteRonda,
   valorar,
 } from "../actions";
+import { estadoRonda } from "@/lib/san/rondas";
 import { Button } from "@/components/ui/button";
 import { PanelTabs } from "@/components/panel-tabs";
 import { ResumenSan } from "@/components/san/resumen-san";
 import { Miembros } from "@/components/san/miembros";
 import { InvitarUsuario } from "@/components/san/invitar-usuario";
+import { EntregaRonda } from "@/components/san/entrega-ronda";
 import { CerrarSan } from "@/components/san/cerrar-san";
 import { MetodoPagoTarjeta } from "@/components/san/metodo-pago-tarjeta";
 import { PagosParticipante } from "@/components/san/pagos-participante";
@@ -57,6 +61,35 @@ export default async function DetalleRecolecta({
 
   // Estado de inicio del san y aportantes (con turno).
   const sanIniciado = r.turnos.length > 0;
+
+  // Estado de la ronda actual + quién cobra (para la entrega/avance, Fase 3).
+  const est = estadoRonda(
+    r.rondaActual,
+    r.turnos.map((t) => ({
+      participanteId: t.participanteId,
+      posicion: t.posicion,
+      cobrado: t.cobrado,
+    })),
+    r.aportes.map((a) => ({
+      participanteId: a.participanteId,
+      ronda: a.ronda,
+      estado: a.estado,
+    })),
+  );
+  const turnoCobrador = r.turnos.find((t) => t.posicion === r.rondaActual);
+  const cobradorNombre = turnoCobrador
+    ? [
+        turnoCobrador.participante.usuario.nombre,
+        turnoCobrador.participante.usuario.apellido,
+      ]
+        .filter(Boolean)
+        .join(" ") ||
+      (turnoCobrador.participante.usuario.nombreUsuario
+        ? `@${turnoCobrador.participante.usuario.nombreUsuario}`
+        : "—")
+    : "—";
+  const entregar = reportarEntrega.bind(null, r.id);
+  const avanzar = iniciarSiguienteRonda.bind(null, r.id);
   const aportantes = r.participantes
     .filter((p) => r.organizadorParticipa || p.usuarioId !== r.organizadorId)
     .map((p) => ({
@@ -172,7 +205,20 @@ export default async function DetalleRecolecta({
             />
           )}
 
-          {/* Vista del organizador: revisión de pagos (Task 7) */}
+          {/* Vista del organizador: cierre de ronda (entrega + avance) y revisión de pagos */}
+          {esOrganizador && sanIniciado && r.estado !== "cerrada" && (
+            <EntregaRonda
+              rondaActual={est.rondaActual}
+              totalRondas={est.totalRondas}
+              pagadosRonda={est.pagadosRonda}
+              aportantes={est.aportantes}
+              completa={est.completa}
+              entregada={est.entregada}
+              cobradorNombre={cobradorNombre}
+              reportarEntrega={entregar}
+              iniciarSiguiente={avanzar}
+            />
+          )}
           {esOrganizador && (
             <PagosOrganizador
               recolecta={r}
