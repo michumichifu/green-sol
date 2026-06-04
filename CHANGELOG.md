@@ -4,6 +4,15 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.1.0] — 2026-06-04 — Adopción de versionado semántico (semver) + documentación al día
+
+### Cambiado
+
+- **Versionado semántico (semver).** Se deja el esquema lineal `0.0.x` y se adopta `MAYOR.MENOR.PARCHE`: este hito (detalle del san completo + invitación/solicitud + inicio del san con sorteo + pagos con declaración/PIN) pasa a **0.1.0**. De aquí en adelante: **parches** (0.1.1, 0.1.2…) para arreglos pequeños, **menores** (0.2.0, 0.3.0…) para bloques de funciones nuevas, y **1.0.0** = primera versión estable/pública. Las entradas previas `0.0.1`–`0.0.137` se conservan como historial.
+- **Documentación al día:** `docs/PRD.md` (v0.18), `docs/PRD.html` y `docs/ARQUITECTURA_TECNICA.md` (v0.10) sincronizados con todo el avance. Se corrige la etiqueta engañosa "beta en vivo": la app **local** está en **v0.1.0**, pero la **beta en la VPS sigue en v0.0.69** (lo nuevo está en local y en GitHub, **sin desplegar** a la VPS aún).
+
+---
+
 ## [0.0.137] — 2026-06-04 — Motor de rondas (inicio + sorteo), pagos con declaración/PIN, congelar $, invitar por @usuario, términos y pulidos
 
 Lote grande sobre el detalle del san: el **inicio del san con sorteo de turnos** (tres modos, incluida una **ruleta con animación y sonido**), la **aprobación de pagos con declaración + PIN**, el **congelado del equivalente en $** y la **fecha del pago**, la **invitación por @usuario**, la **página de Términos (maqueta)** y varios pulidos visuales y de seguridad.
