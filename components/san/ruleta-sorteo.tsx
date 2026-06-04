@@ -13,8 +13,18 @@ type ParticipanteT = {
   esOrganizador: boolean;
 };
 
-function nombreCorto(p: ParticipanteT) {
-  return p.nombre || (p.nombreUsuario ? `@${p.nombreUsuario}` : "—");
+// Primer nombre + primer apellido (para los gajos de la ruleta).
+function nombreApellido(p: ParticipanteT) {
+  const n = (p.nombre ?? "").split(" ")[0];
+  const a = (p.apellido ?? "").split(" ")[0];
+  return [n, a].filter(Boolean).join(" ") || (p.nombreUsuario ? `@${p.nombreUsuario}` : "—");
+}
+
+// Para los resultados: "@usuario (Nombre Apellido)".
+function etiqueta(p: ParticipanteT) {
+  const nombre = [p.nombre, p.apellido].filter(Boolean).join(" ");
+  if (p.nombreUsuario) return nombre ? `@${p.nombreUsuario} (${nombre})` : `@${p.nombreUsuario}`;
+  return nombre || "Participante";
 }
 
 const PALETA = [
@@ -162,13 +172,18 @@ export function RuletaSorteo({
                       x={tx}
                       y={ty}
                       fill="#fff"
-                      fontSize="11"
-                      fontWeight="700"
                       textAnchor="middle"
                       dominantBaseline="middle"
                       transform={`rotate(${deg} ${tx} ${ty})`}
                     >
-                      {nombreCorto(p).slice(0, 10)}
+                      <tspan x={tx} dy="-0.2em" fontSize="10" fontWeight="700">
+                        {nombreApellido(p)}
+                      </tspan>
+                      {p.nombreUsuario && (
+                        <tspan x={tx} dy="1.1em" fontSize="8" fontWeight="500" opacity="0.9">
+                          @{p.nombreUsuario}
+                        </tspan>
+                      )}
                     </text>
                   </g>
                 );
@@ -179,7 +194,7 @@ export function RuletaSorteo({
 
           {orden.length > 0 && (
             <p className="text-center text-xs text-muted-foreground">
-              Ya salieron: {orden.map((p, i) => `${i + 1}. ${nombreCorto(p)}`).join(" · ")}
+              Ya salieron: {orden.map((p, i) => `${i + 1}. ${etiqueta(p)}`).join(" · ")}
             </p>
           )}
 
@@ -205,7 +220,7 @@ export function RuletaSorteo({
                   {i + 1}
                 </span>
                 <span className="truncate text-sm">
-                  {nombreCorto(p)}
+                  {etiqueta(p)}
                   {p.esOrganizador && (
                     <span className="ml-1 text-[10px] font-semibold text-gold">
                       Organizador
