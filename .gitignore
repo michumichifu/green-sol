@@ -29,3 +29,8 @@ _privado/
 
 /lib/generated/prisma
 .superpowers/
+
+# Sistema de skills de Claude / agentes (no es del proyecto)
+.agents/
+.claude/
+skills-lock.json
