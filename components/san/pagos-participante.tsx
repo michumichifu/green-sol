@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,8 @@ import type { Tasas } from "@/lib/rates/cache";
 type Aporte = {
   id: string;
   monto: number;
+  montoAncla: number | null;
+  fechaPago: Date | null;
   referencia: string | null;
   estado: "reportado" | "confirmado" | "rechazado";
   creadoEn: Date;
@@ -73,6 +75,14 @@ export function PagosParticipante({
     info.enBolivares && info.montoBs ? fmt(info.montoBs) : "";
 
   const [montoInput, setMontoInput] = useState(montoBsSugerido);
+  // La fecha del pago por defecto es hoy (se setea en cliente para evitar mismatch de hidratación).
+  const [fechaPago, setFechaPago] = useState("");
+  const [hoy, setHoy] = useState("");
+  useEffect(() => {
+    const h = new Date().toISOString().slice(0, 10);
+    setHoy(h);
+    setFechaPago(h);
+  }, []);
 
   const montoNumerico = parseFloat(montoInput.replace(/\./g, "").replace(",", ".")) || 0;
   const equivalenteUsd =
@@ -157,6 +167,21 @@ export function PagosParticipante({
         </div>
 
         <div className="space-y-1">
+          <Label htmlFor="fecha-pago-input">Fecha del pago</Label>
+          <Input
+            id="fecha-pago-input"
+            name="fechaPago"
+            type="date"
+            value={fechaPago}
+            max={hoy}
+            onChange={(e) => setFechaPago(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            El día en que hiciste el pago (puede ser distinto a hoy).
+          </p>
+        </div>
+
+        <div className="space-y-1">
           <Label htmlFor="referencia-input">Referencia / nº de operación</Label>
           <Input
             id="referencia-input"
@@ -191,6 +216,12 @@ export function PagosParticipante({
                       {info.enBolivares ? "Bs " : ""}
                       {fmt(a.monto)}
                       {!info.enBolivares ? ` ${info.ancla}` : ""}
+                      {info.enBolivares && a.montoAncla != null && (
+                        <span className="font-normal text-muted-foreground">
+                          {" "}
+                          ≈ ${fmt(a.montoAncla)}
+                        </span>
+                      )}
                     </span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${cfg.className}`}
@@ -204,7 +235,8 @@ export function PagosParticipante({
                     </p>
                   )}
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {new Date(a.creadoEn).toLocaleDateString("es-VE", {
+                    Pago del{" "}
+                    {new Date(a.fechaPago ?? a.creadoEn).toLocaleDateString("es-VE", {
                       day: "2-digit",
                       month: "short",
                       year: "numeric",

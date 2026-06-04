@@ -142,6 +142,8 @@ model Aporte {
   participanteId String
   participante   Participante @relation(fields: [participanteId], references: [id], onDelete: Cascade)
   monto          Float
+  montoAncla     Float? // equivalente en la moneda ancla ($/USDC/SOL) congelado al reportar
+  fechaPago      DateTime? // fecha del pago indicada por quien reporta (puede diferir de creadoEn)
   referencia     String?
   comprobanteUrl String?
   estado         EstadoAporte @default(reportado)

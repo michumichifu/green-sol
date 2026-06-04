@@ -21,6 +21,7 @@ type AporteM = {
   participanteId: string;
   estado: string;
   creadoEn: Date;
+  fechaPago: Date | null;
 };
 
 type SolicitudM = {
@@ -122,7 +123,7 @@ export function Miembros({
                   </span>
                   {ultimo && (
                     <span className="text-muted-foreground">
-                      · {ultimo.creadoEn.toLocaleDateString("es-VE")}
+                      · {(ultimo.fechaPago ?? ultimo.creadoEn).toLocaleDateString("es-VE")}
                     </span>
                   )}
                 </div>

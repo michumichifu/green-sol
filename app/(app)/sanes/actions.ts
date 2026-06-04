@@ -15,6 +15,8 @@ import {
 import { etiquetaUsuario } from "@/lib/usuario-etiqueta";
 import { nuevoCodigo } from "@/lib/san/codigo-invitacion";
 import { perfilVerificado } from "@/lib/perfil-verificado";
+import { obtenerTasas } from "@/lib/rates/cache";
+import { infoMontoParticipante } from "@/lib/san/montos";
 
 export type EstadoRecolecta = { error?: string };
 
@@ -540,14 +542,33 @@ export async function reportarPago(
     String(formData.get("referencia") ?? "").trim() || null;
   if (!monto || monto <= 0) return;
 
-  await prisma.aporte.create({
-    data: { recolectaId, participanteId: participante.id, monto, referencia },
-  });
+  // Fecha del pago indicada por el usuario (puede diferir de hoy).
+  const fechaStr = String(formData.get("fechaPago") ?? "").trim();
+  const fechaPago = fechaStr ? new Date(`${fechaStr}T12:00:00`) : new Date();
+
   const recolecta = await prisma.recolecta.findUnique({
     where: { id: recolectaId },
     include: { organizador: { select: { id: true, correo: true, nombre: true } } },
   });
-  if (recolecta) {
+  if (!recolecta) return;
+
+  // Congelar el equivalente en la moneda-ancla ($/cripto) con la tasa del momento.
+  const tasas = await obtenerTasas();
+  const info = infoMontoParticipante(recolecta.moneda, 0, tasas);
+  const montoAncla =
+    info.enBolivares && info.tasa && info.tasa > 0 ? monto / info.tasa : monto;
+
+  await prisma.aporte.create({
+    data: {
+      recolectaId,
+      participanteId: participante.id,
+      monto,
+      montoAncla,
+      fechaPago,
+      referencia,
+    },
+  });
+  {
     await notificarEvento(
       { id: recolecta.organizador.id, correo: recolecta.organizador.correo },
       "san_pago_reportado",

@@ -24,6 +24,8 @@ type Participante = {
 type Aporte = {
   id: string;
   monto: number;
+  montoAncla: number | null;
+  fechaPago: Date | null;
   referencia: string | null;
   estado: "reportado" | "confirmado" | "rechazado";
   creadoEn: Date;
@@ -87,15 +89,19 @@ export function PagosOrganizador({
     tasas,
   );
 
-  function etiquetaMonto(monto: number) {
+  // Usa el equivalente en $ congelado al reportar (no recalcula con la tasa de hoy).
+  function etiquetaMonto(a: { monto: number; montoAncla: number | null }) {
     if (info.enBolivares) {
-      const bsStr = `Bs ${fmt(monto)}`;
-      if (info.tasa && info.tasa > 0) {
-        return `${bsStr} ≈ $${fmt(monto / info.tasa)}`;
-      }
-      return bsStr;
+      const bsStr = `Bs ${fmt(a.monto)}`;
+      const usd =
+        a.montoAncla ?? (info.tasa && info.tasa > 0 ? a.monto / info.tasa : null);
+      return usd != null ? `${bsStr} ≈ $${fmt(usd)}` : bsStr;
     }
-    return `${fmt(monto)} ${info.ancla}`;
+    return `${fmt(a.montoAncla ?? a.monto)} ${info.ancla}`;
+  }
+
+  function fmtFechaPago(a: { fechaPago: Date | null; creadoEn: Date }) {
+    return fmtFecha(a.fechaPago ?? a.creadoEn);
   }
 
   return (
@@ -147,9 +153,9 @@ export function PagosOrganizador({
                   />
                   <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
                     <span className="font-medium text-foreground">
-                      {etiquetaMonto(a.monto)}
+                      {etiquetaMonto(a)}
                     </span>
-                    <span>{fmtFecha(a.creadoEn)}</span>
+                    <span>{fmtFechaPago(a)}</span>
                   </div>
                   {a.referencia && (
                     <p className="mt-0.5 text-xs text-muted-foreground">
@@ -204,9 +210,9 @@ export function PagosOrganizador({
                     />
                     <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
                       <span className="font-medium text-foreground">
-                        {etiquetaMonto(a.monto)}
+                        {etiquetaMonto(a)}
                       </span>
-                      <span>{fmtFecha(a.creadoEn)}</span>
+                      <span>{fmtFechaPago(a)}</span>
                     </div>
                     {a.referencia && (
                       <p className="mt-0.5 text-xs text-muted-foreground">
@@ -233,9 +239,9 @@ export function PagosOrganizador({
                         />
                         <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
                           <span className="font-medium text-red-600 dark:text-red-400">
-                            {etiquetaMonto(a.monto)}
+                            {etiquetaMonto(a)}
                           </span>
-                          <span>{fmtFecha(a.creadoEn)}</span>
+                          <span>{fmtFechaPago(a)}</span>
                         </div>
                       </li>
                     ))}
@@ -252,7 +258,7 @@ export function PagosOrganizador({
           aprobar={confirmando.aprobar}
           nombre={nombreCompleto(confirmando.aporte.participante.usuario)}
           usuario={confirmando.aporte.participante.usuario.nombreUsuario}
-          montoTxt={etiquetaMonto(confirmando.aporte.monto)}
+          montoTxt={etiquetaMonto(confirmando.aporte)}
           referencia={confirmando.aporte.referencia}
           onConfirmar={(pin) =>
             resolver(confirmando.aporte.id, confirmando.aprobar, pin)
