@@ -43,13 +43,18 @@
   .sun-logo { background: radial-gradient(circle at 35% 30%, var(--brand-2), var(--brand) 70%); box-shadow: 0 0 0 6px color-mix(in srgb, var(--brand) 18%, transparent); }
   .hero-glow { background: radial-gradient(60% 120% at 80% 0%, color-mix(in srgb, var(--brand) 22%, transparent), transparent 60%); }
   .chk { color: var(--ok); flex:0 0 auto; }
-  /* Evita que el texto (sobre todo código .mono largo) se salga de sus tarjetas */
+  /* Solo el código .mono largo rompe; el texto normal fluye sin comprimirse */
   .card, .sub { min-width: 0; }
-  main, main * { min-width: 0; }
-  p, li, td, dd, dt, span { overflow-wrap: anywhere; }
-  .mono { overflow-wrap: anywhere; word-break: break-word; }
-  /* Transición suave al colapsar el menú lateral */
-  #sidebar { transition: opacity .2s ease; }
+  p, li, td, dd { overflow-wrap: break-word; }
+  .mono { overflow-wrap: anywhere; }
+  /* Listas del estado: el ícono va a la izquierda fuera del flujo; el texto fluye legible */
+  .lista-estado li { display: block; position: relative; padding-left: 1.7rem; }
+  .lista-estado li > svg, .lista-estado li > i { position: absolute; left: 0; top: 4px; }
+  /* Pestañas del estado del proyecto (una sección a ancho completo) */
+  .estado-tab { display: none; }
+  .estado-tab.active { display: block; }
+  .estado-btn { color: var(--ink-3); border-color: transparent !important; margin-bottom: -1px; }
+  .estado-btn.active { background: var(--paper); color: var(--brand); border-color: var(--line) !important; border-bottom-color: var(--paper) !important; }
 </style>
 </head>
 <body class="min-h-screen">
@@ -110,12 +115,17 @@
     <section id="estado" class="card p-7">
       <h2 class="text-lg font-bold flex items-center gap-2 mb-2"><i data-lucide="list-checks" class="lucide-lg brand-text"></i>Estado del proyecto</h2>
       <p class="text-sm mb-4" style="color:var(--ink-3)">Foto rápida tras la <b style="color:var(--ink-2)">sesión 2026-06-04</b> (sobre v0.0.70–v0.0.137). Lo reciente (v0.0.107–v0.0.137): <b style="color:var(--ink-2)">invitación temporal con solicitud de unión</b> + <b style="color:var(--ink-2)">portero de verificación</b> con PIN, <b style="color:var(--ink-2)">detalle del san en tres pestañas Resumen · Miembros · Pagos</b>, <b style="color:var(--ink-2)">inicio del san con sorteo de turnos</b> (Manual con arrastre, Aleatorio y <b style="color:var(--ink-2)">Ruleta animada con sonido</b>), <b style="color:var(--ink-2)">velo/ojo</b> de percepción de bloqueo, <b style="color:var(--ink-2)">estatus renombrados</b> (Por iniciar / En curso / Finalizado), <b style="color:var(--ink-2)">aprobación de pagos con declaración + PIN</b>, <b style="color:var(--ink-2)">congelado del $ y fecha real del pago</b>, <b style="color:var(--ink-2)">invitar por correo o @usuario</b> con <b style="color:var(--ink-2)">código GS-XXXX + enlace directo</b>, <b style="color:var(--ink-2)">página de Términos (maqueta) con el deslinde P2P</b> y <b style="color:var(--ink-2)">confirmación de cierre de sesión</b>. Previo (v0.0.70–v0.0.106): auth con PIN estilo Cashea, gestión de usuarios completa, planificador de tasas, guía de monedas fiat vs cripto, favicon de marca y detalle del san rediseñado. El detalle exhaustivo está en <span class="mono">docs/PRD.md §0</span>.</p>
-      <div class="grid lg:grid-cols-3 gap-3">
+      <div class="flex flex-wrap gap-1 mb-4 border-b" style="border-color:var(--line)">
+        <button type="button" class="estado-btn active px-3 py-2 text-sm font-medium rounded-t-lg border border-b-0" data-tab="tab-impl">✅ Implementado</button>
+        <button type="button" class="estado-btn px-3 py-2 text-sm font-medium rounded-t-lg border border-b-0" data-tab="tab-pend">🕗 Pendiente</button>
+        <button type="button" class="estado-btn px-3 py-2 text-sm font-medium rounded-t-lg border border-b-0" data-tab="tab-nuevo">✨ Nuevos de esta sesión</button>
+      </div>
+      <div>
 
         <!-- Implementado -->
-        <div class="sub p-4">
+        <div class="sub p-4 estado-tab active" id="tab-impl">
           <div class="flex items-center gap-2 font-semibold mb-3"><span class="badge badge-ok"><i data-lucide="check-circle-2" class="lucide"></i>Implementado</span></div>
-          <ul class="text-sm space-y-1.5" style="color:var(--ink-2)">
+          <ul class="text-sm space-y-1.5 lista-estado" style="color:var(--ink-2)">
             <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Auth rediseñada con PIN</b> (estilo Cashea): correo → OTP → PIN 6 dígitos → datos. PIN hasheado con Argon2; bloqueo tras 5 intentos (15 min). Contraseña como factor fuerte opcional (cripto). Migración suave de cuentas antiguas. "Empezar otro registro".</li>
             <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Roles a 2:</b> <span class="mono">usuario</span> y <span class="mono">super_admin</span> (eliminado <span class="mono">admin_grupo</span>). "Organizador de un san" = etiqueta derivada, no rol.</li>
             <li class="flex gap-2"><i data-lucide="check" class="lucide chk"></i><b style="color:var(--ink)">Gestión de usuarios admin:</b> buscador, filtros chips, lista paginada (20/pág), acciones por íconos (ver ficha, restablecer KYC, suspender/reactivar, eliminar), ficha en modal con identidad/seguridad/KYC/métodos de pago, confirmación con credencial del admin, salvaguardas anti-auto-eliminación.</li>
@@ -136,9 +146,9 @@
         </div>
 
         <!-- Pendiente -->
-        <div class="sub p-4">
+        <div class="sub p-4 estado-tab" id="tab-pend">
           <div class="flex items-center gap-2 font-semibold mb-3"><span class="badge badge-warn"><i data-lucide="clock" class="lucide"></i>Pendiente</span></div>
-          <ul class="text-sm space-y-1.5" style="color:var(--ink-2)">
+          <ul class="text-sm space-y-1.5 lista-estado" style="color:var(--ink-2)">
             <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Motor de rondas — fases 2 y 3:</b> recolección de la ronda (sellar <span class="mono">Aporte.ronda</span>, <b style="color:var(--ink)">fechas de corte y puntualidad</b> a tiempo/mora/adelantado), <b style="color:var(--ink)">entrega del organizador al cobrador</b>, y cierre/avance de ronda hasta finalizar. Spec <span class="mono">2026-06-03-motor-rondas-san-design.md</span>.</li>
             <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Términos definitivos</b> (texto legal real, razón social, comisiones reales) y <b style="color:var(--ink)">motor de gamificación</b> (mecánicas de puntos reales).</li>
             <li class="flex gap-2"><i data-lucide="dot" class="lucide" style="color:var(--warn); flex:0 0 auto"></i><b style="color:var(--ink)">Integración cripto:</b> wallet embebida en el registro, billetera en el dashboard, retiros; primero en <b style="color:var(--ink)">DevNet</b>. El pago cripto real por wallet va en esta fase.</li>
@@ -153,9 +163,9 @@
         </div>
 
         <!-- Nuevos de esta sesión -->
-        <div class="sub p-4" style="background:var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 30%, transparent)">
+        <div class="sub p-4 estado-tab" id="tab-nuevo" style="background:var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 30%, transparent)">
           <div class="flex items-center gap-2 font-semibold mb-3"><span class="badge badge-brand"><i data-lucide="sparkles" class="lucide"></i>Nuevos de esta sesión (v0.0.107–0.0.137)</span></div>
-          <ul class="text-sm space-y-1.5" style="color:var(--ink-2)">
+          <ul class="text-sm space-y-1.5 lista-estado" style="color:var(--ink-2)">
             <li class="flex gap-2"><i data-lucide="dice-5" class="lucide brand-text" style="flex:0 0 auto"></i><b style="color:var(--ink)">Inicio del san + sorteo de turnos:</b> Manual con arrastre, Aleatorio, y <b style="color:var(--ink)">Ruleta animada SVG + sonido Web Audio + desaceleración</b>; resultado definitivo; revela el último "por descarte". Confirmado con PIN.</li>
             <li class="flex gap-2"><i data-lucide="eye" class="lucide brand-text" style="flex:0 0 auto"></i><b style="color:var(--ink)">Velo/ojo</b> de percepción de bloqueo antes de iniciar. Estatus renombrados: <b style="color:var(--ink)">Por iniciar / En curso / Finalizado</b>.</li>
             <li class="flex gap-2"><i data-lucide="user-plus" class="lucide brand-text" style="flex:0 0 auto"></i><b style="color:var(--ink)">Invitación con solicitud de unión</b> + <b style="color:var(--ink)">portero de verificación</b> (PIN). <b style="color:var(--ink)">Tres pestañas Resumen · Miembros · Pagos</b>; Miembros con orden de turnos y fecha de cobro.</li>
@@ -694,6 +704,15 @@
       if (window.lucide) lucide.createIcons();
     });
   }
+  // Pestañas del estado del proyecto (Implementado / Pendiente / Nuevos).
+  document.querySelectorAll('.estado-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.estado-btn').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.estado-tab').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      document.getElementById(b.dataset.tab)?.classList.add('active');
+    });
+  });
   const tocLinks = document.querySelectorAll('.toc a');
   const sections = Array.from(tocLinks).map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
   function onScroll() {
