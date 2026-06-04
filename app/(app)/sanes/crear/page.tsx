@@ -74,6 +74,11 @@ export default function CrearPage() {
   const [verGuiaMonedas, setVerGuiaMonedas] = useState(false);
   const [aceptaResp, setAceptaResp] = useState(false);
   const [pinCrear, setPinCrear] = useState("");
+  const [orgParticipa, setOrgParticipa] = useState(true);
+  const [moraTipo, setMoraTipo] = useState<"ninguna" | "fijo" | "porcentaje">(
+    "ninguna",
+  );
+  const [moraValor, setMoraValor] = useState("");
   // Método de pago: el organizador elige uno de su perfil
   const [metodos, setMetodos] = useState<MetodoPerfil[]>([]);
   const [cargandoMetodos, setCargandoMetodos] = useState(false);
@@ -500,6 +505,68 @@ export default function CrearPage() {
                       </span>
                     </div>
                   )}
+                  {/* ¿Participas o solo organizas? */}
+                  <div className="space-y-2 border-t pt-4">
+                    <p className="text-sm font-medium">¿Participas en el san?</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setOrgParticipa(true)}
+                        className={`rounded-xl border p-2.5 text-sm ${orgParticipa ? "border-brand bg-brand/5 font-medium" : "text-muted-foreground"}`}
+                      >
+                        Aporto y tengo turno
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setOrgParticipa(false)}
+                        className={`rounded-xl border p-2.5 text-sm ${!orgParticipa ? "border-brand bg-brand/5 font-medium" : "text-muted-foreground"}`}
+                      >
+                        Solo organizo
+                      </button>
+                    </div>
+                  </div>
+                  {/* Política de mora */}
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Si alguien se atrasa…</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(
+                        [
+                          ["ninguna", "Sin multa"],
+                          ["fijo", "Multa fija"],
+                          ["porcentaje", "Porcentaje"],
+                        ] as const
+                      ).map(([v, l]) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => setMoraTipo(v)}
+                          className={`rounded-xl border p-2.5 text-xs ${moraTipo === v ? "border-brand bg-brand/5 font-medium" : "text-muted-foreground"}`}
+                        >
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                    {moraTipo !== "ninguna" && (
+                      <div className="relative">
+                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                          {moraTipo === "fijo" ? ancla : "%"}
+                        </span>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={moraValor}
+                          onChange={(e) => setMoraValor(e.target.value)}
+                          placeholder={moraTipo === "fijo" ? "monto de la multa" : "% del aporte"}
+                          className="pl-10"
+                        />
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Pasada la fecha de pago sin confirmarse, el pago se marca con
+                      atraso{moraTipo !== "ninguna" ? " y se calcula la multa" : ""}.
+                    </p>
+                  </div>
                 </>
               ) : (
                 <div className="space-y-2">
@@ -718,6 +785,13 @@ export default function CrearPage() {
                 value={esSan ? cupo : ""}
               />
               <input type="hidden" name="metodoPagoId" value={metodoPagoId} />
+              <input
+                type="hidden"
+                name="organizadorParticipa"
+                value={orgParticipa ? "true" : "false"}
+              />
+              <input type="hidden" name="moraTipo" value={moraTipo} />
+              <input type="hidden" name="moraValor" value={moraValor} />
               <input type="hidden" name="pin" value={pinCrear} />
               <Button type="submit" className="w-full" disabled={pendiente || !aceptaResp || !/^\d{6}$/.test(pinCrear)}>
                 <Check className="size-4" />{" "}
