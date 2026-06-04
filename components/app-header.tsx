@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Bell, X } from "lucide-react";
 import {
   marcarTodasLeidas,
@@ -16,6 +17,7 @@ type Noti = {
   titulo: string;
   cuerpo: string | null;
   leida: boolean;
+  enlace: string | null;
 };
 
 export function AppHeader({
@@ -28,6 +30,7 @@ export function AppHeader({
   nivelNum: number;
   nivelNombre: string;
 }) {
+  const router = useRouter();
   const [verNotis, setVerNotis] = useState(false);
   const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
   const [lista, setLista] = useState(notis);
@@ -52,6 +55,11 @@ export function AppHeader({
   function marcar(id: string) {
     setLista((l) => l.map((n) => (n.id === id ? { ...n, leida: true } : n)));
     marcarLeida(id);
+  }
+  function abrirNoti(n: Noti) {
+    marcar(n.id);
+    setVerNotis(false);
+    if (n.enlace) router.push(n.enlace);
   }
   function eliminar(id: string) {
     setLista((l) => l.filter((n) => n.id !== id));
@@ -132,7 +140,7 @@ export function AppHeader({
                     >
                       <button
                         type="button"
-                        onClick={() => marcar(n.id)}
+                        onClick={() => abrirNoti(n)}
                         className="min-w-0 flex-1 text-left"
                       >
                         <div className="flex items-center gap-1.5">

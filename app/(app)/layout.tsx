@@ -18,7 +18,7 @@ export default async function AppLayout({
       where: { usuarioId: usuario.id },
       orderBy: { creadaEn: "desc" },
       take: 8,
-      select: { id: true, titulo: true, cuerpo: true, leida: true },
+      select: { id: true, titulo: true, cuerpo: true, leida: true, enlace: true },
     }),
     prisma.notificacion.count({
       where: { usuarioId: usuario.id, leida: false },

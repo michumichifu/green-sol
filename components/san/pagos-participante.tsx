@@ -107,6 +107,36 @@ export function PagosParticipante({
     ? `Bs ${fmt(montoNumerico)}`
     : `${fmt(montoNumerico)} ${info.ancla}`;
 
+  // Monto a pagar (reutilizado en la tarjeta sola o en el grid 60/40 al ya reportar).
+  const montoDisplay =
+    info.enBolivares && info.montoBs ? (
+      <>
+        <p className="text-2xl font-bold">Bs {fmt(info.montoBs)}</p>
+        <p className="text-xs text-muted-foreground">
+          ≈ ${fmt(info.montoAncla)}
+          {info.fuenteTasa && info.tasa
+            ? ` · ${info.fuenteTasa}: Bs ${fmt(info.tasa)}/$`
+            : ""}
+        </p>
+      </>
+    ) : info.enBolivares && !info.tasa ? (
+      <>
+        <p className="text-2xl font-bold">${fmt(info.montoAncla)}</p>
+        <p className="mt-1 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+          Tasa no disponible hoy; calcula con la tasa del día.
+        </p>
+      </>
+    ) : (
+      <>
+        <p className="text-2xl font-bold">
+          {fmt(info.montoAncla)} {info.ancla}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Se paga por tu wallet (Solana).
+        </p>
+      </>
+    );
+
   async function confirmarReporte() {
     setEnviando(true);
     const fd = new FormData();
@@ -126,63 +156,47 @@ export function PagosParticipante({
 
   return (
     <div className="space-y-5">
-      {/* Bloque 1: Lo que te toca pagar */}
-      <div className="rounded-xl border bg-card p-4 space-y-1">
-        <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
-          Lo que te toca pagar
-        </p>
-
-        {info.enBolivares && info.montoBs ? (
-          <>
-            <p className="text-2xl font-bold">
-              Bs {fmt(info.montoBs)}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              ≈ ${fmt(info.montoAncla)}
-              {info.fuenteTasa && info.tasa
-                ? ` · ${info.fuenteTasa}: Bs ${fmt(info.tasa)}/$`
-                : ""}
-            </p>
-          </>
-        ) : info.enBolivares && !info.tasa ? (
-          <>
-            <p className="text-2xl font-bold">${fmt(info.montoAncla)}</p>
-            <p className="mt-1 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
-              Tasa no disponible hoy; calcula con la tasa del día.
-            </p>
-          </>
-        ) : (
-          <>
-            <p className="text-2xl font-bold">
-              {fmt(info.montoAncla)} {info.ancla}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Se paga por tu wallet (Solana).
-            </p>
-          </>
-        )}
-      </div>
-
-      {/* Bloque 2: Reportar pago — oculto si ya reporté esta ronda (queda el estado) */}
+      {/* Bloque 1: Lo que te toca pagar. Si ya reporté, en grid 60/40 con el estado
+          al lado, para liberar espacio vertical (historial y donas suben). */}
       {yaReporto ? (
-        <div className="rounded-xl border bg-card p-4">
-          <p className="text-sm font-medium">Ya reportaste tu cuota de esta ronda</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {yaReporto.estado === "confirmado"
-              ? "El organizador la aprobó."
-              : "El organizador la está revisando."}
-          </p>
-          <span
-            className={`mt-2 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${
-              yaReporto.estado === "confirmado"
-                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
-            }`}
-          >
-            {yaReporto.estado === "confirmado" ? "Aprobado" : "En revisión"}
-          </span>
+        <div className="grid grid-cols-5 items-center gap-3 rounded-xl border bg-card p-4">
+          <div className="col-span-3 space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Lo que te toca pagar
+            </p>
+            {montoDisplay}
+          </div>
+          <div className="col-span-2 flex flex-col items-end gap-1 text-right">
+            <p className="text-xs font-medium leading-tight">
+              Ya reportaste tu cuota
+            </p>
+            <p className="text-[11px] leading-tight text-muted-foreground">
+              {yaReporto.estado === "confirmado"
+                ? "El organizador la aprobó."
+                : "El organizador la está revisando."}
+            </p>
+            <span
+              className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                yaReporto.estado === "confirmado"
+                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                  : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+              }`}
+            >
+              {yaReporto.estado === "confirmado" ? "Aprobado" : "En revisión"}
+            </span>
+          </div>
         </div>
       ) : (
+        <div className="rounded-xl border bg-card p-4 space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Lo que te toca pagar
+          </p>
+          {montoDisplay}
+        </div>
+      )}
+
+      {/* Bloque 2: Reportar pago — oculto si ya reporté esta ronda */}
+      {!yaReporto && (
       <div className="rounded-xl border p-4 space-y-3">
         <h2 className="font-semibold">Reportar pago</h2>
 
@@ -250,6 +264,7 @@ export function PagosParticipante({
         </Button>
       </div>
       )}
+
 
       {/* Confirmación con declaración jurada (evita reportes por error) */}
       {confirmando && (

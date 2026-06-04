@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { marcarTodasLeidas } from "./actions";
@@ -29,23 +30,34 @@ export default async function NotificacionesPage() {
         <p className="text-sm text-muted-foreground">No tienes avisos.</p>
       )}
       <ul className="space-y-2">
-        {notis.map((n) => (
-          <li
-            key={n.id}
-            className={cn(
-              "rounded-xl border p-3",
-              n.leida ? "bg-card" : "border-brand/30 bg-brand/5",
-            )}
-          >
-            <p className="font-medium">{n.titulo}</p>
-            {n.cuerpo && (
-              <p className="text-sm text-muted-foreground">{n.cuerpo}</p>
-            )}
-            <p className="text-[10px] text-muted-foreground">
-              {n.creadaEn.toLocaleString("es-VE")}
-            </p>
-          </li>
-        ))}
+        {notis.map((n) => {
+          const contenido = (
+            <>
+              <p className="font-medium">{n.titulo}</p>
+              {n.cuerpo && (
+                <p className="text-sm text-muted-foreground">{n.cuerpo}</p>
+              )}
+              <p className="text-[10px] text-muted-foreground">
+                {n.creadaEn.toLocaleString("es-VE")}
+              </p>
+            </>
+          );
+          const clase = cn(
+            "block rounded-xl border p-3",
+            n.leida ? "bg-card" : "border-brand/30 bg-brand/5",
+          );
+          return (
+            <li key={n.id}>
+              {n.enlace ? (
+                <Link href={n.enlace} className={cn(clase, "hover:bg-muted/40")}>
+                  {contenido}
+                </Link>
+              ) : (
+                <div className={clase}>{contenido}</div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </main>
   );

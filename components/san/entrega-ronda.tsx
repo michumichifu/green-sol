@@ -112,8 +112,14 @@ export function EntregaRonda({
             Cobra <span className="font-medium text-foreground">{cobradorNombre}</span>
           </p>
         </div>
-        <div className="flex flex-col items-center gap-1 rounded-xl border p-3 text-center">
-          <DonaProgreso pagados={pagadosRonda} total={aportantes} label="pagos" />
+        <div className="flex flex-col items-center gap-1 rounded-xl border border-brand/30 bg-gradient-to-br from-brand/20 to-brand/5 p-3 text-center">
+          <DonaProgreso
+            pagados={pagadosRonda}
+            total={aportantes}
+            label="pagos"
+            colorBase="#ffffff"
+            gradiente={{ id: "dona-pagos", desde: "#fef9c3", hasta: "#fde047" }}
+          />
           <p className="text-sm font-semibold">
             {pagadosRonda} de {aportantes} pagaron
           </p>

@@ -2,6 +2,15 @@ interface DonaProgresoProps {
   pagados: number;
   total: number;
   label?: string;
+  /** Color del anillo de fondo (por defecto gris). */
+  colorBase?: string;
+  /** Color del arco de progreso (por defecto verde marca). */
+  colorProgreso?: string;
+  /**
+   * Degradado opcional para el arco de progreso. Si se pasa, sustituye a
+   * `colorProgreso`. El `id` debe ser único en la página.
+   */
+  gradiente?: { id: string; desde: string; hasta: string };
 }
 
 /**
@@ -11,7 +20,14 @@ interface DonaProgresoProps {
  * stroke-dasharray = 100, stroke-dashoffset = 100 - porcentaje
  * → offset 0 = lleno, offset 100 = vacío.
  */
-export function DonaProgreso({ pagados, total, label }: DonaProgresoProps) {
+export function DonaProgreso({
+  pagados,
+  total,
+  label,
+  colorBase = "#eef1ef",
+  colorProgreso = "#14c98a",
+  gradiente,
+}: DonaProgresoProps) {
   // Clamp defensivo: 0 ≤ pct ≤ 100
   const pct = total === 0 ? 0 : Math.min(100, Math.round((pagados / total) * 100));
 
@@ -31,13 +47,21 @@ export function DonaProgreso({ pagados, total, label }: DonaProgresoProps) {
           aria-label={`${pagados} de ${total} pagados`}
           role="img"
         >
+          {gradiente && (
+            <defs>
+              <linearGradient id={gradiente.id} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor={gradiente.desde} />
+                <stop offset="100%" stopColor={gradiente.hasta} />
+              </linearGradient>
+            </defs>
+          )}
           {/* Anillo de fondo */}
           <circle
             cx="18"
             cy="18"
             r={r}
             fill="none"
-            stroke="#eef1ef"
+            stroke={colorBase}
             strokeWidth="3.5"
           />
           {/* Arco de progreso */}
@@ -46,7 +70,7 @@ export function DonaProgreso({ pagados, total, label }: DonaProgresoProps) {
             cy="18"
             r={r}
             fill="none"
-            stroke="#14c98a"
+            stroke={gradiente ? `url(#${gradiente.id})` : colorProgreso}
             strokeWidth="3.5"
             strokeLinecap="round"
             strokeDasharray={`${circunferencia} ${circunferencia}`}

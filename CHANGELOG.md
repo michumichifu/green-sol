@@ -4,6 +4,51 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.2.6] — 2026-06-04 — Refinamientos de pagos y de la vista del san (UX)
+
+Lote de pulidos sobre la pestaña Pagos del san y las notificaciones, a partir de probar el flujo real. Sin cambios de esquema.
+
+### Añadido
+
+- **Navegación desde las notificaciones (v0.2.6):** las notificaciones ya **llevan a su destino al tocarlas**. El campo `enlace` (que ya existía en el modelo `Notificacion`) no se traía ni se usaba: ahora el layout lo selecciona y `components/app-header.tsx` navega (`router.push`) al marcar la noti como leída. La página "Ver todos" (`app/(app)/notificaciones/page.tsx`) también hace clicable cada aviso con enlace.
+- **Tarjeta "¿Dónde pagar?" colapsable (v0.2.6):** `components/san/metodo-pago-tarjeta.tsx` pasó a cliente y ahora está **cerrada por defecto** (muestra solo el ícono + "¿Dónde pagar?" + el método, con un **ojo** y una **flecha** a la derecha). Se despliega al tocar, para **no tapar** "lo que te toca pagar", el historial ni las donas.
+- **Donas de ronda diferenciadas (v0.2.5–v0.2.6):** la vista del organizador muestra el progreso en **dos donas en grid 2×1** — izquierda **"ronda"** (Ronda X de N · Cobra Fulano), derecha **"pagos"** (X de N pagaron) — con el disclaimer de estado **al 100%** debajo. Para no confundirlas, la dona de **pagos** se distingue: tarjeta con **fondo verde degradado** (tono Green Sol), anillo base **blanco** y arco de progreso **amarillo claro con degradado**. `components/san/dona-progreso.tsx` admite ahora `colorBase`, `colorProgreso` y un `gradiente` opcional para el arco.
+
+### Cambiado
+
+- **Pagos del participante más compactos (v0.2.6):** cuando **ya reporté** mi cuota de la ronda, "Lo que te toca pagar" y el estado del reporte se fusionan en **una sola tarjeta con grid 60/40** (60% el monto, 40% "Ya reportaste tu cuota" + la insignia En revisión/Aprobado), liberando espacio para que **el historial y las donas suban**. Si aún no reporté, queda la tarjeta de monto completa + el formulario.
+- **Estado del pago unificado (v0.2.4):** al reportar, el **formulario se oculta** y queda solo el estado ("En revisión"/"Aprobado"); el **calendario** de Cuentas por pagar muestra el mismo estado; las **notificaciones** de pago apuntan a la pestaña correcta (`?tab=pagos`).
+- **Reportar pago con confirmación + declaración jurada (v0.2.3):** antes de enviar, un pop-up con la **declaración jurada** ("juro que ya le pagué al organizador…") y un **check obligatorio**, para evitar reportes por error.
+
+### Corregido
+
+- **"Lo que te toca pagar" mostraba $4 en vez de $20 (v0.2.2):** doble división del aporte — `montoAporte` ya es el aporte por persona y se volvía a dividir entre el cupo. Se usa `montoAporte` directo en `pagos-participante.tsx` y `pagos-organizador.tsx`.
+- **El calendario llevaba a Resumen y el organizador que aporta no podía reportar (v0.2.1):** el calendario ahora abre la pestaña **Pagos**; la vista de reportar cuota se muestra a **cualquier participante**, incluido el organizador que participa.
+
+---
+
+## [0.2.0] — 2026-06-04 — Motor de rondas completo (fases 2 y 3): puntualidad, mora, entrega del bote y Cuentas por pagar
+
+Cierra el **motor de rondas**: además de iniciar el san y sortear turnos (fase 1, ya en v0.1.0), ahora cada aporte se **sella a su ronda**, se calculan **fechas de corte y puntualidad**, se aplica la **mora** (informativa), el organizador **entrega el bote al cobrador** con sus datos de pago y declaración, y la ronda **se cierra y avanza** hasta finalizar el san. Se añade la sección **Cuentas por pagar** con un calendario de vencimientos.
+
+### Añadido
+
+- **Motor de rondas, backend (fases 2/3) — v0.1.4:**
+  - Migraciones: en `Aporte` (`ronda`, `montoAncla`, `fechaPago`), en `Turno` (`entregadoEn`, `entregaReferencia`) y en `Recolecta` (`moraTipo` enum `TipoMora {ninguna|fijo|porcentaje}`, `moraValor`).
+  - `lib/san/rondas.ts`: `fechaCorte(fechaInicio, ronda, díasFrecuencia)`, `puntualidad(fechaPago, corte)` → `a_tiempo`/`adelantado`/`mora` (a nivel de día, **sin días de gracia**: la regla es la fecha de corte), `montoMora(tipo, valor, cuotaAncla)`, y `estadoRonda(...)` (ronda actual, total, aportantes, pagados de la ronda, completa, cobrador, entregada, finalizado).
+  - `reportarPago` ahora **sella** `Aporte.ronda = rondaActual`, congela `montoAncla` y guarda `fechaPago`.
+- **Entrega del bote al cobrador (fase 3 UI) — v0.1.5, v0.1.8–v0.1.9:** `components/san/entrega-ronda.tsx`. Cuando todos pagan la ronda, el organizador ve **cuánto entregar** (bote en $/Bs), los **datos de pago del cobrador** (banco como `código · nombre` + teléfono/cuenta/cédula/wallet **copiables** vía `components/dato-copiable.tsx` y `bancoLabel` en `lib/bancos-venezuela.ts`), una **declaración jurada con check obligatorio** (incluye a quién, cédula y teléfono) y **PIN**. La acción `reportarEntrega` marca el turno como cobrado/entregado y avisa al cobrador (`san_entrega_hecha`).
+- **Avance / cierre de ronda — v0.1.5:** `iniciarSiguienteRonda` incrementa `rondaActual` o **finaliza el san** (estado cerrada) en la última ronda.
+- **Puntualidad y mora en los pagos del organizador — v0.1.6:** cada pago muestra una **insignia** (a tiempo/adelantado/con atraso) y, si hay mora, el recargo calculado (`+X`). La mora es **informativa** (se calcula y se muestra; no se cobra automáticamente).
+- **Asistente de crear: mora y participación del organizador — v0.1.7:** paso nuevo en `app/(app)/sanes/crear/page.tsx` para elegir la **política de mora** (ninguna / monto fijo / porcentaje) y si el organizador **aporta y tiene turno** o **solo organiza** (`organizadorParticipa`).
+- **Cuentas por pagar — v0.2.0:** la sección Pagos del menú pasó a titularse **"Cuentas por pagar"** (`app/(app)/pagos/page.tsx`). Incluye `components/san/calendario-pagos.tsx`: un **calendario lineal** (tira de días, hoy resaltado, días con cuota en amarillo) y vista de **mes**; al tocar un día se ven los sanes que vencen, cuánto y su estado (Por pagar/En revisión/Pagado). Los vencimientos salen de las **fechas de corte** de los sanes activos. Diseño visual adaptado de una plantilla; reimplementado en web (Next.js), no se reusó el código React Native.
+
+### Limpieza
+
+- **v0.1.8:** se quitaron del repositorio archivos de una skill de Claude subidos por error (`.agents/skills/twitter-x-posts`) y se añadieron `.agents/`, `.claude/` y `skills-lock.json` al `.gitignore`.
+
+---
+
 ## [0.1.0] — 2026-06-04 — Adopción de versionado semántico (semver) + documentación al día
 
 ### Desplegado
