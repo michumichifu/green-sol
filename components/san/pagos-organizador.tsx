@@ -7,6 +7,13 @@ import { DonaProgreso } from "@/components/san/dona-progreso";
 import { ConfirmarResolucionPago } from "@/components/san/confirmar-resolucion-pago";
 import { Button } from "@/components/ui/button";
 import { infoMontoParticipante, aportePersona } from "@/lib/san/montos";
+import {
+  fechaCorte,
+  puntualidad,
+  montoMora,
+  PUNTUALIDAD_LABEL,
+  type Puntualidad,
+} from "@/lib/san/rondas";
 import type { Tasas } from "@/lib/rates/cache";
 
 type UsuarioBasico = {
@@ -25,6 +32,7 @@ type Aporte = {
   id: string;
   monto: number;
   montoAncla: number | null;
+  ronda: number;
   fechaPago: Date | null;
   referencia: string | null;
   estado: "reportado" | "confirmado" | "rechazado";
@@ -47,7 +55,17 @@ interface PagosOrganizadorProps {
     aprobar: boolean,
     pin: string,
   ) => Promise<{ error?: string }>;
+  fechaInicio: Date | null;
+  diasFrecuencia: number;
+  moraTipo: string;
+  moraValor: number | null;
 }
+
+const PUNT_CLASE: Record<Puntualidad, string> = {
+  a_tiempo: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+  adelantado: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  mora: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+};
 
 function nombreCompleto(u: UsuarioBasico) {
   return [u.nombre, u.apellido].filter(Boolean).join(" ") || u.correo;
@@ -70,6 +88,10 @@ export function PagosOrganizador({
   tasas,
   aportes,
   resolver,
+  fechaInicio,
+  diasFrecuencia,
+  moraTipo,
+  moraValor,
 }: PagosOrganizadorProps) {
   const [confirmando, setConfirmando] = useState<{
     aporte: Aporte;
@@ -102,6 +124,20 @@ export function PagosOrganizador({
 
   function fmtFechaPago(a: { fechaPago: Date | null; creadoEn: Date }) {
     return fmtFecha(a.fechaPago ?? a.creadoEn);
+  }
+
+  // Badge de puntualidad (a tiempo / adelantado / con atraso) + mora si aplica.
+  function badgePunt(a: Aporte) {
+    if (!fechaInicio) return null;
+    const corte = fechaCorte(fechaInicio, a.ronda, diasFrecuencia);
+    const p = puntualidad(a.fechaPago ?? a.creadoEn, corte);
+    const mora = p === "mora" ? montoMora(moraTipo, moraValor, info.montoAncla) : 0;
+    return (
+      <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${PUNT_CLASE[p]}`}>
+        {PUNTUALIDAD_LABEL[p]}
+        {mora > 0 ? ` · +${fmt(mora)} ${info.ancla}` : ""}
+      </span>
+    );
   }
 
   return (
@@ -155,7 +191,7 @@ export function PagosOrganizador({
                     <span className="font-medium text-foreground">
                       {etiquetaMonto(a)}
                     </span>
-                    <span>{fmtFechaPago(a)}</span>
+                    <span className="flex items-center gap-2">{badgePunt(a)}{fmtFechaPago(a)}</span>
                   </div>
                   {a.referencia && (
                     <p className="mt-0.5 text-xs text-muted-foreground">
@@ -212,7 +248,7 @@ export function PagosOrganizador({
                       <span className="font-medium text-foreground">
                         {etiquetaMonto(a)}
                       </span>
-                      <span>{fmtFechaPago(a)}</span>
+                      <span className="flex items-center gap-2">{badgePunt(a)}{fmtFechaPago(a)}</span>
                     </div>
                     {a.referencia && (
                       <p className="mt-0.5 text-xs text-muted-foreground">
@@ -241,7 +277,7 @@ export function PagosOrganizador({
                           <span className="font-medium text-red-600 dark:text-red-400">
                             {etiquetaMonto(a)}
                           </span>
-                          <span>{fmtFechaPago(a)}</span>
+                          <span className="flex items-center gap-2">{badgePunt(a)}{fmtFechaPago(a)}</span>
                         </div>
                       </li>
                     ))}

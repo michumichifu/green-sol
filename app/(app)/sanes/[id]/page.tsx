@@ -225,6 +225,13 @@ export default async function DetalleRecolecta({
               tasas={tasas}
               aportes={r.aportes}
               resolver={resolverAporte}
+              fechaInicio={r.fechaInicio}
+              diasFrecuencia={
+                r.frecuenciaDias ??
+                (r.frecuencia === "mensual" ? 30 : r.frecuencia === "quincenal" ? 15 : 7)
+              }
+              moraTipo={r.moraTipo}
+              moraValor={r.moraValor}
             />
           )}
 
