@@ -69,11 +69,11 @@ export function RuletaSorteo({
   const [pin, setPin] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState("");
-  // El último turno se revela aparte, con un par de segundos de pausa.
-  const [ultimoPendiente, setUltimoPendiente] = useState<ParticipanteT | null>(null);
+  // El último turno se revela con una pausa, manteniendo la ruleta a la vista.
+  const [revelandoUltimo, setRevelandoUltimo] = useState(false);
   const rotRef = useRef(0);
 
-  const completo = restantes.length === 0 && !ultimoPendiente;
+  const completo = restantes.length === 0 && !revelandoUltimo;
   const n = restantes.length;
   const segDeg = n > 0 ? 360 / n : 0;
   const segRad = (segDeg * Math.PI) / 180;
@@ -83,20 +83,19 @@ export function RuletaSorteo({
   function asignar(ganadorIdx: number) {
     const elegido = restantes[ganadorIdx];
     const quedan = restantes.filter((_, i) => i !== ganadorIdx);
+    setOrden((o) => [...o, elegido]);
+    setRestantes(quedan);
     if (quedan.length === 1) {
-      // Penúltimo: lo asignamos ya; el último se revela "por descarte" tras una pausa.
+      // Queda uno en la ruleta: es el último por descarte. Se mantiene a la vista,
+      // con el mensaje encima, unos segundos antes de cerrarlo.
       const ultimo = quedan[0];
-      setOrden((o) => [...o, elegido]);
-      setRestantes([]);
-      setUltimoPendiente(ultimo);
+      setRevelandoUltimo(true);
       window.setTimeout(() => {
         ganador();
         setOrden((o) => [...o, ultimo]);
-        setUltimoPendiente(null);
-      }, 2000);
-    } else {
-      setOrden((o) => [...o, elegido]);
-      setRestantes(quedan);
+        setRestantes([]);
+        setRevelandoUltimo(false);
+      }, 3000);
     }
   }
 
@@ -164,22 +163,23 @@ export function RuletaSorteo({
             </div>
           )}
 
-          {ultimoPendiente ? (
-            <div className="space-y-1 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-100 to-orange-100 p-5 text-center shadow-sm dark:border-amber-900/50 dark:from-amber-950/40 dark:to-orange-950/30">
+          {/* Mensaje encima de la ruleta */}
+          {revelandoUltimo ? (
+            <div className="space-y-0.5 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-100 to-orange-100 p-3 text-center shadow-sm dark:border-amber-900/50 dark:from-amber-950/40 dark:to-orange-950/30">
               <p className="text-xs text-amber-800/80 dark:text-amber-300/80">
-                Y por descarte, el último turno es para…
+                Por descarte, el último turno es para…
               </p>
-              <p className="text-lg font-bold text-amber-900 dark:text-amber-200">
-                🎉 {etiqueta(ultimoPendiente)}
+              <p className="text-base font-bold text-amber-900 dark:text-amber-200">
+                🎉 {restantes[0] ? etiqueta(restantes[0]) : ""}
               </p>
             </div>
           ) : (
-          <>
-          <p className="text-center text-xs text-muted-foreground">
-            Gira para revelar el turno {orden.length + 1}. No se puede rehacer.
-          </p>
+            <p className="text-center text-xs text-muted-foreground">
+              Gira para revelar el turno {orden.length + 1}. No se puede rehacer.
+            </p>
+          )}
 
-          {/* Ruleta */}
+          {/* Ruleta (siempre visible, también al revelar el último) */}
           <div className="relative mx-auto w-full max-w-[360px]">
             {/* Puntero */}
             <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2">
@@ -227,15 +227,15 @@ export function RuletaSorteo({
             </svg>
           </div>
 
-          <Button
-            type="button"
-            className="w-full"
-            onClick={girar}
-            disabled={girando}
-          >
-            {girando ? "Girando…" : "Girar 🎰"}
-          </Button>
-          </>
+          {!revelandoUltimo && (
+            <Button
+              type="button"
+              className="w-full"
+              onClick={girar}
+              disabled={girando}
+            >
+              {girando ? "Girando…" : "Girar 🎰"}
+            </Button>
           )}
         </>
       ) : (
