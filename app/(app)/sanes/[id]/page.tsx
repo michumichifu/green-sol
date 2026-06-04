@@ -16,6 +16,7 @@ import {
   valorar,
 } from "../actions";
 import { estadoRonda } from "@/lib/san/rondas";
+import { infoMontoParticipante } from "@/lib/san/montos";
 import { Button } from "@/components/ui/button";
 import { PanelTabs } from "@/components/panel-tabs";
 import { ResumenSan } from "@/components/san/resumen-san";
@@ -101,6 +102,31 @@ export default async function DetalleRecolecta({
     }));
 
   const tasas = await obtenerTasas();
+
+  // Para la entrega: cuánto es el bote (lo que recibe quien cobra) y los datos de
+  // pago del cobrador (su método del perfil), que el organizador necesita ver.
+  const infoBote = infoMontoParticipante(r.moneda, r.meta ?? 0, tasas);
+  const cobradorMetodo =
+    esOrganizador && turnoCobrador
+      ? await prisma.metodoPago.findFirst({
+          where: { usuarioId: turnoCobrador.participante.usuarioId },
+          orderBy: { principal: "desc" },
+        })
+      : null;
+  const cobradorPago = cobradorMetodo
+    ? {
+        metodo: cobradorMetodo.metodo,
+        banco: cobradorMetodo.banco,
+        telefono: cobradorMetodo.telefono,
+        titular: cobradorMetodo.titular,
+        cedula: cobradorMetodo.cedula,
+        numeroCuenta: cobradorMetodo.numeroCuenta,
+        tipoCuenta: cobradorMetodo.tipoCuenta,
+        wallet: cobradorMetodo.wallet,
+        email: cobradorMetodo.email,
+      }
+    : null;
+
   const participanteActual = r.participantes.find((p) => p.usuarioId === usuario.id);
   const misAportes = participanteActual
     ? r.aportes.filter((a) => a.participante.usuarioId === usuario.id)
@@ -215,6 +241,11 @@ export default async function DetalleRecolecta({
               completa={est.completa}
               entregada={est.entregada}
               cobradorNombre={cobradorNombre}
+              boteAncla={infoBote.montoAncla}
+              boteBs={infoBote.montoBs}
+              ancla={infoBote.ancla}
+              fuenteTasa={infoBote.fuenteTasa}
+              cobradorPago={cobradorPago}
               reportarEntrega={entregar}
               iniciarSiguiente={avanzar}
             />

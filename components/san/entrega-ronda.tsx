@@ -7,6 +7,23 @@ import { CampoPin } from "@/components/campo-pin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DonaProgreso } from "@/components/san/dona-progreso";
+import { BANCOS_VE } from "@/lib/bancos-venezuela";
+
+type CobradorPago = {
+  metodo: string;
+  banco: string | null;
+  telefono: string | null;
+  titular: string | null;
+  cedula: string | null;
+  numeroCuenta: string | null;
+  tipoCuenta: string | null;
+  wallet: string | null;
+  email: string | null;
+} | null;
+
+function fmt(n: number) {
+  return n.toLocaleString("es-VE", { maximumFractionDigits: 2 });
+}
 
 /**
  * Vista del organizador para cerrar una ronda: progreso de pagos de la ronda,
@@ -21,6 +38,11 @@ export function EntregaRonda({
   completa,
   entregada,
   cobradorNombre,
+  boteAncla,
+  boteBs,
+  ancla,
+  fuenteTasa,
+  cobradorPago,
   reportarEntrega,
   iniciarSiguiente,
 }: {
@@ -31,6 +53,11 @@ export function EntregaRonda({
   completa: boolean;
   entregada: boolean;
   cobradorNombre: string;
+  boteAncla: number;
+  boteBs: number | null;
+  ancla: string;
+  fuenteTasa: string | null;
+  cobradorPago: CobradorPago;
   reportarEntrega: (referencia: string, pin: string) => Promise<{ error?: string }>;
   iniciarSiguiente: (pin: string) => Promise<{ error?: string }>;
 }) {
@@ -40,6 +67,12 @@ export function EntregaRonda({
   const [pin, setPin] = useState("");
   const [proc, setProc] = useState(false);
   const [error, setError] = useState("");
+  const [acepta, setAcepta] = useState(false);
+
+  const bancoCobrador = cobradorPago?.banco
+    ? BANCOS_VE.find((b) => b.codigo === cobradorPago.banco)?.nombre ??
+      cobradorPago.banco
+    : null;
 
   useEffect(() => {
     if (!modal) return;
@@ -64,6 +97,7 @@ export function EntregaRonda({
       setModal(null);
       setReferencia("");
       setPin("");
+      setAcepta(false);
       router.refresh();
     }
   }
@@ -138,10 +172,98 @@ export function EntregaRonda({
 
             {modal === "entregar" ? (
               <>
-                <div className="rounded-xl border border-brand/30 bg-brand/5 p-3 text-xs text-muted-foreground">
-                  Declaro que entregué el total de esta ronda a{" "}
-                  <b className="text-foreground">{cobradorNombre}</b>.
+                {/* Cuánto entregar */}
+                <div className="rounded-xl border bg-muted/40 p-3">
+                  <p className="text-xs text-muted-foreground">Le corresponde el bote</p>
+                  <p className="text-lg font-bold">
+                    {ancla} {fmt(boteAncla)}
+                    {boteBs != null && (
+                      <span className="text-sm font-normal text-muted-foreground">
+                        {" "}
+                        ≈ Bs {fmt(boteBs)}
+                        {fuenteTasa ? ` · ${fuenteTasa}` : ""}
+                      </span>
+                    )}
+                  </p>
                 </div>
+
+                {/* Datos de pago del cobrador */}
+                <div className="rounded-xl border bg-card p-3 text-sm">
+                  <p className="mb-1 text-xs font-medium text-muted-foreground">
+                    Págale a {cobradorNombre}:
+                  </p>
+                  {cobradorPago ? (
+                    <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
+                      {cobradorPago.wallet ? (
+                        <>
+                          <dt className="text-muted-foreground">Wallet</dt>
+                          <dd className="break-all font-medium">{cobradorPago.wallet}</dd>
+                        </>
+                      ) : (
+                        <>
+                          {bancoCobrador && (
+                            <>
+                              <dt className="text-muted-foreground">Banco</dt>
+                              <dd className="font-medium">{bancoCobrador}</dd>
+                            </>
+                          )}
+                          {cobradorPago.telefono && (
+                            <>
+                              <dt className="text-muted-foreground">Teléfono</dt>
+                              <dd className="font-medium">{cobradorPago.telefono}</dd>
+                            </>
+                          )}
+                          {cobradorPago.numeroCuenta && (
+                            <>
+                              <dt className="text-muted-foreground">Cuenta</dt>
+                              <dd className="font-medium">{cobradorPago.numeroCuenta}</dd>
+                            </>
+                          )}
+                          {cobradorPago.titular && (
+                            <>
+                              <dt className="text-muted-foreground">Titular</dt>
+                              <dd className="font-medium">{cobradorPago.titular}</dd>
+                            </>
+                          )}
+                          {cobradorPago.cedula && (
+                            <>
+                              <dt className="text-muted-foreground">Cédula</dt>
+                              <dd className="font-medium">{cobradorPago.cedula}</dd>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </dl>
+                  ) : (
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                      {cobradorNombre} aún no registró datos de pago. Pídeselos
+                      directamente antes de entregar.
+                    </p>
+                  )}
+                </div>
+
+                {/* Declaración con check (incluye los datos a los que se paga) */}
+                <label className="flex cursor-pointer gap-2 rounded-xl border border-brand/30 bg-brand/5 p-3 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={acepta}
+                    onChange={(e) => setAcepta(e.target.checked)}
+                    className="mt-0.5 shrink-0"
+                  />
+                  <span>
+                    Declaro y confirmo que transferí{" "}
+                    <b className="text-foreground">
+                      {ancla} {fmt(boteAncla)}
+                      {boteBs != null ? ` (Bs ${fmt(boteBs)})` : ""}
+                    </b>{" "}
+                    a <b className="text-foreground">{cobradorNombre}</b>
+                    {cobradorPago?.cedula ? `, C.I. ${cobradorPago.cedula}` : ""}
+                    {cobradorPago?.telefono ? `, tel. ${cobradorPago.telefono}` : ""}
+                    {cobradorPago?.numeroCuenta ? `, cuenta ${cobradorPago.numeroCuenta}` : ""}
+                    , y que esos datos le pertenecen a esa persona (no a un tercero).
+                  </span>
+                </label>
+
                 <div className="space-y-1">
                   <label htmlFor="ref-entrega" className="text-xs font-medium">
                     Referencia de la entrega (opcional)
@@ -175,6 +297,7 @@ export function EntregaRonda({
                 onClick={() => {
                   setModal(null);
                   setError("");
+                  setAcepta(false);
                 }}
               >
                 Cancelar
@@ -183,7 +306,11 @@ export function EntregaRonda({
                 type="button"
                 className="flex-1"
                 onClick={confirmar}
-                disabled={proc || !/^\d{6}$/.test(pin)}
+                disabled={
+                  proc ||
+                  !/^\d{6}$/.test(pin) ||
+                  (modal === "entregar" && !acepta)
+                }
               >
                 {proc ? "Procesando…" : "Confirmar"}
               </Button>
