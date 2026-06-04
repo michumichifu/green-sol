@@ -6,6 +6,7 @@ import {
   Play,
   Shuffle,
   Hand,
+  Sparkles,
   ArrowUp,
   ArrowDown,
   GripVertical,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CampoPin } from "@/components/campo-pin";
+import { RuletaSorteo } from "./ruleta-sorteo";
 
 type ParticipanteT = {
   id: string;
@@ -48,7 +50,9 @@ export function IniciarSan({
 }) {
   const router = useRouter();
   const [abierto, setAbierto] = useState(false);
-  const [modo, setModo] = useState<"elegir" | "manual" | "aleatorio">("elegir");
+  const [modo, setModo] = useState<
+    "elegir" | "manual" | "aleatorio" | "ruleta"
+  >("elegir");
   const [orden, setOrden] = useState<ParticipanteT[]>(participantes);
   const [barajando, setBarajando] = useState(false);
   const [pin, setPin] = useState("");
@@ -206,13 +210,32 @@ export function IniciarSan({
                 >
                   <Shuffle className="size-5 text-brand" />
                   <span>
-                    <span className="block text-sm font-medium">Aleatorio</span>
+                    <span className="block text-sm font-medium">
+                      Aleatorio rápido y visual
+                    </span>
                     <span className="block text-xs text-muted-foreground">
-                      Sorteo al azar con animación.
+                      Baraja al instante; sortea las veces que quieras hasta que te
+                      guste.
+                    </span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModo("ruleta")}
+                  className="flex w-full items-center gap-3 rounded-xl border p-3 text-left hover:bg-muted/60"
+                >
+                  <Sparkles className="size-5 text-brand" />
+                  <span>
+                    <span className="block text-sm font-medium">Ruleta 🎰</span>
+                    <span className="block text-xs text-muted-foreground">
+                      Sorteo con animación y sonido, turno por turno. El resultado es
+                      definitivo.
                     </span>
                   </span>
                 </button>
               </div>
+            ) : modo === "ruleta" ? (
+              <RuletaSorteo participantes={participantes} iniciar={iniciar} />
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
