@@ -4,10 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  aportePersona,
-  infoMontoParticipante,
-} from "@/lib/san/montos";
+import { infoMontoParticipante } from "@/lib/san/montos";
 import type { Tasas } from "@/lib/rates/cache";
 
 type Aporte = {
@@ -65,9 +62,10 @@ export function PagosParticipante({
   misAportes,
   reportar,
 }: PagosParticipanteProps) {
+  // montoAporte ya es el aporte por persona ($100 meta ÷ 5 = $20); no se divide otra vez.
   const info = infoMontoParticipante(
     recolecta.moneda,
-    aportePersona(recolecta.montoAporte ?? 0, recolecta.cupoMiembros),
+    recolecta.montoAporte ?? 0,
     tasas,
   );
 

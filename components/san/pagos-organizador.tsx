@@ -6,7 +6,7 @@ import { FilaParticipante } from "@/components/san/fila-participante";
 import { DonaProgreso } from "@/components/san/dona-progreso";
 import { ConfirmarResolucionPago } from "@/components/san/confirmar-resolucion-pago";
 import { Button } from "@/components/ui/button";
-import { infoMontoParticipante, aportePersona } from "@/lib/san/montos";
+import { infoMontoParticipante } from "@/lib/san/montos";
 import {
   fechaCorte,
   puntualidad,
@@ -105,9 +105,10 @@ export function PagosOrganizador({
   const totalParticipantes = recolecta.cupoMiembros ?? 0;
   const totalConfirmados = aprobados.length;
 
+  // montoAporte ya es el aporte por persona; no se divide otra vez entre el cupo.
   const info = infoMontoParticipante(
     recolecta.moneda,
-    aportePersona(recolecta.montoAporte ?? 0, recolecta.cupoMiembros),
+    recolecta.montoAporte ?? 0,
     tasas,
   );
 
