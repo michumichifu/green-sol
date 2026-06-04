@@ -69,9 +69,11 @@ export function RuletaSorteo({
   const [pin, setPin] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState("");
+  // El último turno se revela aparte, con un par de segundos de pausa.
+  const [ultimoPendiente, setUltimoPendiente] = useState<ParticipanteT | null>(null);
   const rotRef = useRef(0);
 
-  const completo = restantes.length === 0;
+  const completo = restantes.length === 0 && !ultimoPendiente;
   const n = restantes.length;
   const segDeg = n > 0 ? 360 / n : 0;
   const segRad = (segDeg * Math.PI) / 180;
@@ -82,10 +84,16 @@ export function RuletaSorteo({
     const elegido = restantes[ganadorIdx];
     const quedan = restantes.filter((_, i) => i !== ganadorIdx);
     if (quedan.length === 1) {
-      // Si solo queda uno, es el último turno: se asigna automáticamente.
+      // Penúltimo: lo asignamos ya; el último se revela "por descarte" tras una pausa.
       const ultimo = quedan[0];
-      setOrden((o) => [...o, elegido, ultimo]);
+      setOrden((o) => [...o, elegido]);
       setRestantes([]);
+      setUltimoPendiente(ultimo);
+      window.setTimeout(() => {
+        ganador();
+        setOrden((o) => [...o, ultimo]);
+        setUltimoPendiente(null);
+      }, 2000);
     } else {
       setOrden((o) => [...o, elegido]);
       setRestantes(quedan);
@@ -140,6 +148,33 @@ export function RuletaSorteo({
     <div className="space-y-3">
       {!completo ? (
         <>
+          {orden.length > 0 && (
+            <div className="space-y-1 rounded-xl border bg-muted/30 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Ya salieron
+              </p>
+              <ol className="space-y-1">
+                {orden.map((p, i) => (
+                  <li key={p.id} className="flex items-baseline gap-2 text-sm">
+                    <span className="font-bold text-brand">{i + 1}.</span>
+                    <span className="font-medium">{etiqueta(p)}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          {ultimoPendiente ? (
+            <div className="space-y-1 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-100 to-orange-100 p-5 text-center shadow-sm dark:border-amber-900/50 dark:from-amber-950/40 dark:to-orange-950/30">
+              <p className="text-xs text-amber-800/80 dark:text-amber-300/80">
+                Y por descarte, el último turno es para…
+              </p>
+              <p className="text-lg font-bold text-amber-900 dark:text-amber-200">
+                🎉 {etiqueta(ultimoPendiente)}
+              </p>
+            </div>
+          ) : (
+          <>
           <p className="text-center text-xs text-muted-foreground">
             Gira para revelar el turno {orden.length + 1}. No se puede rehacer.
           </p>
@@ -192,22 +227,6 @@ export function RuletaSorteo({
             </svg>
           </div>
 
-          {orden.length > 0 && (
-            <div className="space-y-1 rounded-xl border bg-muted/30 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Ya salieron
-              </p>
-              <ol className="space-y-1">
-                {orden.map((p, i) => (
-                  <li key={p.id} className="flex items-baseline gap-2 text-sm">
-                    <span className="font-bold text-brand">{i + 1}.</span>
-                    <span className="font-medium">{etiqueta(p)}</span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
-
           <Button
             type="button"
             className="w-full"
@@ -216,6 +235,8 @@ export function RuletaSorteo({
           >
             {girando ? "Girando…" : "Girar 🎰"}
           </Button>
+          </>
+          )}
         </>
       ) : (
         <>
