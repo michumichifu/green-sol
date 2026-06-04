@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -88,6 +89,29 @@ export function PagosParticipante({
       ? montoNumerico / info.tasa
       : null;
 
+  const router = useRouter();
+  const [referencia, setReferencia] = useState("");
+  const [confirmando, setConfirmando] = useState(false);
+  const [acepta, setAcepta] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+
+  const montoTxt = info.enBolivares
+    ? `Bs ${fmt(montoNumerico)}`
+    : `${fmt(montoNumerico)} ${info.ancla}`;
+
+  async function confirmarReporte() {
+    setEnviando(true);
+    const fd = new FormData();
+    fd.set("monto", String(montoNumerico));
+    fd.set("fechaPago", fechaPago);
+    fd.set("referencia", referencia);
+    await reportar(fd);
+    setEnviando(false);
+    setConfirmando(false);
+    setAcepta(false);
+    router.refresh();
+  }
+
   const sortedAportes = [...misAportes].sort(
     (a, b) => new Date(b.creadoEn).getTime() - new Date(a.creadoEn).getTime(),
   );
@@ -132,7 +156,7 @@ export function PagosParticipante({
       </div>
 
       {/* Bloque 2: Reportar pago */}
-      <form action={reportar} className="rounded-xl border p-4 space-y-3">
+      <div className="rounded-xl border p-4 space-y-3">
         <h2 className="font-semibold">Reportar pago</h2>
 
         <div className="space-y-1">
@@ -183,15 +207,91 @@ export function PagosParticipante({
           <Label htmlFor="referencia-input">Referencia / nº de operación</Label>
           <Input
             id="referencia-input"
-            name="referencia"
+            value={referencia}
+            onChange={(e) => setReferencia(e.target.value)}
             placeholder="Ej: 00123456"
           />
         </div>
 
-        <Button type="submit" className="w-full">
+        <Button
+          type="button"
+          className="w-full"
+          disabled={montoNumerico <= 0}
+          onClick={() => setConfirmando(true)}
+        >
           Reportar pago
         </Button>
-      </form>
+      </div>
+
+      {/* Confirmación con declaración jurada (evita reportes por error) */}
+      {confirmando && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
+          <div
+            className="absolute inset-0"
+            aria-hidden="true"
+            onPointerDown={(e) => {
+              if (e.target === e.currentTarget) setConfirmando(false);
+            }}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="relative z-10 w-full max-w-md space-y-3 rounded-3xl border bg-card p-5 shadow-2xl"
+          >
+            <h2 className="text-base font-semibold">Confirmar reporte de pago</h2>
+            <div className="rounded-xl border bg-muted/40 p-3">
+              <p className="text-xs text-muted-foreground">Reportas</p>
+              <p className="text-lg font-bold">
+                {montoTxt}
+                {equivalenteUsd != null && (
+                  <span className="text-sm font-normal text-muted-foreground">
+                    {" "}
+                    ≈ ${fmt(equivalenteUsd)}
+                  </span>
+                )}
+              </p>
+              {referencia && (
+                <p className="text-xs text-muted-foreground">Ref: {referencia}</p>
+              )}
+            </div>
+            <label className="flex cursor-pointer gap-2 rounded-xl border border-brand/30 bg-brand/5 p-3 text-xs">
+              <input
+                type="checkbox"
+                checked={acepta}
+                onChange={(e) => setAcepta(e.target.checked)}
+                className="mt-0.5 shrink-0"
+              />
+              <span>
+                Juro que ya le pagué al organizador, a los datos de pago indicados
+                arriba, <b className="text-foreground">{montoTxt}</b>
+                {equivalenteUsd != null ? ` (≈ $${fmt(equivalenteUsd)})` : ""}, y que la
+                referencia es correcta.
+              </span>
+            </label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                className="flex-1"
+                onClick={() => {
+                  setConfirmando(false);
+                  setAcepta(false);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                className="flex-1"
+                onClick={confirmarReporte}
+                disabled={enviando || !acepta}
+              >
+                {enviando ? "Reportando…" : "Confirmar pago"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bloque 3: Mi historial */}
       <section className="space-y-2">
