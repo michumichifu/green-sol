@@ -36,3 +36,10 @@ export const BANCOS_VE: BancoVE[] = [
   { codigo: "0177", nombre: "Banfanb" },
   { codigo: "0191", nombre: "BNC" },
 ];
+
+/** Etiqueta de banco "código · nombre" (ej. "0105 · Banco Mercantil") a partir del código. */
+export function bancoLabel(codigo: string | null | undefined): string {
+  if (!codigo) return "";
+  const b = BANCOS_VE.find((x) => x.codigo === codigo);
+  return b ? `${b.codigo} · ${b.nombre}` : codigo;
+}

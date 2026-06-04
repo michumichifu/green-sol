@@ -7,7 +7,8 @@ import { CampoPin } from "@/components/campo-pin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DonaProgreso } from "@/components/san/dona-progreso";
-import { BANCOS_VE } from "@/lib/bancos-venezuela";
+import { bancoLabel } from "@/lib/bancos-venezuela";
+import { DatoCopiable } from "@/components/dato-copiable";
 
 type CobradorPago = {
   metodo: string;
@@ -69,10 +70,7 @@ export function EntregaRonda({
   const [error, setError] = useState("");
   const [acepta, setAcepta] = useState(false);
 
-  const bancoCobrador = cobradorPago?.banco
-    ? BANCOS_VE.find((b) => b.codigo === cobradorPago.banco)?.nombre ??
-      cobradorPago.banco
-    : null;
+  const bancoCobrador = cobradorPago?.banco ? bancoLabel(cobradorPago.banco) : null;
 
   useEffect(() => {
     if (!modal) return;
@@ -193,47 +191,36 @@ export function EntregaRonda({
                     Págale a {cobradorNombre}:
                   </p>
                   {cobradorPago ? (
-                    <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
-                      {cobradorPago.wallet ? (
-                        <>
-                          <dt className="text-muted-foreground">Wallet</dt>
-                          <dd className="break-all font-medium">{cobradorPago.wallet}</dd>
-                        </>
-                      ) : (
-                        <>
-                          {bancoCobrador && (
-                            <>
-                              <dt className="text-muted-foreground">Banco</dt>
-                              <dd className="font-medium">{bancoCobrador}</dd>
-                            </>
-                          )}
-                          {cobradorPago.telefono && (
-                            <>
-                              <dt className="text-muted-foreground">Teléfono</dt>
-                              <dd className="font-medium">{cobradorPago.telefono}</dd>
-                            </>
-                          )}
-                          {cobradorPago.numeroCuenta && (
-                            <>
-                              <dt className="text-muted-foreground">Cuenta</dt>
-                              <dd className="font-medium">{cobradorPago.numeroCuenta}</dd>
-                            </>
-                          )}
-                          {cobradorPago.titular && (
-                            <>
-                              <dt className="text-muted-foreground">Titular</dt>
-                              <dd className="font-medium">{cobradorPago.titular}</dd>
-                            </>
-                          )}
-                          {cobradorPago.cedula && (
-                            <>
-                              <dt className="text-muted-foreground">Cédula</dt>
-                              <dd className="font-medium">{cobradorPago.cedula}</dd>
-                            </>
-                          )}
-                        </>
-                      )}
-                    </dl>
+                    cobradorPago.wallet ? (
+                      <DatoCopiable etiqueta="Wallet" valor={cobradorPago.wallet} />
+                    ) : (
+                      <div className="space-y-1.5">
+                        {bancoCobrador && (
+                          <div className="rounded-lg bg-muted/40 px-2.5 py-1.5">
+                            <p className="text-[11px] text-muted-foreground">Banco</p>
+                            <p className="text-sm font-medium">{bancoCobrador}</p>
+                          </div>
+                        )}
+                        {cobradorPago.telefono && (
+                          <DatoCopiable etiqueta="Teléfono" valor={cobradorPago.telefono} />
+                        )}
+                        {cobradorPago.numeroCuenta && (
+                          <DatoCopiable
+                            etiqueta="N° de cuenta"
+                            valor={cobradorPago.numeroCuenta}
+                          />
+                        )}
+                        {cobradorPago.cedula && (
+                          <DatoCopiable etiqueta="Cédula" valor={cobradorPago.cedula} />
+                        )}
+                        {cobradorPago.titular && (
+                          <div className="rounded-lg bg-muted/40 px-2.5 py-1.5">
+                            <p className="text-[11px] text-muted-foreground">Titular</p>
+                            <p className="text-sm font-medium">{cobradorPago.titular}</p>
+                          </div>
+                        )}
+                      </div>
+                    )
                   ) : (
                     <p className="text-xs text-amber-600 dark:text-amber-400">
                       {cobradorNombre} aún no registró datos de pago. Pídeselos
@@ -251,16 +238,15 @@ export function EntregaRonda({
                     className="mt-0.5 shrink-0"
                   />
                   <span>
-                    Declaro y confirmo que transferí{" "}
+                    Confirmo que pagué{" "}
                     <b className="text-foreground">
                       {ancla} {fmt(boteAncla)}
                       {boteBs != null ? ` (Bs ${fmt(boteBs)})` : ""}
                     </b>{" "}
                     a <b className="text-foreground">{cobradorNombre}</b>
                     {cobradorPago?.cedula ? `, C.I. ${cobradorPago.cedula}` : ""}
-                    {cobradorPago?.telefono ? `, tel. ${cobradorPago.telefono}` : ""}
-                    {cobradorPago?.numeroCuenta ? `, cuenta ${cobradorPago.numeroCuenta}` : ""}
-                    , y que esos datos le pertenecen a esa persona (no a un tercero).
+                    {cobradorPago?.telefono ? `, tel. ${cobradorPago.telefono}` : ""}, y que
+                    esos datos son de esa persona.
                   </span>
                 </label>
 

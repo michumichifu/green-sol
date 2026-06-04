@@ -1,6 +1,7 @@
 import { Landmark, Wallet } from "lucide-react";
 import { MONEDA_RECOLECTA } from "@/lib/validations/recolecta";
-import { BANCOS_VE } from "@/lib/bancos-venezuela";
+import { bancoLabel } from "@/lib/bancos-venezuela";
+import { DatoCopiable } from "@/components/dato-copiable";
 
 type DatosPago = {
   tipo: string;
@@ -24,8 +25,6 @@ export function MetodoPagoTarjeta({
   if (!datosPago) return null;
   const info = MONEDA_RECOLECTA[moneda];
   const esWallet = datosPago.tipo === "wallet";
-  const banco =
-    BANCOS_VE.find((b) => b.codigo === datosPago.banco)?.nombre ?? datosPago.banco;
 
   return (
     <section className="space-y-3 rounded-2xl border bg-card p-4 shadow-sm">
@@ -46,44 +45,32 @@ export function MetodoPagoTarjeta({
       </div>
 
       {esWallet ? (
-        <p className="break-all rounded-lg bg-muted px-3 py-2 text-sm font-medium">
-          {datosPago.wallet}
-        </p>
+        <DatoCopiable etiqueta="Wallet" valor={datosPago.wallet ?? ""} />
       ) : (
-        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-          <dt className="text-muted-foreground">Banco</dt>
-          <dd className="font-medium">{banco}</dd>
-          {datosPago.tipoCuenta && (
-            <>
-              <dt className="text-muted-foreground">Tipo</dt>
-              <dd className="font-medium capitalize">{datosPago.tipoCuenta}</dd>
-            </>
-          )}
-          {datosPago.numeroCuenta && (
-            <>
-              <dt className="text-muted-foreground">N° cuenta</dt>
-              <dd className="font-medium">{datosPago.numeroCuenta}</dd>
-            </>
+        <div className="space-y-1.5">
+          {/* El banco no se copia (se elige en la app del banco): código + nombre */}
+          {datosPago.banco && (
+            <div className="rounded-lg bg-muted/40 px-2.5 py-1.5">
+              <p className="text-[11px] text-muted-foreground">Banco</p>
+              <p className="text-sm font-medium">{bancoLabel(datosPago.banco)}</p>
+            </div>
           )}
           {datosPago.telefono && (
-            <>
-              <dt className="text-muted-foreground">Teléfono</dt>
-              <dd className="font-medium">{datosPago.telefono}</dd>
-            </>
+            <DatoCopiable etiqueta="Teléfono" valor={datosPago.telefono} />
           )}
-          {datosPago.titular && (
-            <>
-              <dt className="text-muted-foreground">Titular</dt>
-              <dd className="font-medium">{datosPago.titular}</dd>
-            </>
+          {datosPago.numeroCuenta && (
+            <DatoCopiable etiqueta="N° de cuenta" valor={datosPago.numeroCuenta} />
           )}
           {datosPago.cedula && (
-            <>
-              <dt className="text-muted-foreground">Cédula</dt>
-              <dd className="font-medium">{datosPago.cedula}</dd>
-            </>
+            <DatoCopiable etiqueta="Cédula" valor={datosPago.cedula} />
           )}
-        </dl>
+          {datosPago.titular && (
+            <div className="rounded-lg bg-muted/40 px-2.5 py-1.5">
+              <p className="text-[11px] text-muted-foreground">Titular</p>
+              <p className="text-sm font-medium">{datosPago.titular}</p>
+            </div>
+          )}
+        </div>
       )}
 
       {info?.enBolivares && (
