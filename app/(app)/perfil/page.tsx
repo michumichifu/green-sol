@@ -10,14 +10,13 @@ import {
   BadgeCheck,
   ShieldAlert,
   ScrollText,
-  LogOut,
   ChevronRight,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { obtenerReputacion, nivelPorReputacion } from "@/lib/reputacion";
 import { BannerVerificacion } from "@/components/banner-verificacion";
-import { cerrarSesionAction } from "@/app/(auth)/actions";
+import { BotonCerrarSesion } from "@/components/boton-cerrar-sesion";
 
 function ItemMenu({
   href,
@@ -132,14 +131,7 @@ export default async function PerfilPage() {
         )}
       </nav>
 
-      <form action={cerrarSesionAction}>
-        <button
-          type="submit"
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border bg-card py-3 text-sm font-medium text-destructive shadow-sm transition-colors hover:bg-destructive/10"
-        >
-          <LogOut className="size-4" /> Cerrar sesión
-        </button>
-      </form>
+      <BotonCerrarSesion />
     </main>
   );
 }
