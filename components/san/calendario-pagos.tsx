@@ -167,7 +167,7 @@ export function CalendarioPagos({ vencimientos }: { vencimientos: Vencimiento[] 
           delDia.map((v) => (
             <Link
               key={`${v.sanId}-${v.ronda}`}
-              href={`/sanes/${v.sanId}`}
+              href={`/sanes/${v.sanId}?tab=pagos`}
               className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 hover:bg-muted/40"
             >
               <span className="size-2 shrink-0 rounded-full bg-gold" />

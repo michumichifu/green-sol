@@ -30,10 +30,14 @@ import { PagosOrganizador } from "@/components/san/pagos-organizador";
 
 export default async function DetalleRecolecta({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
   const { id } = await params;
+  const { tab } = await searchParams;
+  const tabInicial = tab === "pagos" ? 2 : tab === "miembros" ? 1 : 0;
   const usuario = await obtenerUsuario();
   if (!usuario) redirect("/login");
 
@@ -167,6 +171,7 @@ export default async function DetalleRecolecta({
       <PanelTabs
         tabs={["Resumen", "Miembros", "Pagos"]}
         avisos={[false, hayPendientes, false]}
+        inicial={tabInicial}
       >
         {/* Pestaña 0 — Resumen */}
         <ResumenSan
@@ -221,8 +226,8 @@ export default async function DetalleRecolecta({
           {/* Método de pago del san, arriba para ambos roles */}
           <MetodoPagoTarjeta datosPago={r.datosPago} moneda={r.moneda} />
 
-          {/* Vista del participante (Task 6) */}
-          {esParticipante && !esOrganizador && (
+          {/* Reportar mi cuota — cualquier participante, incluido el organizador si aporta */}
+          {esParticipante && (
             <PagosParticipante
               recolecta={r}
               tasas={tasas}
