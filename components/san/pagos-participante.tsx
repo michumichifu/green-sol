@@ -235,7 +235,7 @@ export function PagosParticipante({
                     </p>
                   )}
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Pago del{" "}
+                    Pagó el{" "}
                     {new Date(a.fechaPago ?? a.creadoEn).toLocaleDateString("es-VE", {
                       day: "2-digit",
                       month: "short",

@@ -18,10 +18,16 @@ Un san de N personas tiene **N rondas**. En cada ronda **todos aportan su cuota*
 - **`Recolecta`:**
   - `organizadorParticipa Boolean @default(true)` — elegido en el asistente de creación.
   - `rondaActual Int @default(1)` — ronda en curso.
+  - `fechaInicio DateTime?` — cuándo arranca la ronda 1 (para calcular las fechas de corte).
 - **`Aporte`:**
   - `ronda Int @default(1)` — a qué ronda pertenece el pago (se sella con `rondaActual` al reportar).
+  - `montoAncla Float?` y `fechaPago DateTime?` — ya existen (v0.0.127): equivalente $ congelado y fecha real del pago.
 - **`Turno`:** (ya tiene `cobrado`)
   - `entregadoEn DateTime?` y `entregaReferencia String?` — datos de la entrega al cobrador.
+
+### Fechas de corte y puntualidad (pedido de Luis)
+
+Cada ronda tiene una **fecha de corte/vencimiento** = `fechaInicio + (ronda − 1) × frecuencia` (semanal/quincenal/mensual, según `frecuencia`/`frecuenciaDias`). Al mostrar un pago se comparan **dos fechas**: la **de corte** (cuándo le tocaba) y la **`fechaPago`** (cuándo pagó realmente), con un indicador **a tiempo / adelantado / con retraso (mora)**. Esto es clave para el organizador y para la gamificación (penalización por mora, bonus por anticipación — ver T&C maqueta). Mostrar ambas fechas en Pagos y Miembros, no solo una.
 
 **Aportantes de una ronda** = participantes con turno (si `organizadorParticipa`, incluye al organizador; si no, lo excluye). El **nº de rondas** = nº de turnos.
 
