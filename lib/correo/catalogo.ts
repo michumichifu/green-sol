@@ -446,6 +446,39 @@ export const EVENTOS_NOTIFICACION: EventoNotificacion[] = [
     },
   },
   {
+    clave: "san_iniciado",
+    nombre: "San iniciado (participante)",
+    descripcion: "Cuando el organizador inicia el san y se sortean los turnos; avisa a cada participante su turno.",
+    categoria: "Ahorros",
+    canales: ["app", "correo"],
+    variables: {
+      nombreSan: "Nombre del san",
+      turno: "Número de turno asignado",
+      link: "Enlace al san",
+    },
+    datosMuestra: {
+      nombreSan: "San de los amigos",
+      turno: "3",
+      link: LINK_DEMO,
+    },
+    app: {
+      titulo: "🎉 ¡Empezó tu san!",
+      cuerpo: "«{{nombreSan}}» ya arrancó. Tu turno para cobrar es el N.º {{turno}}.",
+    },
+    correo: {
+      asunto: "¡Empezó «{{nombreSan}}»! Tu turno es el N.º {{turno}}",
+      html: correoBase({
+        titulo: "¡Tu san arrancó! 🎉",
+        preheader: "Ya se sortearon los turnos",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'><strong>«{{nombreSan}}»</strong> ya inició y se sortearon los turnos.</p>" +
+          "<p style='margin:0;'>Tu turno para cobrar es el <strong>N.º {{turno}}</strong>. Mientras tanto, recuerda aportar tu cuota cada ronda.</p>",
+        ctaTexto: "Ver el san",
+        ctaUrl: "{{link}}",
+      }),
+    },
+  },
+  {
     clave: "kyc_recibida",
     nombre: "Verificación recibida",
     descripcion: "Al enviar el usuario su verificación de identidad (KYC).",

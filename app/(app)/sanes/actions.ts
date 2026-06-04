@@ -482,48 +482,77 @@ export async function invitarPorCorreo(
   }
 }
 
-export async function generarTurnos(recolectaId: string): Promise<void> {
+/**
+ * Inicia el san: crea los turnos en el orden dado (manual o aleatorio decidido en
+ * cliente), pone el san activo y avisa a cada participante su turno. Confirma con PIN.
+ * `orden` = lista de `participanteId` en orden de turno (1.º, 2.º, …).
+ */
+export async function iniciarSan(
+  recolectaId: string,
+  orden: string[],
+  pin = "",
+): Promise<{ error?: string }> {
   const usuario = await obtenerUsuario();
-  if (!usuario) return;
+  if (!usuario) return { error: "Inicia sesión." };
   const recolecta = await prisma.recolecta.findUnique({
     where: { id: recolectaId },
-    include: { participantes: true, turnos: true },
+    include: {
+      participantes: {
+        include: { usuario: { select: { id: true, correo: true } } },
+      },
+      turnos: true,
+    },
   });
-  if (
-    !recolecta ||
-    recolecta.organizadorId !== usuario.id ||
-    recolecta.tipo !== "san" ||
-    recolecta.turnos.length
-  ) {
-    return;
+  if (!recolecta || recolecta.organizadorId !== usuario.id) {
+    return { error: "No autorizado." };
+  }
+  if (recolecta.tipo !== "san") return { error: "Solo aplica a un san." };
+  if (recolecta.estado !== "abierta" || recolecta.turnos.length) {
+    return { error: "Este san ya inició." };
+  }
+  if (!pin || !(await credencialValida(usuario.id, pin))) {
+    return { error: "PIN incorrecto. Confírmalo para iniciar el san." };
   }
 
-  const mezclados = [...recolecta.participantes].sort(
-    () => Math.random() - 0.5,
+  // Aportantes con turno: todos, o sin el organizador si solo administra.
+  const aportantes = recolecta.participantes.filter(
+    (p) => recolecta.organizadorParticipa || p.usuarioId !== recolecta.organizadorId,
   );
+  const idsAportantes = new Set(aportantes.map((p) => p.id));
+  const ordenValido = orden.filter((id) => idsAportantes.has(id));
+  if (ordenValido.length !== idsAportantes.size) {
+    return { error: "El orden de turnos no es válido." };
+  }
+
   await prisma.$transaction([
-    ...mezclados.map((p, i) =>
+    ...ordenValido.map((participanteId, i) =>
       prisma.turno.create({
-        data: { recolectaId, participanteId: p.id, posicion: i + 1 },
+        data: { recolectaId, participanteId, posicion: i + 1 },
       }),
     ),
     prisma.recolecta.update({
       where: { id: recolectaId },
-      data: { estado: "activa" },
+      data: { estado: "activa", rondaActual: 1, fechaInicio: new Date() },
     }),
   ]);
-  await notificarVarios(
-    recolecta.participantes
-      .map((p) => p.usuarioId)
-      .filter((id) => id !== usuario.id),
-    {
-      tipo: "turnos",
-      titulo: "Se sortearon los turnos",
-      cuerpo: `Ya hay orden de turnos en "${recolecta.nombre}".`,
-      enlace: `/sanes/${recolectaId}`,
-    },
-  );
+
+  // Avisar a cada participante su turno.
+  for (let i = 0; i < ordenValido.length; i++) {
+    const p = aportantes.find((a) => a.id === ordenValido[i]);
+    if (!p) continue;
+    await notificarEvento(
+      { id: p.usuario.id, correo: p.usuario.correo },
+      "san_iniciado",
+      {
+        nombreSan: recolecta.nombre,
+        turno: String(i + 1),
+        link: `/sanes/${recolectaId}`,
+      },
+      { tipo: "san_iniciado", enlace: `/sanes/${recolectaId}` },
+    );
+  }
   revalidatePath(`/sanes/${recolectaId}`);
+  return {};
 }
 
 export async function reportarPago(

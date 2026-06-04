@@ -85,6 +85,9 @@ model Recolecta {
   frecuencia    String?
   frecuenciaDias Int?
   cupoMiembros  Int?
+  organizadorParticipa Boolean @default(true) // si el organizador aporta y tiene turno, o solo administra
+  rondaActual   Int             @default(1) // ronda en curso (1..nº turnos)
+  fechaInicio   DateTime? // cuándo arrancó el san (para calcular las fechas de corte por ronda)
   estado        EstadoRecolecta @default(abierta)
   organizadorId String
   organizador   Usuario         @relation("organizadas", fields: [organizadorId], references: [id])

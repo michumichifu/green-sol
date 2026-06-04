@@ -5,7 +5,7 @@ import { obtenerTasas } from "@/lib/rates/cache";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import {
   invitarPorCorreo,
-  generarTurnos,
+  iniciarSan,
   generarInvitacion,
   revocarInvitacion,
   listarInvitacionesActivas,
@@ -54,8 +54,20 @@ export default async function DetalleRecolecta({
   if (!esParticipante && r.visibilidad === "privado") notFound();
   const esOrganizador = r.organizadorId === usuario.id;
   const invitar = invitarPorCorreo.bind(null, r.id);
-  const generar = generarTurnos.bind(null, r.id);
+  const iniciar = iniciarSan.bind(null, r.id);
   const reportar = reportarPago.bind(null, r.id);
+
+  // Estado de inicio del san y aportantes (con turno).
+  const sanIniciado = r.turnos.length > 0;
+  const aportantes = r.participantes
+    .filter((p) => r.organizadorParticipa || p.usuarioId !== r.organizadorId)
+    .map((p) => ({
+      id: p.id,
+      nombre: p.usuario.nombre,
+      apellido: p.usuario.apellido,
+      nombreUsuario: p.usuario.nombreUsuario,
+      esOrganizador: p.usuarioId === r.organizadorId,
+    }));
 
   const tasas = await obtenerTasas();
   const participanteActual = r.participantes.find((p) => p.usuarioId === usuario.id);
@@ -107,6 +119,9 @@ export default async function DetalleRecolecta({
           invitaciones={invitaciones}
           generar={generarInv}
           revocar={revocarInvitacion}
+          sanIniciado={sanIniciado}
+          aportantes={aportantes}
+          iniciar={iniciar}
         />
 
         {/* Pestaña 1 — Miembros */}
@@ -118,6 +133,11 @@ export default async function DetalleRecolecta({
             esOrganizador={esOrganizador}
             solicitudes={solicitudes}
             resolver={resolverSolicitud}
+            fechaInicio={r.fechaInicio}
+            diasFrecuencia={
+              r.frecuenciaDias ??
+              (r.frecuencia === "mensual" ? 30 : r.frecuencia === "quincenal" ? 15 : 7)
+            }
           />
 
           {/* Administrar — gestión del organizador (invitar por correo, turnos, cerrar) */}
@@ -135,13 +155,6 @@ export default async function DetalleRecolecta({
                   Invitar
                 </Button>
               </form>
-              {r.tipo === "san" && r.turnos.length === 0 && (
-                <form action={generar}>
-                  <Button type="submit" className="w-full">
-                    Sortear turnos e iniciar
-                  </Button>
-                </form>
-              )}
               {r.estado !== "cerrada" && <CerrarSan recolectaId={r.id} />}
             </section>
           )}

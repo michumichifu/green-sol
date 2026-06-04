@@ -40,6 +40,8 @@ export function Miembros({
   esOrganizador,
   solicitudes,
   resolver,
+  fechaInicio,
+  diasFrecuencia,
 }: {
   participantes: ParticipanteM[];
   aportes: AporteM[];
@@ -47,7 +49,16 @@ export function Miembros({
   esOrganizador: boolean;
   solicitudes: SolicitudM[];
   resolver: (solicitudId: string, aprobar: boolean) => Promise<void>;
+  fechaInicio: Date | null;
+  diasFrecuencia: number;
 }) {
+  // Fecha en que le toca cobrar a un turno = fechaInicio + (posición − 1) × frecuencia.
+  function fechaCobro(posicion: number): string | null {
+    if (!fechaInicio) return null;
+    const d = new Date(fechaInicio);
+    d.setDate(d.getDate() + (posicion - 1) * diasFrecuencia);
+    return d.toLocaleDateString("es-VE", { day: "2-digit", month: "short" });
+  }
   // Último aporte por participante (para estado de pago + fecha).
   const ultimoPorParticipante = new Map<string, AporteM>();
   for (const a of aportes) {
@@ -116,14 +127,19 @@ export function Miembros({
                   turnoPosicion={p.turno?.posicion}
                   cobrado={p.turno?.cobrado}
                 />
-                <div className="flex items-center gap-1.5 pl-[34px] text-xs">
+                <div className="flex flex-wrap items-center gap-1.5 pl-[34px] text-xs">
                   <span className={`inline-flex items-center gap-1 ${pago.cls}`}>
                     {pago.icon}
                     {pago.txt}
                   </span>
                   {ultimo && (
                     <span className="text-muted-foreground">
-                      · {(ultimo.fechaPago ?? ultimo.creadoEn).toLocaleDateString("es-VE")}
+                      · pagó {(ultimo.fechaPago ?? ultimo.creadoEn).toLocaleDateString("es-VE")}
+                    </span>
+                  )}
+                  {p.turno && fechaCobro(p.turno.posicion) && (
+                    <span className="text-muted-foreground">
+                      · cobra el {fechaCobro(p.turno.posicion)}
                     </span>
                   )}
                 </div>

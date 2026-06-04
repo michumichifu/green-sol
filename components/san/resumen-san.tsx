@@ -1,6 +1,7 @@
 import { DonaProgreso } from "./dona-progreso";
 import { CompartirAhorro } from "@/components/compartir-ahorro";
 import { Invitar, type InvitacionVista } from "./invitar";
+import { IniciarSan } from "./iniciar-san";
 import { MONEDA_RECOLECTA } from "@/lib/validations/recolecta";
 
 // Tipos inline derivados de lo que devuelve la query de prisma en el page
@@ -49,6 +50,14 @@ type Recolecta = {
   participantes: Participante[];
 };
 
+type AportanteT = {
+  id: string;
+  nombre: string | null;
+  apellido: string | null;
+  nombreUsuario: string | null;
+  esOrganizador: boolean;
+};
+
 interface ResumenSanProps {
   recolecta: Recolecta;
   esOrganizador: boolean;
@@ -56,6 +65,9 @@ interface ResumenSanProps {
   invitaciones?: InvitacionVista[];
   generar?: (dias: number) => Promise<{ codigo?: string; enlace?: string; error?: string }>;
   revocar?: (id: string) => Promise<void>;
+  sanIniciado?: boolean;
+  aportantes?: AportanteT[];
+  iniciar?: (orden: string[], pin: string) => Promise<{ error?: string }>;
 }
 
 const COLORES_ESTADO: Record<string, string> = {
@@ -77,6 +89,9 @@ export function ResumenSan({
   invitaciones,
   generar,
   revocar,
+  sanIniciado = true,
+  aportantes,
+  iniciar,
 }: ResumenSanProps) {
   const info = MONEDA_RECOLECTA[r.moneda];
   const ancla = info?.ancla ?? "$";
@@ -158,20 +173,36 @@ export function ResumenSan({
         </div>
       )}
 
-      {/* Progreso + dona */}
-      {r.tipo === "san" && (
-        <div className="flex items-center gap-4 rounded-xl border p-4">
-          <DonaProgreso pagados={pagados} total={total} label="cobrados" />
-          <div className="space-y-0.5">
-            <p className="text-sm font-semibold">
-              Ronda {rondaActual} de {totalRondas}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Ya cobró {pagados} de {total} {total === 1 ? "turno" : "turnos"}
-            </p>
+      {/* Progreso: si el san no ha iniciado, se muestra el bloque de inicio (bloqueado) */}
+      {r.tipo === "san" &&
+        (sanIniciado ? (
+          <div className="flex items-center gap-4 rounded-xl border p-4">
+            <DonaProgreso pagados={pagados} total={total} label="cobrados" />
+            <div className="space-y-0.5">
+              <p className="text-sm font-semibold">
+                Ronda {rondaActual} de {totalRondas}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Ya cobró {pagados} de {total} {total === 1 ? "turno" : "turnos"}
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="space-y-2 rounded-xl border border-dashed p-4 text-center">
+            <p className="text-sm font-semibold">El san aún no ha iniciado</p>
+            <p className="text-xs text-muted-foreground">
+              Al iniciar se sortean los turnos y arranca la ronda 1. Cada ronda todos
+              aportan y una persona cobra.
+            </p>
+            {esOrganizador && iniciar && aportantes ? (
+              <IniciarSan participantes={aportantes} iniciar={iniciar} />
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Espera a que el organizador inicie el san.
+              </p>
+            )}
+          </div>
+        ))}
 
       {/* Invitar — visible mientras el san no esté cerrado (gestión del organizador) */}
       {r.estado !== "cerrada" &&
