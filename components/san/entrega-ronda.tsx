@@ -102,17 +102,20 @@ export function EntregaRonda({
 
   return (
     <section className="space-y-3 rounded-2xl border bg-card p-4 shadow-sm">
-      <div className="flex items-center gap-3">
-        <DonaProgreso pagados={pagadosRonda} total={aportantes} label="esta ronda" />
-        <div className="min-w-0 flex-1">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col items-center gap-1 rounded-xl border p-3 text-center">
+          <DonaProgreso pagados={rondaActual} total={totalRondas} label="ronda" />
           <p className="text-sm font-semibold">
             Ronda {rondaActual} de {totalRondas}
           </p>
           <p className="text-xs text-muted-foreground">
-            {pagadosRonda} de {aportantes} pagaron esta ronda
+            Cobra <span className="font-medium text-foreground">{cobradorNombre}</span>
           </p>
-          <p className="text-xs text-muted-foreground">
-            Cobra: <span className="font-medium text-foreground">{cobradorNombre}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 rounded-xl border p-3 text-center">
+          <DonaProgreso pagados={pagadosRonda} total={aportantes} label="pagos" />
+          <p className="text-sm font-semibold">
+            {pagadosRonda} de {aportantes} pagaron
           </p>
         </div>
       </div>

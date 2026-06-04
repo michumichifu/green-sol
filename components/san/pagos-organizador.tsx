@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { PanelTabs } from "@/components/panel-tabs";
 import { FilaParticipante } from "@/components/san/fila-participante";
-import { DonaProgreso } from "@/components/san/dona-progreso";
 import { ConfirmarResolucionPago } from "@/components/san/confirmar-resolucion-pago";
 import { Button } from "@/components/ui/button";
 import { infoMontoParticipante } from "@/lib/san/montos";
@@ -102,9 +101,6 @@ export function PagosOrganizador({
   const aprobados = aportes.filter((a) => a.estado === "confirmado");
   const rechazados = aportes.filter((a) => a.estado === "rechazado");
 
-  const totalParticipantes = recolecta.cupoMiembros ?? 0;
-  const totalConfirmados = aprobados.length;
-
   // montoAporte ya es el aporte por persona; no se divide otra vez entre el cupo.
   const info = infoMontoParticipante(
     recolecta.moneda,
@@ -143,30 +139,20 @@ export function PagosOrganizador({
 
   return (
     <div className="space-y-4">
-      {/* Mini-resumen */}
-      <div className="flex items-center gap-4 rounded-xl border bg-card p-4">
-        <DonaProgreso
-          pagados={totalConfirmados}
-          total={totalParticipantes > 0 ? totalParticipantes : aportes.length || 1}
-          label="pagos"
-        />
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold">
-            {totalConfirmados} de{" "}
-            {totalParticipantes > 0 ? totalParticipantes : "?"} pagaron
-          </p>
+      {(pendientes.length > 0 || rechazados.length > 0) && (
+        <div className="flex flex-wrap gap-3 text-xs">
           {pendientes.length > 0 && (
-            <p className="text-xs text-amber-600 dark:text-amber-400">
+            <span className="font-medium text-amber-600 dark:text-amber-400">
               {pendientes.length} por revisar
-            </p>
+            </span>
           )}
           {rechazados.length > 0 && (
-            <p className="text-xs text-red-500 dark:text-red-400">
+            <span className="font-medium text-red-500 dark:text-red-400">
               {rechazados.length} rechazado{rechazados.length !== 1 ? "s" : ""}
-            </p>
+            </span>
           )}
         </div>
-      </div>
+      )}
 
       {/* Sub-pestañas */}
       <PanelTabs variante="sub" tabs={["Pendientes", "Aprobados"]}>
