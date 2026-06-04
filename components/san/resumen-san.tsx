@@ -2,6 +2,7 @@ import { DonaProgreso } from "./dona-progreso";
 import { CompartirAhorro } from "@/components/compartir-ahorro";
 import { Invitar, type InvitacionVista } from "./invitar";
 import { IniciarSan } from "./iniciar-san";
+import { VeloRevelable } from "./velo-revelable";
 import { MONEDA_RECOLECTA } from "@/lib/validations/recolecta";
 
 // Tipos inline derivados de lo que devuelve la query de prisma en el page
@@ -71,15 +72,15 @@ interface ResumenSanProps {
 }
 
 const COLORES_ESTADO: Record<string, string> = {
-  abierta: "text-brand",
-  activa: "text-blue-500",
+  abierta: "text-amber-600 dark:text-amber-400",
+  activa: "text-brand",
   cerrada: "text-muted-foreground",
 };
 
 const LABEL_ESTADO: Record<string, string> = {
-  abierta: "Abierta",
-  activa: "Activa",
-  cerrada: "Cerrada",
+  abierta: "Por iniciar",
+  activa: "En curso",
+  cerrada: "Finalizado",
 };
 
 export function ResumenSan({
@@ -150,27 +151,30 @@ export function ResumenSan({
         {r.descripcion && <p className="mt-1.5 text-sm">{r.descripcion}</p>}
       </div>
 
-      {/* Montos: aporte de cada persona vs lo que recibe quien cobra el turno */}
+      {/* Montos: aporte de cada persona vs lo que recibe quien cobra el turno.
+          Si el san no ha iniciado, se velan (percepción de bloqueo, con ojo para ver). */}
       {r.tipo === "san" && (
-        <div className="space-y-1 rounded-xl border p-4">
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-sm text-muted-foreground">Aporta cada persona</span>
-            <span className="text-base font-bold">
-              {ancla} {r.montoAporte ?? "?"}
-            </span>
+        <VeloRevelable velar={!sanIniciado}>
+          <div className="space-y-1 rounded-xl border p-4">
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-sm text-muted-foreground">Aporta cada persona</span>
+              <span className="text-base font-bold">
+                {ancla} {r.montoAporte ?? "?"}
+              </span>
+            </div>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-sm text-muted-foreground">Recibe quien cobra</span>
+              <span className="text-sm font-semibold">
+                {ancla} {r.meta ?? "?"}
+              </span>
+            </div>
+            {info?.enBolivares && (
+              <p className="pt-1 text-xs text-muted-foreground">
+                Se paga en Bs a la tasa del día (ver pestaña Pagos).
+              </p>
+            )}
           </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-sm text-muted-foreground">Recibe quien cobra</span>
-            <span className="text-sm font-semibold">
-              {ancla} {r.meta ?? "?"}
-            </span>
-          </div>
-          {info?.enBolivares && (
-            <p className="pt-1 text-xs text-muted-foreground">
-              Se paga en Bs a la tasa del día (ver pestaña Pagos).
-            </p>
-          )}
-        </div>
+        </VeloRevelable>
       )}
 
       {/* Progreso: si el san no ha iniciado, se muestra el bloque de inicio (bloqueado) */}
@@ -188,16 +192,18 @@ export function ResumenSan({
             </div>
           </div>
         ) : (
-          <div className="space-y-2 rounded-xl border border-dashed p-4 text-center">
-            <p className="text-sm font-semibold">El san aún no ha iniciado</p>
-            <p className="text-xs text-muted-foreground">
+          <div className="space-y-2 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-100 to-orange-100 p-4 text-center shadow-sm dark:border-amber-900/50 dark:from-amber-950/40 dark:to-orange-950/30">
+            <p className="text-sm font-bold text-amber-900 dark:text-amber-200">
+              El san aún no ha iniciado
+            </p>
+            <p className="text-xs text-amber-800/80 dark:text-amber-300/80">
               Al iniciar se sortean los turnos y arranca la ronda 1. Cada ronda todos
               aportan y una persona cobra.
             </p>
             {esOrganizador && iniciar && aportantes ? (
               <IniciarSan participantes={aportantes} iniciar={iniciar} />
             ) : (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-amber-800/80 dark:text-amber-300/80">
                 Espera a que el organizador inicie el san.
               </p>
             )}
@@ -205,16 +211,21 @@ export function ResumenSan({
         ))}
 
       {/* Invitar — visible mientras el san no esté cerrado (gestión del organizador) */}
-      {r.estado !== "cerrada" &&
-        (esOrganizador && invitaciones && generar && revocar ? (
-          <Invitar
-            invitaciones={invitaciones}
-            generar={generar}
-            revocar={revocar}
-          />
-        ) : esParticipante ? (
-          <CompartirAhorro codigo={r.id} nombre={r.nombre} />
-        ) : null)}
+      {r.estado !== "cerrada" && (
+        <VeloRevelable velar={!sanIniciado}>
+          {esOrganizador && invitaciones && generar && revocar ? (
+            <Invitar
+              invitaciones={invitaciones}
+              generar={generar}
+              revocar={revocar}
+            />
+          ) : esParticipante ? (
+            <CompartirAhorro codigo={r.id} nombre={r.nombre} />
+          ) : (
+            <span />
+          )}
+        </VeloRevelable>
+      )}
     </div>
   );
 }
