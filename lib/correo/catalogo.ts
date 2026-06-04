@@ -479,6 +479,39 @@ export const EVENTOS_NOTIFICACION: EventoNotificacion[] = [
     },
   },
   {
+    clave: "san_entrega_hecha",
+    nombre: "Entrega del bote (cobrador)",
+    descripcion: "Cuando el organizador entrega el total de la ronda al participante que cobra ese turno.",
+    categoria: "Ahorros",
+    canales: ["app", "correo"],
+    variables: {
+      nombreSan: "Nombre del san",
+      referencia: "Referencia de la entrega",
+      link: "Enlace al san",
+    },
+    datosMuestra: {
+      nombreSan: "San de los amigos",
+      referencia: "0099",
+      link: LINK_DEMO,
+    },
+    app: {
+      titulo: "💸 ¡Te tocó cobrar!",
+      cuerpo: "El organizador te entregó el bote de «{{nombreSan}}» (ref. {{referencia}}). Revísalo.",
+    },
+    correo: {
+      asunto: "Cobraste tu turno en «{{nombreSan}}» 💸",
+      html: correoBase({
+        titulo: "¡Te entregaron el bote! 💸",
+        preheader: "Cobraste tu turno del san",
+        cuerpoHtml:
+          "<p style='margin:0 0 12px;'>El organizador te entregó el total de la ronda en <strong>«{{nombreSan}}»</strong> (referencia <strong>{{referencia}}</strong>).</p>" +
+          "<p style='margin:0;'>Verifica que recibiste el monto correcto. ¡Felicidades por tu turno!</p>",
+        ctaTexto: "Ver el san",
+        ctaUrl: "{{link}}",
+      }),
+    },
+  },
+  {
     clave: "kyc_recibida",
     nombre: "Verificación recibida",
     descripcion: "Al enviar el usuario su verificación de identidad (KYC).",

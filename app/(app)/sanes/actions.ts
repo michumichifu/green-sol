@@ -17,6 +17,7 @@ import { nuevoCodigo } from "@/lib/san/codigo-invitacion";
 import { perfilVerificado } from "@/lib/perfil-verificado";
 import { obtenerTasas } from "@/lib/rates/cache";
 import { infoMontoParticipante } from "@/lib/san/montos";
+import { estadoRonda } from "@/lib/san/rondas";
 
 export type EstadoRecolecta = { error?: string };
 
@@ -83,6 +84,19 @@ export async function crearRecolecta(
     }
   }
 
+  // Política de mora (configurable en el asistente): ninguna | fijo | porcentaje.
+  const moraTipo: "ninguna" | "fijo" | "porcentaje" =
+    formData.get("moraTipo") === "fijo"
+      ? "fijo"
+      : formData.get("moraTipo") === "porcentaje"
+        ? "porcentaje"
+        : "ninguna";
+  const moraValorRaw = Number(formData.get("moraValor"));
+  const moraValor =
+    moraTipo !== "ninguna" && moraValorRaw > 0 ? moraValorRaw : null;
+  // El organizador aporta y tiene turno, salvo que elija "solo administrar".
+  const organizadorParticipa = formData.get("organizadorParticipa") !== "false";
+
   const recolecta = await prisma.recolecta.create({
     data: {
       tipo,
@@ -96,7 +110,12 @@ export async function crearRecolecta(
       frecuencia: tipo === "san" ? (frecuencia ?? null) : null,
       frecuenciaDias: tipo === "san" ? (frecuenciaDias ?? null) : null,
       cupoMiembros: tipo === "san" ? cupoMiembros : null,
-      participantes: { create: { usuarioId: usuario.id } },
+      organizadorParticipa,
+      moraTipo,
+      moraValor,
+      participantes: organizadorParticipa
+        ? { create: { usuarioId: usuario.id } }
+        : undefined,
       datosPago,
     },
   });
@@ -605,6 +624,7 @@ export async function reportarPago(
       participanteId: participante.id,
       monto,
       montoAncla,
+      ronda: recolecta.rondaActual,
       fechaPago,
       referencia,
     },
@@ -667,6 +687,139 @@ export async function resolverAporte(
     { tipo: "pago_resuelto", enlace: `/sanes/${aporte.recolectaId}` },
   );
   revalidatePath(`/sanes/${aporte.recolectaId}`);
+  return {};
+}
+
+/**
+ * El organizador reporta que entregó el bote de la ronda al cobrador del turno
+ * (inverso de aprobar). Solo si la ronda está completa. Confirma con PIN.
+ */
+export async function reportarEntrega(
+  recolectaId: string,
+  referencia: string,
+  pin = "",
+): Promise<{ error?: string }> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return { error: "Inicia sesión." };
+  const recolecta = await prisma.recolecta.findUnique({
+    where: { id: recolectaId },
+    include: {
+      turnos: {
+        include: {
+          participante: {
+            include: { usuario: { select: { id: true, correo: true } } },
+          },
+        },
+      },
+      aportes: { select: { participanteId: true, ronda: true, estado: true } },
+    },
+  });
+  if (!recolecta || recolecta.organizadorId !== usuario.id) {
+    return { error: "No autorizado." };
+  }
+  if (!pin || !(await credencialValida(usuario.id, pin))) {
+    return { error: "PIN incorrecto. Confírmalo para registrar la entrega." };
+  }
+
+  const est = estadoRonda(
+    recolecta.rondaActual,
+    recolecta.turnos.map((t) => ({
+      participanteId: t.participanteId,
+      posicion: t.posicion,
+      cobrado: t.cobrado,
+    })),
+    recolecta.aportes,
+  );
+  if (!est.completa) return { error: "Aún faltan pagos de esta ronda." };
+  if (est.entregada) return { error: "Esta ronda ya fue entregada." };
+
+  const turnoCobrador = recolecta.turnos.find(
+    (t) => t.posicion === recolecta.rondaActual,
+  );
+  if (!turnoCobrador) return { error: "No hay turno para esta ronda." };
+
+  await prisma.turno.update({
+    where: { id: turnoCobrador.id },
+    data: {
+      cobrado: true,
+      entregadoEn: new Date(),
+      entregaReferencia: referencia.trim() || null,
+    },
+  });
+  await notificarEvento(
+    {
+      id: turnoCobrador.participante.usuario.id,
+      correo: turnoCobrador.participante.usuario.correo,
+    },
+    "san_entrega_hecha",
+    {
+      nombreSan: recolecta.nombre,
+      referencia: referencia.trim() || "—",
+      link: `/sanes/${recolectaId}`,
+    },
+    { tipo: "entrega", enlace: `/sanes/${recolectaId}` },
+  );
+  revalidatePath(`/sanes/${recolectaId}`);
+  return {};
+}
+
+/**
+ * Avanza a la siguiente ronda (o finaliza el san si fue la última). Requiere que
+ * el bote de la ronda actual ya se haya entregado. Confirma con PIN.
+ */
+export async function iniciarSiguienteRonda(
+  recolectaId: string,
+  pin = "",
+): Promise<{ error?: string }> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return { error: "Inicia sesión." };
+  const recolecta = await prisma.recolecta.findUnique({
+    where: { id: recolectaId },
+    include: { turnos: true, participantes: { select: { usuarioId: true } } },
+  });
+  if (!recolecta || recolecta.organizadorId !== usuario.id) {
+    return { error: "No autorizado." };
+  }
+  if (!pin || !(await credencialValida(usuario.id, pin))) {
+    return { error: "PIN incorrecto. Confírmalo para continuar." };
+  }
+
+  const turnoActual = recolecta.turnos.find(
+    (t) => t.posicion === recolecta.rondaActual,
+  );
+  if (!turnoActual?.cobrado) {
+    return { error: "Primero entrega el bote de esta ronda." };
+  }
+
+  const ids = recolecta.participantes.map((p) => p.usuarioId);
+  if (recolecta.rondaActual >= recolecta.turnos.length) {
+    // Era la última ronda: el san se finaliza.
+    await prisma.recolecta.update({
+      where: { id: recolectaId },
+      data: { estado: "cerrada" },
+    });
+    await notificarVarios(ids, {
+      tipo: "san_finalizado",
+      titulo: "🏁 El san terminó",
+      cuerpo: `"${recolecta.nombre}" se completó: todos cobraron su turno. Valora a los demás.`,
+      enlace: `/sanes/${recolectaId}`,
+    });
+    revalidatePath(`/sanes/${recolectaId}`);
+    return {};
+  }
+
+  const nueva = recolecta.rondaActual + 1;
+  await prisma.recolecta.update({
+    where: { id: recolectaId },
+    data: { rondaActual: nueva },
+  });
+  await notificarVarios(ids, {
+    tipo: "nueva_ronda",
+    titulo: `Empezó la ronda ${nueva}`,
+    cuerpo: `Aporta tu cuota de esta ronda en "${recolecta.nombre}".`,
+    enlace: `/sanes/${recolectaId}`,
+  });
+  revalidatePath(`/sanes/${recolectaId}`);
   return {};
 }
 

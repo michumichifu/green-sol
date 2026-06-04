@@ -88,6 +88,8 @@ model Recolecta {
   organizadorParticipa Boolean @default(true) // si el organizador aporta y tiene turno, o solo administra
   rondaActual   Int             @default(1) // ronda en curso (1..nº turnos)
   fechaInicio   DateTime? // cuándo arrancó el san (para calcular las fechas de corte por ronda)
+  moraTipo      TipoMora        @default(ninguna) // política ante atraso: ninguna | fijo | porcentaje
+  moraValor     Float? // monto fijo (en la ancla) o % según moraTipo
   estado        EstadoRecolecta @default(abierta)
   organizadorId String
   organizador   Usuario         @relation("organizadas", fields: [organizadorId], references: [id])
@@ -136,6 +138,8 @@ model Turno {
   participante   Participante @relation(fields: [participanteId], references: [id], onDelete: Cascade)
   posicion       Int
   cobrado        Boolean      @default(false)
+  entregadoEn      DateTime? // cuándo el organizador entregó el bote al cobrador de este turno
+  entregaReferencia String? // referencia de esa entrega
 }
 
 model Aporte {
@@ -146,6 +150,7 @@ model Aporte {
   participante   Participante @relation(fields: [participanteId], references: [id], onDelete: Cascade)
   monto          Float
   montoAncla     Float? // equivalente en la moneda ancla ($/USDC/SOL) congelado al reportar
+  ronda          Int          @default(1) // a qué ronda del san pertenece este aporte
   fechaPago      DateTime? // fecha del pago indicada por quien reporta (puede diferir de creadoEn)
   referencia     String?
   comprobanteUrl String?
@@ -292,6 +297,12 @@ enum EstadoSolicitud {
   pendiente
   aprobada
   rechazada
+}
+
+enum TipoMora {
+  ninguna
+  fijo
+  porcentaje
 }
 
 model Invitacion {
