@@ -12,11 +12,13 @@ import { Label } from "@/components/ui/label";
 
 export function FormDatos({
   correo,
+  walletAddress,
   nombre: n0,
   apellido: a0,
   nombreUsuario: u0,
 }: {
-  correo: string;
+  correo: string | null;
+  walletAddress?: string | null;
   nombre: string;
   apellido: string;
   nombreUsuario: string;
@@ -31,10 +33,23 @@ export function FormDatos({
 
   return (
     <form action={accion} className="space-y-3">
-      <div className="space-y-1">
-        <Label>Correo</Label>
-        <Input value={correo} disabled />
-      </div>
+      {correo ? (
+        <div className="space-y-1">
+          <Label>Correo</Label>
+          <Input value={correo} disabled />
+        </div>
+      ) : walletAddress ? (
+        <div className="space-y-1">
+          <Label>Wallet</Label>
+          <Input
+            value={`${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}`}
+            disabled
+          />
+          <p className="text-xs text-muted-foreground">
+            Tu cuenta usa tu wallet de Solana. El correo es opcional.
+          </p>
+        </div>
+      ) : null}
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1">
           <Label htmlFor="nombre">Nombre</Label>
