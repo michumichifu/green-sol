@@ -54,12 +54,16 @@ export function SeccionVerificacion({
   estadoKyc,
   motivoRechazoKyc,
   pasosKyc,
+  nombreInicial = "",
+  apellidoInicial = "",
 }: {
   correoVerificado: boolean;
   esWallet?: boolean;
   estadoKyc: EstadoKyc | null;
   motivoRechazoKyc: string | null;
   pasosKyc: PasosRequeridos;
+  nombreInicial?: string;
+  apellidoInicial?: string;
 }) {
   const kycHecho = estadoKyc === "aprobada";
   // El PIN ya se crea durante el registro, así que no es un paso pendiente aquí.
@@ -91,6 +95,8 @@ export function SeccionVerificacion({
         estado={estadoKyc}
         motivoRechazo={motivoRechazoKyc}
         pasos={pasosKyc}
+        nombreInicial={nombreInicial}
+        apellidoInicial={apellidoInicial}
       />
     </section>
   );

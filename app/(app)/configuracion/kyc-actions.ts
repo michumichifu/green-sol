@@ -76,6 +76,8 @@ export async function enviarVerificacion(
   const pasos = await pasosRequeridos();
 
   // Campos de texto
+  const nombre = String(formData.get("nombre") ?? "").trim();
+  const apellido = String(formData.get("apellido") ?? "").trim();
   const tipoDocumento = (formData.get("tipoDocumento") || "") as TipoDocumento | "";
   const nacionalidad = (formData.get("nacionalidad") || "") as Nacionalidad | "";
   const numeroDocumento = String(formData.get("numeroDocumento") ?? "").trim();
@@ -85,6 +87,9 @@ export async function enviarVerificacion(
 
   // Validación de documento
   if (pasos.DOCUMENTO) {
+    if (!nombre || !apellido) {
+      return { error: "Indica tu nombre y apellido." };
+    }
     if (tipoDocumento !== "cedula" && tipoDocumento !== "pasaporte") {
       return { error: "Elige el tipo de documento." };
     }
@@ -102,6 +107,8 @@ export async function enviarVerificacion(
     data: {
       usuarioId: u.id,
       estado: "pendiente",
+      nombre: pasos.DOCUMENTO ? nombre : null,
+      apellido: pasos.DOCUMENTO ? apellido : null,
       tipoDocumento: pasos.DOCUMENTO ? (tipoDocumento as TipoDocumento) : null,
       nacionalidad:
         pasos.DOCUMENTO && tipoDocumento === "cedula"

@@ -241,6 +241,8 @@ model VerificacionKyc {
   id              String         @id @default(cuid())
   usuarioId       String
   usuario         Usuario        @relation("verificaciones", fields: [usuarioId], references: [id], onDelete: Cascade)
+  nombre          String?
+  apellido        String?
   tipoDocumento   TipoDocumento?
   nacionalidad    Nacionalidad?
   numeroDocumento String?

@@ -21,15 +21,21 @@ const INSTR_DOC =
 export function AsistenteKyc({
   pasos,
   onCerrar,
+  nombreInicial = "",
+  apellidoInicial = "",
 }: {
   pasos: PasosRequeridos;
   onCerrar: () => void;
+  nombreInicial?: string;
+  apellidoInicial?: string;
 }) {
   const [estado, accion, pendiente] = useActionState<EstadoEnvioKyc, FormData>(
     enviarVerificacion,
     {},
   );
 
+  const [nombre, setNombre] = useState(nombreInicial);
+  const [apellido, setApellido] = useState(apellidoInicial);
   const [tipoDocumento, setTipoDocumento] = useState<"" | "cedula" | "pasaporte">("");
   const [nacionalidad, setNacionalidad] = useState<"" | "V" | "E">("");
   const [numeroDocumento, setNumeroDocumento] = useState("");
@@ -57,6 +63,8 @@ export function AsistenteKyc({
   const esCedula = tipoDocumento === "cedula";
   // Datos de texto del documento listos → recién entonces se piden las fotos.
   const datosDocListos =
+    nombre.trim().length > 0 &&
+    apellido.trim().length > 0 &&
     !!tipoDocumento &&
     numeroDocumento.trim().length > 0 &&
     (!esCedula || !!nacionalidad);
@@ -80,6 +88,8 @@ export function AsistenteKyc({
   function enviar() {
     const fd = new FormData();
     if (pasos.DOCUMENTO) {
+      fd.set("nombre", nombre);
+      fd.set("apellido", apellido);
       fd.set("tipoDocumento", tipoDocumento);
       fd.set("nacionalidad", nacionalidad);
       fd.set("numeroDocumento", numeroDocumento);
@@ -144,7 +154,30 @@ export function AsistenteKyc({
           <div key={pasoActual} className="animate-in fade-in slide-in-from-right-2 duration-300">
             {pasoActual === "documento" && (
               <div className="space-y-4">
-                <p className="text-sm font-medium">
+                <div className="space-y-1.5">
+                  <p className="text-sm font-medium">
+                    Tu nombre y apellido, tal como aparecen en el documento
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      value={nombre}
+                      onChange={(e) => setNombre(e.target.value)}
+                      placeholder="Nombre"
+                      autoComplete="given-name"
+                    />
+                    <Input
+                      value={apellido}
+                      onChange={(e) => setApellido(e.target.value)}
+                      placeholder="Apellido"
+                      autoComplete="family-name"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    El verificador los contrastará con tu documento. Al aprobar, quedan
+                    fijos en tu cuenta.
+                  </p>
+                </div>
+                <p className="border-t pt-4 text-sm font-medium">
                   Selecciona el tipo de documento con el que deseas iniciar tu verificación
                 </p>
                 <div className="grid grid-cols-2 gap-2">
@@ -256,6 +289,14 @@ export function AsistenteKyc({
               <div className="space-y-3">
                 <p className="text-sm font-medium">Revisa y envía</p>
                 <ul className="space-y-1.5 text-sm text-muted-foreground">
+                  {pasos.DOCUMENTO && (
+                    <li>
+                      Nombre:{" "}
+                      <span className="text-foreground">
+                        {nombre} {apellido}
+                      </span>
+                    </li>
+                  )}
                   {pasos.DOCUMENTO && (
                     <li>
                       Documento:{" "}

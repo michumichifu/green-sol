@@ -120,7 +120,15 @@ function Tarjeta({ s }: { s: SolicitudVista }) {
             <p className="truncate text-xs text-brand">@{s.usuario.nombreUsuario}</p>
           )}
           <p className="truncate text-xs text-muted-foreground">{s.usuario.correo}</p>
-          <p className="mt-1 text-xs">{docDe(s)}</p>
+          {(s.kycNombre || s.kycApellido) && (
+            <p className="mt-1 text-xs">
+              Declarado:{" "}
+              <span className="font-medium text-foreground">
+                {[s.kycNombre, s.kycApellido].filter(Boolean).join(" ")}
+              </span>
+            </p>
+          )}
+          <p className="text-xs">{docDe(s)}</p>
         </div>
         <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
           {ETIQUETA_ESTADO[s.estado]}

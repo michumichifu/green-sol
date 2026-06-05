@@ -85,7 +85,16 @@ export async function resolverKyc(
       },
     });
     if (accion === "aprobar") {
-      await tx.usuario.update({ where: { id: v.usuarioId }, data: { nivelKyc: 1 } });
+      // Al aprobar, la identidad declarada en el KYC pasa a ser la de la cuenta
+      // (y queda bloqueada por el candado tras-KYC en actualizarPerfil).
+      await tx.usuario.update({
+        where: { id: v.usuarioId },
+        data: {
+          nivelKyc: 1,
+          ...(v.nombre ? { nombre: v.nombre } : {}),
+          ...(v.apellido ? { apellido: v.apellido } : {}),
+        },
+      });
     } else if (accion === "banear") {
       // Banear desverifica además de bloquear.
       await tx.usuario.update({

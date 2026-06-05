@@ -25,6 +25,8 @@ export type SolicitudVista = {
   revisorNombre: string | null;
   motivoRechazo: string | null;
   notaInterna: string | null;
+  kycNombre: string | null;
+  kycApellido: string | null;
   tipoDocumento: TipoDocumento | null;
   nacionalidad: Nacionalidad | null;
   numeroDocumento: string | null;
@@ -77,6 +79,8 @@ export async function colaVerificaciones(): Promise<{
       : null,
     motivoRechazo: v.motivoRechazo,
     notaInterna: v.notaInterna,
+    kycNombre: v.nombre,
+    kycApellido: v.apellido,
     tipoDocumento: v.tipoDocumento,
     nacionalidad: v.nacionalidad,
     numeroDocumento: v.numeroDocumento,

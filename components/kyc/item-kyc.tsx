@@ -11,11 +11,15 @@ export function ItemKyc({
   estado,
   motivoRechazo,
   pasos,
+  nombreInicial = "",
+  apellidoInicial = "",
 }: {
   numero: number;
   estado: EstadoKyc | null;
   motivoRechazo: string | null;
   pasos: PasosRequeridos;
+  nombreInicial?: string;
+  apellidoInicial?: string;
 }) {
   const [abierto, setAbierto] = useState(false);
 
@@ -80,7 +84,12 @@ export function ItemKyc({
       )}
 
       {abierto && puedeIniciar && (
-        <AsistenteKyc pasos={pasos} onCerrar={() => setAbierto(false)} />
+        <AsistenteKyc
+          pasos={pasos}
+          onCerrar={() => setAbierto(false)}
+          nombreInicial={nombreInicial}
+          apellidoInicial={apellidoInicial}
+        />
       )}
     </div>
   );
