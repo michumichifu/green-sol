@@ -4,6 +4,33 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.3.0] — 2026-06-04 — Registro y login con wallet de Solana (primer paso de la capa cripto)
+
+Primera integración real de wallets de Solana: el usuario puede **registrarse y entrar con su wallet** (Phantom/Solflare). La autenticación es **off-chain** (firma de un mensaje, criptografía ed25519): no gasta SOL ni toca la red. Es la base del bootcamp y deja montado el stack para saldos y wallet gestionada a futuro. Spec/plan en `docs/superpowers/specs/2026-06-04-auth-wallet-solana-design.md` y `docs/superpowers/plans/2026-06-04-auth-wallet-solana.md`.
+
+### Añadido
+
+- **Stack de Solana (framework-kit):** `@solana/client` + `@solana/react-hooks` + `@solana/kit`, más `tweetnacl` + `bs58` para verificar firmas. `app/providers.tsx` monta `SolanaProvider` con un cliente apuntando a **devnet** (`NEXT_PUBLIC_SOLANA_RPC_URL`), envuelto en el layout raíz. El RPC queda listo para la fase de saldos; la autenticación no lo usa.
+- **Esquema (migración `auth_wallet`):** `Usuario.correo` pasa a **opcional**, nuevos `Usuario.walletAddress @unique` y `Usuario.registradoCon` (enum `MetodoRegistro` correo|wallet), y tabla `AuthNonce` (nonce de un solo uso con expiración de 5 min, anti-replay).
+- **Lógica de auth con wallet (probada con TDD):** `lib/auth/wallet.ts` (`construirMensaje` + `verificarFirma` ed25519) y `lib/auth/nonce.ts` (`esNonceUtilizable`/`crearNonce`/`consumirNonce`). 10 tests unitarios en `tests/wallet-auth.test.ts`.
+- **Server actions** en `app/(auth)/actions.ts`: `generarNonceWallet`, `registrarConWallet` (firma + `@usuario` → crea cuenta), `loginConWallet` (firma) y `loginConUsuarioPin` (ruta alterna sin wallet, reutiliza el PIN y su bloqueo por intentos).
+- **UI:** `components/botones-wallet.tsx` pasa de maqueta a **conexión real** (Phantom/Solflare, vía `useWalletConnection`): conecta, firma el nonce y entra (login) o pide `@usuario` y crea la cuenta (registro). Integrado en las pantallas de login y registro existentes.
+- **Perfil:** muestra **"Registrado con wallet"** + la dirección copiable; un usuario de wallet puede crear su **primer PIN** desde Seguridad (su identidad ya está probada por la firma), habilitando el login `@usuario` + PIN.
+
+### Cambiado
+
+- **Correo opcional en todo el código:** `notificarYCorreo`/`notificarEvento` aceptan correo nullable y **saltan el envío de email** para usuarios sin correo (la notificación in-app siempre se crea); tipos y vistas que mostraban el correo usan un fallback (`correo ?? @usuario ?? "—"`).
+
+### Decisiones
+
+- **Solo Phantom y Solflare** (las más usadas en Venezuela). MetaMask queda fuera (es de Ethereum). La wallet es la **identidad**; el correo es opcional y se puede vincular después.
+
+### Pendiente
+
+- Vincular correo desde el perfil (acción aún no implementada), lectura de saldos SOL/USDC, wallet gestionada por la app y transacciones en devnet (fases siguientes que este hito habilita). La verificación end-to-end con Phantom/Solflare reales en devnet es **manual** (no automatizable con Playwright).
+
+---
+
 ## [0.2.6] — 2026-06-04 — Refinamientos de pagos y de la vista del san (UX)
 
 Lote de pulidos sobre la pestaña Pagos del san y las notificaciones, a partir de probar el flujo real. Sin cambios de esquema.
