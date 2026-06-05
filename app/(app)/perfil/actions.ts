@@ -40,10 +40,19 @@ export async function actualizarPerfil(
     if (err) return { error: err };
   }
 
+  // Tras aprobar el KYC, el nombre y el apellido quedan fijos (deben coincidir con la
+  // identidad verificada): se conservan los actuales aunque el formulario envíe otros.
+  // El @usuario (seudónimo) sigue siendo editable.
+  const kycAprobado = usuario.nivelKyc >= 1;
+
   try {
     await prisma.usuario.update({
       where: { id: usuario.id },
-      data: { nombre, apellido, nombreUsuario },
+      data: {
+        nombre: kycAprobado ? usuario.nombre : nombre,
+        apellido: kycAprobado ? usuario.apellido : apellido,
+        nombreUsuario,
+      },
     });
   } catch {
     return { error: "Ese nombre de usuario ya está en uso." };

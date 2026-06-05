@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { ShieldCheck } from "lucide-react";
 import {
   actualizarPerfil,
   type EstadoPerfil,
@@ -16,12 +17,14 @@ export function FormDatos({
   nombre: n0,
   apellido: a0,
   nombreUsuario: u0,
+  kycAprobado = false,
 }: {
   correo: string | null;
   walletAddress?: string | null;
   nombre: string;
   apellido: string;
   nombreUsuario: string;
+  kycAprobado?: boolean;
 }) {
   const [estado, accion, pendiente] = useActionState<EstadoPerfil, FormData>(
     actualizarPerfil,
@@ -58,6 +61,7 @@ export function FormDatos({
             name="nombre"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
+            disabled={kycAprobado}
           />
         </div>
         <div className="space-y-1">
@@ -67,9 +71,16 @@ export function FormDatos({
             name="apellido"
             value={apellido}
             onChange={(e) => setApellido(e.target.value)}
+            disabled={kycAprobado}
           />
         </div>
       </div>
+      {kycAprobado && (
+        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <ShieldCheck className="size-3.5 text-brand" />
+          Nombre y apellido quedaron fijos al verificar tu identidad (KYC).
+        </p>
+      )}
       <div className="space-y-1">
         <Label htmlFor="nombreUsuario">Nombre de usuario</Label>
         <CampoUsuario

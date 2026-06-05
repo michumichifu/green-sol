@@ -48,6 +48,7 @@ export default async function ConfiguracionPage({
           nombre={usuario!.nombre ?? ""}
           apellido={usuario!.apellido ?? ""}
           nombreUsuario={usuario!.nombreUsuario ?? ""}
+          kycAprobado={usuario!.nivelKyc >= 1}
         />
 
         {/* Verificación */}
