@@ -154,31 +154,44 @@ export function AsistenteKyc({
           <div key={pasoActual} className="animate-in fade-in slide-in-from-right-2 duration-300">
             {pasoActual === "documento" && (
               <div className="space-y-4">
-                <div className="space-y-1.5">
+                <div className="space-y-3">
                   <p className="text-sm font-medium">
-                    Tu nombre y apellido, tal como aparecen en el documento
+                    1. Empecemos por tus datos
                   </p>
                   <div className="grid grid-cols-2 gap-2">
-                    <Input
-                      value={nombre}
-                      onChange={(e) => setNombre(e.target.value)}
-                      placeholder="Nombre"
-                      autoComplete="given-name"
-                    />
-                    <Input
-                      value={apellido}
-                      onChange={(e) => setApellido(e.target.value)}
-                      placeholder="Apellido"
-                      autoComplete="family-name"
-                    />
+                    <div className="space-y-1.5">
+                      <label htmlFor="kyc-nombre" className="text-sm font-medium">
+                        Nombre
+                      </label>
+                      <Input
+                        id="kyc-nombre"
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                        placeholder="Ej. María"
+                        autoComplete="given-name"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label htmlFor="kyc-apellido" className="text-sm font-medium">
+                        Apellido
+                      </label>
+                      <Input
+                        id="kyc-apellido"
+                        value={apellido}
+                        onChange={(e) => setApellido(e.target.value)}
+                        placeholder="Ej. Pérez"
+                        autoComplete="family-name"
+                      />
+                    </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    El verificador los contrastará con tu documento. Al aprobar, quedan
-                    fijos en tu cuenta.
+                    Tal como aparecen en tu documento. El verificador los contrastará y,
+                    al aprobar, quedan fijos en tu cuenta.
                   </p>
                 </div>
                 <p className="border-t pt-4 text-sm font-medium">
-                  Selecciona el tipo de documento con el que deseas iniciar tu verificación
+                  2. Selecciona el tipo de documento con el que deseas iniciar tu
+                  verificación
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {(["cedula", "pasaporte"] as const).map((t) => (
