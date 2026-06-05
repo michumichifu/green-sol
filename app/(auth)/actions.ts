@@ -460,3 +460,21 @@ export async function loginConUsuarioPin(input: {
   await crearSesion(usuario.id);
   return {};
 }
+
+/**
+ * Crea el PIN del usuario de la sesión actual (cuenta de wallet). Su identidad ya
+ * quedó probada por la firma al registrarse, así que no pide credencial previa.
+ * El PIN es para confirmar acciones dentro de la app, NO para iniciar sesión
+ * (el login de una cuenta wallet siempre es firmando con la wallet).
+ */
+export async function establecerPinWallet(pin: string): Promise<EstadoAuth> {
+  const usuario = await obtenerUsuario();
+  if (!usuario) return { error: "No autorizado." };
+  if (!/^\d{6}$/.test(pin)) return { error: "El PIN debe ser de 6 dígitos." };
+  if (!pinFormatoValido(pin)) return { error: "Elige un PIN menos obvio." };
+  await prisma.usuario.update({
+    where: { id: usuario.id },
+    data: { pinHash: await hashearPin(pin) },
+  });
+  return {};
+}

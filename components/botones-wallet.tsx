@@ -5,14 +5,17 @@ import { useRouter } from "next/navigation";
 import { useWalletConnection } from "@solana/react-hooks";
 import { toast } from "sonner";
 import bs58 from "bs58";
+import { Wallet, ShieldCheck } from "lucide-react";
 import {
   generarNonceWallet,
   loginConWallet,
   registrarConWallet,
+  establecerPinWallet,
 } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CampoPin } from "@/components/campo-pin";
 
 const WALLETS = [
   { id: "phantom", nombre: "Phantom", icono: "/wallets/phantom.png", url: "https://phantom.app" },
@@ -20,12 +23,14 @@ const WALLETS = [
 ];
 
 type Firmado = { address: string; firma: string; nonce: string };
+type SubPaso = "usuario" | "pin";
 
 /**
  * Botones de wallet (Phantom / Solflare) con conexión real de Solana. Conecta la
  * wallet, firma un mensaje con el nonce del servidor (off-chain, no gasta SOL) y:
  * - login: verifica e inicia sesión;
- * - registro: pide un @usuario y crea la cuenta (identidad = wallet).
+ * - registro: pantalla propia para elegir @usuario y, opcional, un PIN para acciones
+ *   internas (el login siempre es firmando con la wallet). Termina en el onboarding.
  */
 export function BotonesWallet({
   accion = "entrar",
@@ -37,11 +42,13 @@ export function BotonesWallet({
   const [procesando, setProcesando] = useState<string | null>(null);
   const proposito = accion === "registrarte" ? "registro" : "login";
 
-  // Registro: tras firmar, pedimos @usuario antes de crear la cuenta.
-  const [pendiente, setPendiente] = useState<Firmado | null>(null);
+  // Registro: tras firmar, pasamos a una pantalla propia (no overlay traslúcido).
+  const [firmado, setFirmado] = useState<Firmado | null>(null);
+  const [subPaso, setSubPaso] = useState<SubPaso>("usuario");
   const [nombreUsuario, setNombreUsuario] = useState("");
-  const [errorReg, setErrorReg] = useState("");
-  const [creando, setCreando] = useState(false);
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+  const [trabajando, setTrabajando] = useState(false);
 
   function connectorDe(walletId: string) {
     return connectors.find((c) => c.name.toLowerCase().includes(walletId));
@@ -77,7 +84,9 @@ export function BotonesWallet({
           router.refresh();
         }
       } else {
-        setPendiente({ address, firma, nonce });
+        setError("");
+        setSubPaso("usuario");
+        setFirmado({ address, firma, nonce });
       }
     } catch (e) {
       const msg = (e as Error)?.message ?? "";
@@ -92,17 +101,112 @@ export function BotonesWallet({
   }
 
   async function crearCuenta() {
-    if (!pendiente) return;
-    setCreando(true);
-    setErrorReg("");
-    const res = await registrarConWallet({ ...pendiente, nombreUsuario });
-    setCreando(false);
+    if (!firmado) return;
+    setTrabajando(true);
+    setError("");
+    const res = await registrarConWallet({ ...firmado, nombreUsuario });
+    setTrabajando(false);
     if (res.error) {
-      setErrorReg(res.error);
+      setError(res.error);
     } else {
-      router.push("/dashboard");
+      setSubPaso("pin");
+    }
+  }
+
+  async function guardarPin() {
+    setTrabajando(true);
+    setError("");
+    const res = await establecerPinWallet(pin);
+    setTrabajando(false);
+    if (res.error) {
+      setError(res.error);
+    } else {
+      router.push("/onboarding");
       router.refresh();
     }
+  }
+
+  function omitirPin() {
+    router.push("/onboarding");
+    router.refresh();
+  }
+
+  // ── Pantalla propia de registro con wallet (cubre todo, sin transparencias) ──
+  if (firmado) {
+    const corta = `${firmado.address.slice(0, 4)}…${firmado.address.slice(-4)}`;
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
+        <div className="mx-auto flex min-h-full max-w-sm flex-col justify-center gap-5 px-6 py-10">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+              {subPaso === "usuario" ? (
+                <Wallet className="size-6" />
+              ) : (
+                <ShieldCheck className="size-6" />
+              )}
+            </span>
+            <h1 className="text-xl font-bold">
+              {subPaso === "usuario" ? "Casi listo 🎉" : "Protege tus acciones"}
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Wallet conectada: <span className="font-medium">{corta}</span>
+            </p>
+          </div>
+
+          {subPaso === "usuario" ? (
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="wallet-usuario">Elige tu nombre de usuario</Label>
+                <Input
+                  id="wallet-usuario"
+                  value={nombreUsuario}
+                  onChange={(e) => setNombreUsuario(e.target.value)}
+                  placeholder="tu_usuario"
+                  autoFocus
+                />
+                <p className="text-xs text-muted-foreground">
+                  Así te verán las demás personas en la app.
+                </p>
+              </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <Button
+                type="button"
+                className="w-full"
+                disabled={trabajando || nombreUsuario.trim().length < 3}
+                onClick={crearCuenta}
+              >
+                {trabajando ? "Creando…" : "Crear cuenta"}
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="rounded-xl border border-border/60 bg-muted/30 p-3 text-center text-xs text-muted-foreground">
+                Crea un PIN de 6 dígitos para <b className="text-foreground">confirmar
+                acciones dentro de la app</b> (como aprobar pagos). No lo necesitas
+                para entrar: para iniciar sesión sigues firmando con tu wallet.
+              </div>
+              <CampoPin onChange={setPin} autoFocus testId="wallet-pin" />
+              {error && <p className="text-center text-sm text-destructive">{error}</p>}
+              <Button
+                type="button"
+                className="w-full"
+                disabled={trabajando || !/^\d{6}$/.test(pin)}
+                onClick={guardarPin}
+              >
+                {trabajando ? "Guardando…" : "Guardar PIN"}
+              </Button>
+              <button
+                type="button"
+                onClick={omitirPin}
+                className="w-full text-center text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              >
+                Omitir por ahora
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -134,59 +238,6 @@ export function BotonesWallet({
           </button>
         ))}
       </div>
-
-      {/* Registro con wallet: pedir @usuario tras firmar */}
-      {pendiente && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
-          <div
-            className="absolute inset-0"
-            aria-hidden="true"
-            onPointerDown={(e) => {
-              if (e.target === e.currentTarget) setPendiente(null);
-            }}
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            className="relative z-10 w-full max-w-sm space-y-3 rounded-3xl border bg-card p-5 shadow-2xl"
-          >
-            <h2 className="text-base font-semibold">Elige tu nombre de usuario</h2>
-            <p className="text-xs text-muted-foreground">
-              Wallet conectada: {pendiente.address.slice(0, 4)}…
-              {pendiente.address.slice(-4)}
-            </p>
-            <div className="space-y-1">
-              <Label htmlFor="wallet-usuario">@usuario</Label>
-              <Input
-                id="wallet-usuario"
-                value={nombreUsuario}
-                onChange={(e) => setNombreUsuario(e.target.value)}
-                placeholder="tu_usuario"
-                autoFocus
-              />
-            </div>
-            {errorReg && <p className="text-sm text-destructive">{errorReg}</p>}
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                className="flex-1"
-                onClick={() => setPendiente(null)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                className="flex-1"
-                disabled={creando || nombreUsuario.trim().length < 3}
-                onClick={crearCuenta}
-              >
-                {creando ? "Creando…" : "Crear cuenta"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
