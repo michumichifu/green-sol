@@ -11,12 +11,14 @@ import {
   ShieldAlert,
   ScrollText,
   ChevronRight,
+  Wallet,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { obtenerUsuario } from "@/lib/auth/session";
 import { obtenerReputacion, nivelPorReputacion } from "@/lib/reputacion";
 import { BannerVerificacion } from "@/components/banner-verificacion";
 import { BotonCerrarSesion } from "@/components/boton-cerrar-sesion";
+import { DatoCopiable } from "@/components/dato-copiable";
 
 function ItemMenu({
   href,
@@ -107,6 +109,35 @@ export default async function PerfilPage() {
           {rep.positivos} positivos · {rep.negativos} negativos
         </p>
       </section>
+
+      {/* Identidad por wallet (registro con Solana) */}
+      {usuario!.registradoCon === "wallet" && usuario!.walletAddress && (
+        <section className="space-y-3 rounded-2xl border bg-card p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
+              <Wallet className="size-5" />
+            </span>
+            <div>
+              <h2 className="text-sm font-semibold leading-tight">
+                Registrado con wallet
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Tu identidad es tu wallet de Solana.
+              </p>
+            </div>
+          </div>
+          <DatoCopiable etiqueta="Dirección" valor={usuario!.walletAddress} />
+          {!usuario!.correo && (
+            <p className="text-xs text-muted-foreground">
+              Sin correo vinculado. Puedes crear un PIN en{" "}
+              <Link href="/configuracion?tab=seguridad" className="text-brand underline">
+                Seguridad
+              </Link>{" "}
+              para entrar también con @usuario + PIN.
+            </p>
+          )}
+        </section>
+      )}
 
       {/* Menú */}
       <nav className="divide-y overflow-hidden rounded-2xl border bg-card shadow-sm">

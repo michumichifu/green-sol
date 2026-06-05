@@ -40,6 +40,9 @@ export async function definirPin(
     if (!(await verificarContrasena(u.hashContrasena, claveActual))) {
       return { error: "Contraseña incorrecta." };
     }
+  } else if (u.registradoCon === "wallet") {
+    // Usuario registrado con wallet: su identidad ya quedó probada por la firma al
+    // iniciar sesión, así que puede fijar su primer PIN sin credencial previa.
   } else {
     // Sin PIN ni contraseña: estado inalcanzable por los flujos de la app. Lo
     // rechazamos explícitamente para que ninguna sesión robada pueda fijar un PIN
