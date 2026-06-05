@@ -22,11 +22,13 @@ export function CampoUsuario({
   name,
   value,
   onChange,
+  className,
 }: {
   id: string;
   name: string;
   value: string;
   onChange: (v: string) => void;
+  className?: string;
 }) {
   const [estado, setEstado] = useState<Estado>("idle");
 
@@ -63,7 +65,7 @@ export function CampoUsuario({
           maxLength={15}
           autoComplete="username"
           placeholder="seudónimo con el que te verán"
-          className="pr-9"
+          className={cn("pr-9", className)}
         />
         <span className="absolute right-2.5 top-1/2 -translate-y-1/2">
           {estado === "check" && (

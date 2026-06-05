@@ -16,9 +16,9 @@ import {
   establecerPinWallet,
 } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CampoPin } from "@/components/campo-pin";
+import { CampoUsuario } from "@/components/campo-usuario";
 
 const WALLETS = [
   { id: "phantom", nombre: "Phantom", icono: "/wallets/phantom.png", url: "https://phantom.app" },
@@ -190,27 +190,24 @@ export function BotonesWallet({
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="wallet-usuario">Elige tu nombre de usuario</Label>
-                <Input
+                <CampoUsuario
                   id="wallet-usuario"
+                  name="nombreUsuario"
                   value={nombreUsuario}
-                  onChange={(e) => setNombreUsuario(e.target.value)}
-                  placeholder="tu_usuario"
-                  autoFocus
+                  onChange={setNombreUsuario}
+                  className="h-12 text-base"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Así te verán las demás personas en la app.
-                </p>
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <Button
                 type="button"
-                className="w-full"
+                className="h-12 w-full text-base"
                 disabled={trabajando || nombreUsuario.trim().length < 3}
                 onClick={crearCuenta}
               >
                 {trabajando ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" /> Creando…
+                    <Loader2 className="size-4 animate-spin" /> Verificando…
                   </>
                 ) : (
                   "Crear cuenta"
