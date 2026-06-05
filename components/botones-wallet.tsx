@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useWalletConnection } from "@solana/react-hooks";
 import { toast } from "sonner";
@@ -140,12 +141,12 @@ export function BotonesWallet({
     router.refresh();
   }
 
-  // ── Pantalla propia de registro con wallet (cubre todo, sin transparencias) ──
+  // ── Modal de registro con wallet (glassmorphism, por portal para cubrir todo) ──
   if (firmado) {
     const corta = `${firmado.address.slice(0, 4)}…${firmado.address.slice(-4)}`;
-    return (
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
-        <div className="mx-auto flex min-h-full max-w-sm flex-col justify-center gap-5 px-6 py-10">
+    return createPortal(
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-md">
+        <div className="max-h-[90vh] w-full max-w-sm space-y-5 overflow-y-auto rounded-3xl border border-white/10 bg-card p-6 shadow-2xl">
           <div className="flex flex-col items-center gap-2 text-center">
             <span className="flex size-12 items-center justify-center rounded-2xl bg-brand/10 text-brand">
               {subPaso === "usuario" ? (
@@ -214,7 +215,8 @@ export function BotonesWallet({
             </div>
           )}
         </div>
-      </div>
+      </div>,
+      document.body,
     );
   }
 
