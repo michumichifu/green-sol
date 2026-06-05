@@ -4,6 +4,38 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.4.0] — 2026-06-05 — Identidad real en el KYC + registro/login con wallet pulido de punta a punta
+
+Cierra el flujo de autenticación con wallet con todas las correcciones surgidas al probarlo, y convierte el **KYC en la fuente de la identidad verificada** (nombre, apellido y cédula), igual para cuentas de wallet y de correo.
+
+### Añadido
+
+- **El KYC captura y fija la identidad (nombre + apellido):**
+  - Migración `kyc_nombre_apellido`: `VerificacionKyc` guarda `nombre` y `apellido`.
+  - El asistente de verificación (`components/kyc/asistente-kyc.tsx`) pide **nombre y apellido** al inicio del paso del documento, **pre-llenados desde el perfil** (para confirmar o corregir); `enviarVerificacion` los valida y los guarda.
+  - El **verificador** (cola del super-admin, `components/kyc/cola-kyc.tsx`) ve **"Declarado: Nombre Apellido"** junto a la cédula, para contrastarlos con la foto del documento (`SolicitudVista` ahora trae `kycNombre`/`kycApellido`).
+  - Al **aprobar**, el nombre/apellido del KYC **se copian a la cuenta** (`app/admin/kyc-actions.ts`). Es el mismo flujo para wallet y correo: pase lo que pase en el registro, la identidad real se fija en el KYC, validada por una persona.
+- **Bloqueo de datos de identidad tras el KYC:** una vez aprobada la verificación (`nivelKyc >= 1`), **nombre y apellido quedan fijos**: los campos se deshabilitan en "Tus datos" (con la nota correspondiente) y `actualizarPerfil` conserva los valores verificados aunque el formulario envíe otros. El **@usuario (seudónimo) sigue editable**. Los usuarios de wallet pueden establecer nombre/apellido opcionalmente en "Tus datos" **antes** del KYC.
+- **Registro con wallet persistente:** al firmar se crea un usuario **pendiente** (sin @usuario) + cookie; si el usuario abandona antes de elegir @usuario, al volver a `/registro` **retoma sin firmar de nuevo** (`iniciarRegistroWallet` / `completarRegistroWallet` / `registroWalletPendiente`).
+- **Indicadores de carga (spinners):** "Conectando…", "Verificando…/Creando…" y "Guardando…" muestran un spinner; el de Guardar PIN sigue girando mientras navega al onboarding.
+- **Login con wallet no registrada** ofrece un botón **"Registrarme"** (y el registro de una wallet ya registrada ofrece "Iniciar sesión").
+
+### Cambiado
+
+- **Modal de registro con wallet rehecho:** pantalla por **portal** (cubre todo, ya no queda atrapada dentro del marco del login), **glassmorphism** (fondo oscurecido + desenfocado) y esquinas redondeadas. Pasos: **@usuario** (con `CampoUsuario`: verificación de disponibilidad en vivo, placeholder claro, campo y botón más altos) → **PIN obligatorio** (es para confirmar acciones internas, no para entrar) → **onboarding**.
+- **El PIN del registro con wallet es obligatorio** (se quitó "Omitir por ahora"). Un usuario de wallet puede fijar su **primer PIN** sin credencial previa (su identidad ya está probada por la firma).
+- **Perfil con identidad por wallet:** muestra la **dirección truncada** (`xxxxx…xxxxx`) con botón para copiar la completa, y un texto correcto ("Sin correo vinculado… también puedes entrar con @usuario + PIN", sin sugerir crear un PIN que ya existe).
+- **"Tus datos" para cuentas wallet:** muestra **"Wallet"** con la dirección (no un correo inexistente); la pestaña Verificación muestra **"Wallet conectada"** como paso 1 (no "verificar correo").
+- **Botón a registro en la pantalla de login:** dorado **amarillo pollito** (`#F5C84B`) y con el texto **"Crear cuenta"** (antes "Empezar"), para diferenciar bien login de registro.
+- **Correo opcional en notificaciones:** `notificarYCorreo`/`notificarEvento` aceptan correo nullable y solo dejan la notificación in-app cuando no hay correo.
+
+### Corregido
+
+- **El registro/login con wallet se quedaba en "Guardando…":** el servidor completaba todo (registro, PIN, `GET /onboarding 200`) pero `router.push` + `router.refresh()` con el modal por portal dejaban la soft-navigation a medias. Se usa `window.location.href` tras cambiar la sesión.
+- **El campo @usuario del modal** usaba un input plano (placeholder `tu_usuario` que parecía un slash). Ahora usa `CampoUsuario` (disponibilidad en vivo + placeholder claro).
+
+---
+
 ## [0.3.0] — 2026-06-04 — Registro y login con wallet de Solana (primer paso de la capa cripto)
 
 Primera integración real de wallets de Solana: el usuario puede **registrarse y entrar con su wallet** (Phantom/Solflare). La autenticación es **off-chain** (firma de un mensaje, criptografía ed25519): no gasta SOL ni toca la red. Es la base del bootcamp y deja montado el stack para saldos y wallet gestionada a futuro. Spec/plan en `docs/superpowers/specs/2026-06-04-auth-wallet-solana-design.md` y `docs/superpowers/plans/2026-06-04-auth-wallet-solana.md`.
