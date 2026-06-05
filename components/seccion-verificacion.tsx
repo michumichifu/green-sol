@@ -50,19 +50,23 @@ function ItemVerif({
 
 export function SeccionVerificacion({
   correoVerificado,
+  esWallet = false,
   estadoKyc,
   motivoRechazoKyc,
   pasosKyc,
 }: {
   correoVerificado: boolean;
+  esWallet?: boolean;
   estadoKyc: EstadoKyc | null;
   motivoRechazoKyc: string | null;
   pasosKyc: PasosRequeridos;
 }) {
   const kycHecho = estadoKyc === "aprobada";
   // El PIN ya se crea durante el registro, así que no es un paso pendiente aquí.
-  // Los dos pasos de verificación son: correo (hecho al registrarse) e identidad (KYC).
-  const hechos = [correoVerificado, kycHecho].filter(Boolean).length;
+  // Paso 1: identidad de acceso (correo verificado en cuentas de correo, o la wallet
+  // conectada en cuentas de wallet — ya hecho). Paso 2: identidad real (KYC).
+  const paso1Hecho = esWallet ? true : correoVerificado;
+  const hechos = [paso1Hecho, kycHecho].filter(Boolean).length;
   return (
     <section className="space-y-3">
       <div>
@@ -74,9 +78,13 @@ export function SeccionVerificacion({
       </div>
       <ItemVerif
         numero={1}
-        hecho={correoVerificado}
-        titulo="Correo verificado"
-        sub="Confirmado al registrarte."
+        hecho={paso1Hecho}
+        titulo={esWallet ? "Wallet conectada" : "Correo verificado"}
+        sub={
+          esWallet
+            ? "Tu identidad de acceso es tu wallet de Solana."
+            : "Confirmado al registrarte."
+        }
       />
       <ItemKyc
         numero={2}

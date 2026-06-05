@@ -53,6 +53,7 @@ export default async function ConfiguracionPage({
         {/* Verificación */}
         <SeccionVerificacion
           correoVerificado={usuario!.correoVerificado}
+          esWallet={usuario!.registradoCon === "wallet"}
           estadoKyc={kyc?.estado ?? null}
           motivoRechazoKyc={kyc?.motivoRechazo ?? null}
           pasosKyc={pasosKyc}
