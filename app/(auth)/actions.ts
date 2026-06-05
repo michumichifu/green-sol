@@ -20,7 +20,11 @@ import {
   otpSchema,
 } from "@/lib/validations/auth";
 import { paisPorCodigo } from "@/lib/paises";
-import { SENAL_MIGRAR_PIN, COOKIE_PENDIENTE as PENDIENTE } from "./constants";
+import {
+  SENAL_MIGRAR_PIN,
+  COOKIE_PENDIENTE as PENDIENTE,
+  COOKIE_PENDIENTE_WALLET as PENDIENTE_WALLET,
+} from "./constants";
 
 export type EstadoAuth = { error?: string };
 
@@ -388,41 +392,90 @@ async function validarFirmaWallet(
   }
 }
 
-/** Registro con wallet: valida firma, crea usuario con @usuario y abre sesión. */
-export async function registrarConWallet(input: {
+/**
+ * Paso 1 del registro con wallet: valida la firma y deja el registro PENDIENTE
+ * (crea el usuario sin @usuario y guarda la wallet en cookie). Así, si el usuario
+ * cierra antes de elegir @usuario, el progreso no se pierde y puede continuar.
+ */
+export async function iniciarRegistroWallet(input: {
   address: string;
   firma: string;
   nonce: string;
-  nombreUsuario: string;
 }): Promise<EstadoAuth> {
-  const usuario = input.nombreUsuario.trim();
-  if (usuario.length < 3) {
-    return { error: "El usuario debe tener al menos 3 caracteres." };
-  }
   try {
     await validarFirmaWallet(input.address, input.nonce, input.firma, "registro");
   } catch (e) {
     return { error: (e as Error).message };
   }
-  if (await prisma.usuario.findUnique({ where: { walletAddress: input.address } })) {
+  const existente = await prisma.usuario.findUnique({
+    where: { walletAddress: input.address },
+  });
+  if (existente?.nombreUsuario) {
     return { error: "Esa wallet ya está registrada. Inicia sesión." };
+  }
+  if (!existente) {
+    await prisma.usuario.create({
+      data: { walletAddress: input.address, registradoCon: "wallet" },
+    });
+  }
+  (await cookies()).set(PENDIENTE_WALLET, input.address, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 1800,
+  });
+  return {};
+}
+
+/**
+ * Paso 2 del registro con wallet: asigna el @usuario al registro pendiente
+ * (identificado por la cookie) y abre la sesión. No requiere re-firmar.
+ */
+export async function completarRegistroWallet(
+  nombreUsuario: string,
+): Promise<EstadoAuth> {
+  const u = nombreUsuario.trim();
+  if (u.length < 3) {
+    return { error: "El usuario debe tener al menos 3 caracteres." };
+  }
+  const address = (await cookies()).get(PENDIENTE_WALLET)?.value;
+  if (!address) {
+    return { error: "La sesión de registro expiró. Vuelve a empezar." };
+  }
+  const usuario = await prisma.usuario.findUnique({
+    where: { walletAddress: address },
+  });
+  if (!usuario) {
+    return { error: "No encontramos tu registro. Vuelve a empezar." };
   }
   if (
     await prisma.usuario.findFirst({
-      where: { nombreUsuario: { equals: usuario, mode: "insensitive" } },
+      where: { nombreUsuario: { equals: u, mode: "insensitive" } },
     })
   ) {
     return { error: "Ese nombre de usuario ya está tomado." };
   }
-  const nuevo = await prisma.usuario.create({
-    data: {
-      walletAddress: input.address,
-      nombreUsuario: usuario,
-      registradoCon: "wallet",
-    },
+  await prisma.usuario.update({
+    where: { id: usuario.id },
+    data: { nombreUsuario: u },
   });
-  await crearSesion(nuevo.id);
+  (await cookies()).delete(PENDIENTE_WALLET);
+  await crearSesion(usuario.id);
   return {};
+}
+
+/**
+ * ¿Hay un registro con wallet a medias? (firmado pero sin @usuario). Lo usa la UI
+ * al volver a la pantalla de registro para retomar sin pedir firmar de nuevo.
+ */
+export async function registroWalletPendiente(): Promise<{ address: string } | null> {
+  const address = (await cookies()).get(PENDIENTE_WALLET)?.value;
+  if (!address) return null;
+  const usuario = await prisma.usuario.findUnique({
+    where: { walletAddress: address },
+  });
+  if (usuario && !usuario.nombreUsuario) return { address };
+  return null;
 }
 
 /** Login con wallet (firma). */

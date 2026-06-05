@@ -120,7 +120,7 @@ export default function LoginPage() {
             ¿No tienes cuenta?
             <Link
               href="/registro"
-              className="rounded-full bg-gold px-3 py-1 font-semibold text-black shadow-sm transition-colors hover:bg-gold/90"
+              className="rounded-full bg-gradient-to-br from-yellow-300 to-amber-400 px-3 py-1 font-semibold text-amber-950 shadow-sm transition-all hover:from-yellow-200 hover:to-amber-300"
             >
               Crear cuenta
             </Link>

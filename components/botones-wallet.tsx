@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useWalletConnection } from "@solana/react-hooks";
@@ -10,7 +10,9 @@ import { Wallet, ShieldCheck } from "lucide-react";
 import {
   generarNonceWallet,
   loginConWallet,
-  registrarConWallet,
+  iniciarRegistroWallet,
+  completarRegistroWallet,
+  registroWalletPendiente,
   establecerPinWallet,
 } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
@@ -23,15 +25,15 @@ const WALLETS = [
   { id: "solflare", nombre: "Solflare", icono: "/wallets/solflare.jpg", url: "https://solflare.com" },
 ];
 
-type Firmado = { address: string; firma: string; nonce: string };
 type SubPaso = "usuario" | "pin";
 
 /**
  * Botones de wallet (Phantom / Solflare) con conexión real de Solana. Conecta la
  * wallet, firma un mensaje con el nonce del servidor (off-chain, no gasta SOL) y:
  * - login: verifica e inicia sesión;
- * - registro: pantalla propia para elegir @usuario y, opcional, un PIN para acciones
- *   internas (el login siempre es firmando con la wallet). Termina en el onboarding.
+ * - registro: deja el registro pendiente (persistente) y pide @usuario y, opcional,
+ *   un PIN para acciones internas. Si el usuario abandona tras firmar, al volver
+ *   retoma en @usuario sin firmar de nuevo. Termina en el onboarding.
  */
 export function BotonesWallet({
   accion = "entrar",
@@ -43,13 +45,24 @@ export function BotonesWallet({
   const [procesando, setProcesando] = useState<string | null>(null);
   const proposito = accion === "registrarte" ? "registro" : "login";
 
-  // Registro: tras firmar, pasamos a una pantalla propia (no overlay traslúcido).
-  const [firmado, setFirmado] = useState<Firmado | null>(null);
+  // Registro: dirección de la wallet de un registro pendiente (firmado, sin @usuario).
+  const [pendiente, setPendiente] = useState<{ address: string } | null>(null);
   const [subPaso, setSubPaso] = useState<SubPaso>("usuario");
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [trabajando, setTrabajando] = useState(false);
+
+  // Al volver a la pantalla de registro, retoma un registro a medias (sin re-firmar).
+  useEffect(() => {
+    if (proposito !== "registro") return;
+    registroWalletPendiente().then((p) => {
+      if (p) {
+        setSubPaso("usuario");
+        setPendiente(p);
+      }
+    });
+  }, [proposito]);
 
   function connectorDe(walletId: string) {
     return connectors.find((c) => c.name.toLowerCase().includes(walletId));
@@ -94,9 +107,24 @@ export function BotonesWallet({
           router.refresh();
         }
       } else {
-        setError("");
-        setSubPaso("usuario");
-        setFirmado({ address, firma, nonce });
+        // Deja el registro pendiente (persistente) y pasa a elegir @usuario.
+        const res = await iniciarRegistroWallet({ address, firma, nonce });
+        if (res.error) {
+          if (res.error.includes("ya está registrada")) {
+            toast.error(res.error, {
+              action: {
+                label: "Iniciar sesión",
+                onClick: () => router.push("/login"),
+              },
+            });
+          } else {
+            toast.error(res.error);
+          }
+        } else {
+          setError("");
+          setSubPaso("usuario");
+          setPendiente({ address });
+        }
       }
     } catch (e) {
       const msg = (e as Error)?.message ?? "";
@@ -111,10 +139,9 @@ export function BotonesWallet({
   }
 
   async function crearCuenta() {
-    if (!firmado) return;
     setTrabajando(true);
     setError("");
-    const res = await registrarConWallet({ ...firmado, nombreUsuario });
+    const res = await completarRegistroWallet(nombreUsuario);
     setTrabajando(false);
     if (res.error) {
       setError(res.error);
@@ -142,8 +169,8 @@ export function BotonesWallet({
   }
 
   // ── Modal de registro con wallet (glassmorphism, por portal para cubrir todo) ──
-  if (firmado) {
-    const corta = `${firmado.address.slice(0, 4)}…${firmado.address.slice(-4)}`;
+  if (pendiente) {
+    const corta = `${pendiente.address.slice(0, 4)}…${pendiente.address.slice(-4)}`;
     return createPortal(
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-md">
         <div className="max-h-[90vh] w-full max-w-sm space-y-5 overflow-y-auto rounded-3xl border border-white/10 bg-card p-6 shadow-2xl">
