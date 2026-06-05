@@ -103,8 +103,7 @@ export function BotonesWallet({
             toast.error(res.error);
           }
         } else {
-          router.push("/dashboard");
-          router.refresh();
+          window.location.href = "/dashboard";
         }
       } else {
         // Deja el registro pendiente (persistente) y pasa a elegir @usuario.
@@ -158,9 +157,10 @@ export function BotonesWallet({
       setTrabajando(false);
       setError(res.error);
     } else {
-      // No apagamos `trabajando`: el spinner sigue mientras navega al onboarding.
-      router.push("/onboarding");
-      router.refresh();
+      // Navegación dura: la sesión acaba de cambiar y hay un modal por portal montado;
+      // recargar evita que la soft-navigation quede a medias. El spinner sigue hasta
+      // que carga el onboarding.
+      window.location.href = "/onboarding";
     }
   }
 
