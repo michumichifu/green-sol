@@ -103,7 +103,7 @@ export function BotonesWallet({
             toast.error(res.error);
           }
         } else {
-          window.location.href = "/dashboard";
+          window.location.href = res.destino ?? "/dashboard";
         }
       } else {
         // Deja el registro pendiente (persistente) y pasa a elegir @usuario.

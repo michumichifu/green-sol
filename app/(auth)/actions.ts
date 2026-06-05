@@ -483,7 +483,7 @@ export async function loginConWallet(input: {
   address: string;
   firma: string;
   nonce: string;
-}): Promise<EstadoAuth> {
+}): Promise<EstadoAuth & { destino?: string }> {
   try {
     await validarFirmaWallet(input.address, input.nonce, input.firma, "login");
   } catch (e) {
@@ -494,8 +494,16 @@ export async function loginConWallet(input: {
   });
   if (!usuario) return { error: "Esa wallet no está registrada. Crea tu cuenta." };
   if (usuario.baneado) return { error: "Esta cuenta está suspendida." };
+  // Cuenta el ingreso (como el login por correo) y decide el destino: el onboarding
+  // se muestra hasta que el usuario lo cierre (o tras varios ingresos).
+  const actualizado = await prisma.usuario.update({
+    where: { id: usuario.id },
+    data: { ingresos: { increment: 1 } },
+  });
   await crearSesion(usuario.id);
-  return {};
+  return {
+    destino: debeMostrarOnboarding(actualizado) ? "/onboarding" : "/dashboard",
+  };
 }
 
 /** Login alterno: @usuario + PIN (sin wallet). */
