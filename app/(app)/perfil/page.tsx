@@ -18,6 +18,7 @@ import { obtenerUsuario } from "@/lib/auth/session";
 import { obtenerReputacion, nivelPorReputacion } from "@/lib/reputacion";
 import { BannerVerificacion } from "@/components/banner-verificacion";
 import { BotonCerrarSesion } from "@/components/boton-cerrar-sesion";
+import { version } from "@/package.json";
 import { DatoCopiable } from "@/components/dato-copiable";
 
 function ItemMenu({
@@ -165,6 +166,10 @@ export default async function PerfilPage() {
           />
         )}
       </nav>
+
+      <p className="text-center text-xs text-muted-foreground">
+        Versión {version}
+      </p>
 
       <BotonCerrarSesion />
     </main>

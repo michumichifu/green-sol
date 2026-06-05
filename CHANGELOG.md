@@ -4,6 +4,18 @@ Versionado **0.0.x** durante el desarrollo, incrementando por cada avance, hasta
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/).
 
+## [0.4.1] — 2026-06-05 — Onboarding en login con wallet + versión visible en el perfil
+
+### Corregido
+
+- **Login con wallet respeta el onboarding:** `loginConWallet` iba directo a `/dashboard` y se saltaba el onboarding aunque el usuario no lo hubiera cerrado. Ahora incrementa `ingresos` (como el login por correo) y decide el destino con `debeMostrarOnboarding` (`/onboarding` o `/dashboard`).
+
+### Añadido
+
+- **Versión de la app en el perfil:** se muestra "Versión X.Y.Z" (leída de `package.json`) al final del perfil, entre Términos y el botón de cerrar sesión, para saber siempre con qué build se está interactuando.
+
+---
+
 ## [0.4.0] — 2026-06-05 — Identidad real en el KYC + registro/login con wallet pulido de punta a punta
 
 Cierra el flujo de autenticación con wallet con todas las correcciones surgidas al probarlo, y convierte el **KYC en la fuente de la identidad verificada** (nombre, apellido y cédula), igual para cuentas de wallet y de correo.
