@@ -43,7 +43,7 @@ export default async function ConfiguracionPage({
       >
         {/* Datos */}
         <FormDatos
-          correo={usuario!.correo}
+          correo={usuario!.correo ?? usuario!.nombreUsuario ?? ""}
           nombre={usuario!.nombre ?? ""}
           apellido={usuario!.apellido ?? ""}
           nombreUsuario={usuario!.nombreUsuario ?? ""}

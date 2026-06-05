@@ -26,7 +26,7 @@ type AporteM = {
 
 type SolicitudM = {
   id: string;
-  usuario: UsuarioM & { correo: string };
+  usuario: UsuarioM & { correo: string | null };
 };
 
 /**
@@ -84,7 +84,7 @@ export function Miembros({
                   <div className="min-w-0 flex-1">
                     <FilaParticipante usuario={s.usuario} esOrganizador={false} />
                     <p className="truncate text-xs text-muted-foreground">
-                      {etiquetaUsuario(s.usuario)}
+                      {etiquetaUsuario({ ...s.usuario, correo: s.usuario.correo ?? "" })}
                     </p>
                   </div>
                   <div className="flex shrink-0 gap-1.5">

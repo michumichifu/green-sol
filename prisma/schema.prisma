@@ -12,7 +12,9 @@ datasource db {
 
 model Usuario {
   id               String         @id @default(cuid())
-  correo           String         @unique
+  correo           String?        @unique
+  walletAddress    String?        @unique
+  registradoCon    MetodoRegistro @default(correo)
   hashContrasena   String?
   pinHash          String?
   pinIntentos      Int            @default(0)
@@ -303,6 +305,23 @@ enum TipoMora {
   ninguna
   fijo
   porcentaje
+}
+
+enum MetodoRegistro {
+  correo
+  wallet
+}
+
+model AuthNonce {
+  id            String   @id @default(cuid())
+  nonce         String   @unique
+  walletAddress String
+  proposito     String // "registro" | "login"
+  usado         Boolean  @default(false)
+  expiraEn      DateTime
+  creadoEn      DateTime @default(now())
+
+  @@index([walletAddress])
 }
 
 model Invitacion {

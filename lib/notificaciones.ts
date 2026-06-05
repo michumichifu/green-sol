@@ -17,7 +17,7 @@ type BaseNoti = {
  * el default del catálogo. Reemplaza las variables con `datos`.
  */
 export async function notificarEvento(
-  usuario: { id: string; correo: string },
+  usuario: { id: string; correo: string | null },
   clave: string,
   datos: Record<string, string> = {},
   opts?: { tipo?: string; enlace?: string },
@@ -38,7 +38,8 @@ export async function notificarEvento(
   }
   if (evento.canales.includes("correo")) {
     const correo = await resolverNotificacion(clave, "correo", datos);
-    if (correo) {
+    // Usuario registrado con wallet y sin correo vinculado: solo notificación in-app.
+    if (correo && usuario.correo) {
       try {
         await enviarCorreo(usuario.correo, correo.asunto, correo.texto, correo.contenido);
       } catch {
@@ -53,10 +54,12 @@ export async function notificarEvento(
  * importantes: seguridad (métodos de pago), creación de un ahorro, etc.
  */
 export async function notificarYCorreo(
-  usuario: { id: string; correo: string },
+  usuario: { id: string; correo: string | null },
   base: BaseNoti,
 ): Promise<void> {
   await crearNotificacion(usuario.id, base);
+  // Usuario registrado con wallet y sin correo vinculado: solo notificación in-app.
+  if (!usuario.correo) return;
   const texto = base.cuerpo ? `${base.titulo}\n\n${base.cuerpo}` : base.titulo;
   // Layout de marca general: el título/cuerpo cambian según la acción.
   const html = correoBase({

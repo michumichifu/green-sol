@@ -10,7 +10,7 @@ import type {
 
 export type UsuarioResumen = {
   id: string;
-  correo: string;
+  correo: string | null;
   nombreUsuario: string | null;
   nombre: string | null;
   apellido: string | null;
@@ -30,7 +30,7 @@ export type ResultadoBusqueda = {
 
 export type FichaUsuario = {
   id: string;
-  correo: string;
+  correo: string | null;
   nombre: string | null;
   apellido: string | null;
   nombreUsuario: string | null;

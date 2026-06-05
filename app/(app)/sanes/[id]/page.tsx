@@ -289,7 +289,7 @@ export default async function DetalleRecolecta({
                         key={p.id}
                         className="flex items-center justify-between rounded-lg border bg-card px-3 py-2"
                       >
-                        <span>{p.usuario.correo}</span>
+                        <span>{p.usuario.correo ?? p.usuario.nombreUsuario ?? "—"}</span>
                         <div className="flex gap-2">
                           <form action={arriba}>
                             <Button type="submit" size="sm" variant="outline">

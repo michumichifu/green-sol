@@ -202,7 +202,7 @@ export async function buscarRecolecta(
       tipo: r.tipo,
       estado: r.estado,
       visibilidad: r.visibilidad,
-      organizador: r.organizador.nombre ?? r.organizador.correo,
+      organizador: r.organizador.nombre ?? r.organizador.correo ?? "—",
       miembros: r._count.participantes,
       yaUnido: Boolean(yaUnido),
       abierta: r.estado === "abierta",
@@ -214,7 +214,7 @@ type ResultadoUnion = { error?: string; ok?: string; verificar?: boolean };
 
 type UsuarioUnion = {
   id: string;
-  correo: string;
+  correo: string | null;
   nombre: string | null;
   apellido: string | null;
   nombreUsuario: string | null;
@@ -227,7 +227,7 @@ type RecolectaUnion = {
   estado: string;
   visibilidad: string;
   organizadorId: string;
-  organizador: { id: string; correo: string; nombre: string | null };
+  organizador: { id: string; correo: string | null; nombre: string | null };
 };
 
 /**
@@ -277,10 +277,10 @@ async function procesarUnion(
       update: { estado: "pendiente", resueltaEn: null },
     });
     await notificarEvento(
-      { id: r.organizador.id, correo: r.organizador.correo },
+      { id: r.organizador.id, correo: r.organizador.correo ?? "" },
       "san_solicitud_union",
       {
-        solicitante: etiquetaUsuario(usuario),
+        solicitante: etiquetaUsuario({ ...usuario, correo: usuario.correo ?? "" }),
         nombreSan: r.nombre,
         link: `/sanes/${r.id}?tab=miembros`,
       },
@@ -299,11 +299,11 @@ async function procesarUnion(
     // ya estaba unido
   }
   await notificarEvento(
-    { id: r.organizador.id, correo: r.organizador.correo },
+    { id: r.organizador.id, correo: r.organizador.correo ?? "" },
     "union_san",
     {
-      organizador: r.organizador.nombre ?? r.organizador.correo,
-      usuario: etiquetaUsuario(usuario),
+      organizador: r.organizador.nombre ?? r.organizador.correo ?? "—",
+      usuario: etiquetaUsuario({ ...usuario, correo: usuario.correo ?? "" }),
       nombreSan: r.nombre,
       link: `/sanes/${r.id}`,
     },
@@ -460,7 +460,7 @@ export async function resolverSolicitud(
   }
 
   await notificarEvento(
-    { id: sol.usuario.id, correo: sol.usuario.correo },
+    { id: sol.usuario.id, correo: sol.usuario.correo ?? "" },
     aprobar ? "san_solicitud_aceptada" : "san_solicitud_rechazada",
     { nombreSan: sol.recolecta.nombre, link: `/sanes/${sol.recolecta.id}` },
     { tipo: "solicitud_resuelta", enlace: `/sanes/${sol.recolecta.id}` },
@@ -572,7 +572,7 @@ export async function iniciarSan(
     const p = aportantes.find((a) => a.id === ordenValido[i]);
     if (!p) continue;
     await notificarEvento(
-      { id: p.usuario.id, correo: p.usuario.correo },
+      { id: p.usuario.id, correo: p.usuario.correo ?? "" },
       "san_iniciado",
       {
         nombreSan: recolecta.nombre,
@@ -631,11 +631,11 @@ export async function reportarPago(
   });
   {
     await notificarEvento(
-      { id: recolecta.organizador.id, correo: recolecta.organizador.correo },
+      { id: recolecta.organizador.id, correo: recolecta.organizador.correo ?? "" },
       "san_pago_reportado",
       {
-        organizador: recolecta.organizador.nombre ?? recolecta.organizador.correo,
-        usuario: etiquetaUsuario(usuario),
+        organizador: recolecta.organizador.nombre ?? recolecta.organizador.correo ?? "—",
+        usuario: etiquetaUsuario({ ...usuario, correo: usuario.correo ?? "" }),
         monto: `$${monto}`,
         nombreSan: recolecta.nombre,
         link: `/sanes/${recolectaId}?tab=pagos`,
@@ -676,10 +676,13 @@ export async function resolverAporte(
   const participanteUsuario = aporte.participante.usuario;
 
   await notificarEvento(
-    { id: participanteUsuario.id, correo: participanteUsuario.correo },
+    { id: participanteUsuario.id, correo: participanteUsuario.correo ?? "" },
     confirmar ? "san_pago_aprobado" : "san_pago_rechazado",
     {
-      usuario: etiquetaUsuario(participanteUsuario),
+      usuario: etiquetaUsuario({
+        ...participanteUsuario,
+        correo: participanteUsuario.correo ?? "",
+      }),
       monto: `$${aporte.monto}`,
       nombreSan: aporte.recolecta.nombre,
       link: `/sanes/${aporte.recolectaId}`,
@@ -749,7 +752,7 @@ export async function reportarEntrega(
   await notificarEvento(
     {
       id: turnoCobrador.participante.usuario.id,
-      correo: turnoCobrador.participante.usuario.correo,
+      correo: turnoCobrador.participante.usuario.correo ?? "",
     },
     "san_entrega_hecha",
     {

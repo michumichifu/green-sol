@@ -234,7 +234,8 @@ function ContenidoFicha({
   const nombre =
     [ficha.nombre, ficha.apellido].filter(Boolean).join(" ") ||
     ficha.nombreUsuario ||
-    ficha.correo;
+    ficha.correo ||
+    "—";
   const inicial = nombre[0]?.toUpperCase() ?? "?";
 
   const pinBloqueado = ficha.pinBloqueadoHasta && new Date(ficha.pinBloqueadoHasta) > new Date();

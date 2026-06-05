@@ -52,7 +52,9 @@ export default async function PerfilPage() {
 
   const nombreCompleto =
     [usuario!.nombre, usuario!.apellido].filter(Boolean).join(" ") || "Tu perfil";
-  const inicial = (usuario!.nombre ?? usuario!.correo).charAt(0).toUpperCase();
+  const inicial = (usuario!.nombre ?? usuario!.correo ?? usuario!.nombreUsuario ?? "?")
+    .charAt(0)
+    .toUpperCase();
 
   return (
     <main className="mx-auto max-w-md space-y-5 px-5 py-6">

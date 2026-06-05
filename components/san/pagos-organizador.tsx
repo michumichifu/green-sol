@@ -20,7 +20,7 @@ type UsuarioBasico = {
   apellido: string | null;
   nombreUsuario: string | null;
   fotoUrl: string | null;
-  correo: string;
+  correo: string | null;
 };
 
 type Participante = {
@@ -67,7 +67,7 @@ const PUNT_CLASE: Record<Puntualidad, string> = {
 };
 
 function nombreCompleto(u: UsuarioBasico) {
-  return [u.nombre, u.apellido].filter(Boolean).join(" ") || u.correo;
+  return [u.nombre, u.apellido].filter(Boolean).join(" ") || u.correo || u.nombreUsuario || "—";
 }
 
 function fmt(n: number) {

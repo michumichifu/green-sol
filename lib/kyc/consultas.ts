@@ -34,7 +34,7 @@ export type SolicitudVista = {
     nombre: string | null;
     apellido: string | null;
     nombreUsuario: string | null;
-    correo: string;
+    correo: string | null;
   };
 };
 

@@ -246,7 +246,7 @@ export async function iniciarSesion(
     return { error: "Tu cuenta está suspendida. Contacta a soporte." };
   }
 
-  if (!usuario.correoVerificado) {
+  if (usuario.correo && !usuario.correoVerificado) {
     await crearYEnviarOtp(usuario.id, usuario.correo, "verificacion");
     await guardarPendiente(usuario.correo);
     redirect("/verificar");
