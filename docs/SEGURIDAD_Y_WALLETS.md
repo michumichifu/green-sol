@@ -1,7 +1,7 @@
 # Seguridad y wallets — Green Sol
 
-- **Versión:** 0.1
-- **Fecha:** 2026-05-29
+- **Versión:** 0.2
+- **Fecha:** 2026-06-05
 
 > La confianza es el producto. Green Sol gana usuarios precisamente porque **no custodia el dinero de nadie**. Este documento explica los modelos de custodia, por qué elegimos el no-custodial, cómo funciona el bote de grupo de forma segura, y un checklist para la fase de desarrollo.
 
@@ -12,8 +12,8 @@
 | Modelo | ¿Quién controla las llaves? | Riesgo | Uso en Green Sol |
 | --- | --- | --- | --- |
 | **Custodial** | La aplicación guarda la llave secreta del usuario. | Alto: si nos hackean o desaparecemos, el dinero se pierde. Además, guardar dinero ajeno está **regulado por ley**. | **NO se usa.** |
-| **No-custodial embebida** | El usuario, mediante una llave dividida (MPC/TEE). Ni la app ni el proveedor tienen la llave completa. | Bajo. Experiencia fácil (correo), custodia real del usuario. | **Sí.** Wallet personal creada con el correo. |
-| **Externa** | El usuario, con su propia wallet (Phantom, Solflare). | Bajo. El usuario ya la gestiona. | **Sí.** Para conectar/importar y para el "modo espejo". |
+| **No-custodial embebida (wallet de la app)** | El usuario. **Cada usuario tiene su propia** wallet y llave; **nunca una sola para toda la app**. | Bajo. Experiencia fácil, custodia real del usuario. | **Sí — modelo principal.** Se crea **una por usuario** al registrarse, sin importar el método de login (correo o wallet externa). |
+| **Externa** | El usuario, con su propia wallet (Phantom, Solflare). | Bajo. El usuario ya la gestiona. | **Sí, pero solo como identidad de login** (firma) y para el "modo espejo". NO se usa como wallet de cobro: para eso el usuario tiene su wallet de la app. |
 
 ## 2. La regla de oro
 
@@ -27,11 +27,26 @@ Por qué importa:
 
 > Aclaración importante que surgió en el diseño: "que la app gestione el bote pero sin entregar la llave a nadie" suena bien, pero si la app **puede mover los fondos**, entonces la app **controla la llave** y es custodial de facto. La forma correcta de lograr "administradores que aprueban, sin que la app custodie" es la **multifirma** (sección 4).
 
-## 3. Cómo funciona la wallet embebida (sin tecnicismos)
+## 3. La wallet de la app (no-custodial) — una por usuario
 
-El usuario se registra con su correo y, por detrás, se crea una wallet **no-custodial**. La magia está en que la llave **no existe completa en ningún solo lugar**: se parte en pedazos con técnicas de criptografía (MPC — cómputo multiparte — o entornos seguros TEE). Para firmar una operación se combinan los pedazos en el momento, sin que nadie —ni la app, ni el proveedor— llegue a tener la llave entera.
+Al **terminar el registro** —da igual si entró con **correo + PIN** o con una **wallet externa** (Phantom/Solflare)— Green Sol le crea **su propia wallet de Solana** dentro de la app. Puntos clave:
 
-Resultado: la comodidad de "entrar con correo y contraseña" con la seguridad de que el usuario mantiene la custodia. Proveedores que ofrecen esto: Privy, Web3Auth, Turnkey (ver [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md)).
+- **Una por usuario, con su propia llave.** NO existe una sola wallet/llave para toda la aplicación: **cada persona controla la suya**.
+- **No-custodial.** La llave **no existe completa en ningún solo lugar**: se parte con criptografía (MPC — cómputo multiparte — o entornos seguros TEE), de modo que ni la app ni el proveedor llegan a tener la llave entera. Para firmar una operación se combinan los pedazos en el momento. Resultado: comodidad de "entrar y listo" con custodia real del usuario. Proveedores: Privy, Web3Auth, Turnkey (ver [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md)).
+- **Visible en el perfil y en métodos de pago.** El usuario ve su dirección y su saldo desde el primer día.
+- **Exportable.** Puede ver/exportar su llave secreta y usarla en wallets externas; a partir de ahí la custodia es 100 % suya.
+- **Gestionada dentro de la app:** depósitos y retiros a esa dirección, y participar en sanes cripto (USDC/SOL).
+
+### Login ≠ wallet de la app (importante, no confundir)
+
+- **Login / identidad:** *cómo entras*. Correo + PIN, o **firmando con tu wallet externa** (Phantom/Solflare) — esto último ya está implementado (autenticación **off-chain** por firma; ver `CHANGELOG.md` `[0.3.0]`). La wallet externa de login **solo prueba quién eres**.
+- **Wallet de la app:** *dónde está tu dinero*. La dirección **que genera Green Sol**, una por usuario, para ahorrar/cobrar/depositar/retirar.
+
+Por eso, a quien entra con Phantom **no** se le usa esa wallet externa como método de cobro: se le crea **su propia wallet de la app** (interna), igual que a quien entra por correo.
+
+### Por qué (el puente fiat → cripto)
+
+Que la wallet aparezca desde el registro despierta la curiosidad del usuario fiat ("¿qué es este saldo?, ¿cómo lo uso?"). Ahí se le presenta el ahorro en **USDC** (estable, atado al dólar) como alternativa **más segura y estable** que el Bolívar, que con la inflación se **deprecia**. Facilita la migración a cripto sin exigir que la entiendan de entrada.
 
 ## 4. El bote de grupo: multifirma (multisig)
 
