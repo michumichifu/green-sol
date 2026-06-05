@@ -10,6 +10,9 @@ import { debeMostrarOnboarding } from "@/lib/onboarding";
 import { validarRestricciones } from "@/lib/restricciones";
 import { verificarPin, hashearPin, pinFormatoValido } from "@/lib/auth/pin";
 import { verificarContrasena } from "@/lib/auth/password";
+import { construirMensaje, verificarFirma, type Proposito } from "@/lib/auth/wallet";
+import { crearNonce, consumirNonce } from "@/lib/auth/nonce";
+import bs58 from "bs58";
 import {
   pinSchema,
   registroDatosSchema,
@@ -354,4 +357,106 @@ export async function cerrarOnboarding(noMostrarMas?: boolean) {
     });
   }
   redirect("/dashboard");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Auth con wallet de Solana (registro/login off-chain por firma de mensaje)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Paso 1: el cliente pide el mensaje a firmar para una wallet+propósito. */
+export async function generarNonceWallet(
+  address: string,
+  proposito: Proposito,
+): Promise<{ mensaje: string; nonce: string }> {
+  const nonce = await crearNonce(address, proposito);
+  return { mensaje: construirMensaje(nonce, proposito), nonce };
+}
+
+/** Valida nonce (single-use) + firma. Lanza Error con mensaje claro si algo falla. */
+async function validarFirmaWallet(
+  address: string,
+  nonce: string,
+  firmaBase58: string,
+  proposito: Proposito,
+): Promise<void> {
+  const okNonce = await consumirNonce(nonce, address, proposito);
+  if (!okNonce) throw new Error("El código de firma expiró. Intenta de nuevo.");
+  const mensaje = construirMensaje(nonce, proposito);
+  const firma = bs58.decode(firmaBase58);
+  if (!verificarFirma(address, mensaje, firma)) {
+    throw new Error("La firma no es válida.");
+  }
+}
+
+/** Registro con wallet: valida firma, crea usuario con @usuario y abre sesión. */
+export async function registrarConWallet(input: {
+  address: string;
+  firma: string;
+  nonce: string;
+  nombreUsuario: string;
+}): Promise<EstadoAuth> {
+  const usuario = input.nombreUsuario.trim();
+  if (usuario.length < 3) {
+    return { error: "El usuario debe tener al menos 3 caracteres." };
+  }
+  try {
+    await validarFirmaWallet(input.address, input.nonce, input.firma, "registro");
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+  if (await prisma.usuario.findUnique({ where: { walletAddress: input.address } })) {
+    return { error: "Esa wallet ya está registrada. Inicia sesión." };
+  }
+  if (
+    await prisma.usuario.findFirst({
+      where: { nombreUsuario: { equals: usuario, mode: "insensitive" } },
+    })
+  ) {
+    return { error: "Ese nombre de usuario ya está tomado." };
+  }
+  const nuevo = await prisma.usuario.create({
+    data: {
+      walletAddress: input.address,
+      nombreUsuario: usuario,
+      registradoCon: "wallet",
+    },
+  });
+  await crearSesion(nuevo.id);
+  return {};
+}
+
+/** Login con wallet (firma). */
+export async function loginConWallet(input: {
+  address: string;
+  firma: string;
+  nonce: string;
+}): Promise<EstadoAuth> {
+  try {
+    await validarFirmaWallet(input.address, input.nonce, input.firma, "login");
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+  const usuario = await prisma.usuario.findUnique({
+    where: { walletAddress: input.address },
+  });
+  if (!usuario) return { error: "Esa wallet no está registrada. Crea tu cuenta." };
+  if (usuario.baneado) return { error: "Esta cuenta está suspendida." };
+  await crearSesion(usuario.id);
+  return {};
+}
+
+/** Login alterno: @usuario + PIN (sin wallet). */
+export async function loginConUsuarioPin(input: {
+  nombreUsuario: string;
+  pin: string;
+}): Promise<EstadoAuth> {
+  const usuario = await prisma.usuario.findFirst({
+    where: { nombreUsuario: { equals: input.nombreUsuario.trim(), mode: "insensitive" } },
+  });
+  if (!usuario) return { error: "Usuario o PIN incorrectos." };
+  const res = await verificarPin(usuario.id, input.pin);
+  if (!res.ok) return { error: res.error ?? "Usuario o PIN incorrectos." };
+  if (usuario.baneado) return { error: "Esta cuenta está suspendida." };
+  await crearSesion(usuario.id);
+  return {};
 }
