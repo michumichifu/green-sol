@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useWalletConnection } from "@solana/react-hooks";
 import { toast } from "sonner";
 import bs58 from "bs58";
-import { Wallet, ShieldCheck } from "lucide-react";
+import { Wallet, ShieldCheck, Loader2 } from "lucide-react";
 import {
   generarNonceWallet,
   loginConWallet,
@@ -154,18 +154,14 @@ export function BotonesWallet({
     setTrabajando(true);
     setError("");
     const res = await establecerPinWallet(pin);
-    setTrabajando(false);
     if (res.error) {
+      setTrabajando(false);
       setError(res.error);
     } else {
+      // No apagamos `trabajando`: el spinner sigue mientras navega al onboarding.
       router.push("/onboarding");
       router.refresh();
     }
-  }
-
-  function omitirPin() {
-    router.push("/onboarding");
-    router.refresh();
   }
 
   // ── Modal de registro con wallet (glassmorphism, por portal para cubrir todo) ──
@@ -212,7 +208,13 @@ export function BotonesWallet({
                 disabled={trabajando || nombreUsuario.trim().length < 3}
                 onClick={crearCuenta}
               >
-                {trabajando ? "Creando…" : "Crear cuenta"}
+                {trabajando ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" /> Creando…
+                  </>
+                ) : (
+                  "Crear cuenta"
+                )}
               </Button>
             </div>
           ) : (
@@ -230,15 +232,14 @@ export function BotonesWallet({
                 disabled={trabajando || !/^\d{6}$/.test(pin)}
                 onClick={guardarPin}
               >
-                {trabajando ? "Guardando…" : "Guardar PIN"}
+                {trabajando ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" /> Guardando…
+                  </>
+                ) : (
+                  "Guardar PIN"
+                )}
               </Button>
-              <button
-                type="button"
-                onClick={omitirPin}
-                className="w-full text-center text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-              >
-                Omitir por ahora
-              </button>
             </div>
           )}
         </div>
@@ -270,8 +271,14 @@ export function BotonesWallet({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={w.icono} alt={w.nombre} className="size-full object-cover" />
             </span>
-            <span className="text-xs font-medium">
-              {procesando === w.id ? "Conectando…" : w.nombre}
+            <span className="flex items-center gap-1 text-xs font-medium">
+              {procesando === w.id ? (
+                <>
+                  <Loader2 className="size-3 animate-spin" /> Conectando…
+                </>
+              ) : (
+                w.nombre
+              )}
             </span>
           </button>
         ))}
