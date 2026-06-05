@@ -126,14 +126,16 @@ export default async function PerfilPage() {
               </p>
             </div>
           </div>
-          <DatoCopiable etiqueta="Dirección" valor={usuario!.walletAddress} />
+          <DatoCopiable
+            etiqueta="Dirección"
+            valor={usuario!.walletAddress}
+            display={`${usuario!.walletAddress.slice(0, 5)}…${usuario!.walletAddress.slice(-5)}`}
+          />
           {!usuario!.correo && (
             <p className="text-xs text-muted-foreground">
-              Sin correo vinculado. Puedes crear un PIN en{" "}
-              <Link href="/configuracion?tab=seguridad" className="text-brand underline">
-                Seguridad
-              </Link>{" "}
-              para entrar también con @usuario + PIN.
+              Sin correo vinculado (podrás vincular uno más adelante). También puedes
+              entrar con tu{" "}
+              <span className="font-medium text-foreground">@usuario + PIN</span>.
             </p>
           )}
         </section>
