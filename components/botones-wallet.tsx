@@ -78,7 +78,16 @@ export function BotonesWallet({
       if (proposito === "login") {
         const res = await loginConWallet({ address, firma, nonce });
         if (res.error) {
-          toast.error(res.error);
+          if (res.error.includes("no está registrada")) {
+            toast.error(res.error, {
+              action: {
+                label: "Registrarme",
+                onClick: () => router.push("/registro"),
+              },
+            });
+          } else {
+            toast.error(res.error);
+          }
         } else {
           router.push("/dashboard");
           router.refresh();
